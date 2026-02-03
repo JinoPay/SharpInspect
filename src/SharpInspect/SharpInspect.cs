@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using SharpInspect.Core.Configuration;
+using SharpInspect.Core.EnvironmentDetection;
 using SharpInspect.Core.Events;
 using SharpInspect.Core.Interceptors;
 using SharpInspect.Core.Logging;
@@ -19,6 +20,7 @@ namespace SharpInspect
     public static class SharpInspectDevTools
     {
         private static bool _initialized;
+        private static bool _disabled;
         private static ConsoleHook _consoleHook;
         private static InMemoryStore _store;
 
@@ -40,6 +42,21 @@ namespace SharpInspect
                 lock (_lock)
                 {
                     return _initialized;
+                }
+            }
+        }
+
+        /// <summary>
+        ///     SharpInspect가 개발 환경 외에서 비활성화되었는지 여부를 가져옵니다.
+        ///     EnableInDevelopmentOnly가 true이고 프로덕션 환경에서 실행 중일 때 true입니다.
+        /// </summary>
+        public static bool IsDisabled
+        {
+            get
+            {
+                lock (_lock)
+                {
+                    return _disabled;
                 }
             }
         }
@@ -94,6 +111,17 @@ namespace SharpInspect
                         "SharpInspect has already been initialized. Call Shutdown() first.");
 
                 Options = options ?? new SharpInspectOptions();
+
+                // 개발 환경 체크
+                if (!DevelopmentEnvironmentDetector.IsDevelopment(Options))
+                {
+                    // 프로덕션 환경 - 초기화하지 않고 조용히 종료
+                    _disabled = true;
+                    _initialized = true;
+                    return;
+                }
+
+                _disabled = false;
                 EventBus = new EventBus();
                 _store = new InMemoryStore(Options.MaxNetworkEntries, Options.MaxConsoleEntries, Options.MaxPerformanceEntries);
 
@@ -175,6 +203,7 @@ namespace SharpInspect
                 EventBus?.ClearAll();
 
                 _initialized = false;
+                _disabled = false;
             }
         }
 
@@ -182,24 +211,12 @@ namespace SharpInspect
         {
             try
             {
-#if NETFRAMEWORK
-                Process.Start(url);
-#else
-                // 크로스 플랫폼 브라우저 열기
-                if (RuntimeInformation.IsOSPlatform(
-                        OSPlatform.Windows))
-                    Process.Start(new ProcessStartInfo
-                    {
-                        FileName = url,
-                        UseShellExecute = true
-                    });
-                else if (RuntimeInformation.IsOSPlatform(
-                             OSPlatform.Linux))
-                    Process.Start("xdg-open", url);
-                else if (RuntimeInformation.IsOSPlatform(
-                             OSPlatform.OSX))
-                    Process.Start("open", url);
-#endif
+                // 앱 모드가 활성화된 경우 Chrome/Edge 앱 모드로 시도
+                if (Options.OpenInAppMode && TryOpenInAppMode(url))
+                    return;
+
+                // 기본 브라우저로 열기
+                OpenInDefaultBrowser(url);
             }
             catch
             {
@@ -207,12 +224,80 @@ namespace SharpInspect
             }
         }
 
+        /// <summary>
+        ///     Chrome 또는 Edge의 앱 모드로 URL을 엽니다.
+        /// </summary>
+        private static bool TryOpenInAppMode(string url)
+        {
+            // Chrome/Edge 실행 파일 경로 목록 (Windows 기준)
+            var browserPaths = new[]
+            {
+                // Chrome 경로들
+                Environment.ExpandEnvironmentVariables(@"%ProgramFiles%\Google\Chrome\Application\chrome.exe"),
+                Environment.ExpandEnvironmentVariables(@"%ProgramFiles(x86)%\Google\Chrome\Application\chrome.exe"),
+                Environment.ExpandEnvironmentVariables(@"%LocalAppData%\Google\Chrome\Application\chrome.exe"),
+                // Edge 경로들
+                Environment.ExpandEnvironmentVariables(@"%ProgramFiles%\Microsoft\Edge\Application\msedge.exe"),
+                Environment.ExpandEnvironmentVariables(@"%ProgramFiles(x86)%\Microsoft\Edge\Application\msedge.exe")
+            };
+
+            foreach (var browserPath in browserPaths)
+            {
+                if (System.IO.File.Exists(browserPath))
+                {
+                    try
+                    {
+                        Process.Start(new ProcessStartInfo
+                        {
+                            FileName = browserPath,
+                            Arguments = $"--app={url}",
+                            UseShellExecute = false
+                        });
+                        return true;
+                    }
+                    catch
+                    {
+                        // 이 경로 실패, 다음 경로 시도
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        ///     기본 브라우저로 URL을 엽니다.
+        /// </summary>
+        private static void OpenInDefaultBrowser(string url)
+        {
+#if NETFRAMEWORK
+            Process.Start(url);
+#else
+            // 크로스 플랫폼 브라우저 열기
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = url,
+                    UseShellExecute = true
+                });
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                Process.Start("xdg-open", url);
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                Process.Start("open", url);
+#endif
+        }
+
 #if !NET35
         /// <summary>
         ///     SharpInspect 인터셉션이 활성화된 새 HttpClient를 생성합니다.
+        ///     비활성화 상태에서는 인터셉션 없는 일반 HttpClient를 반환합니다.
         /// </summary>
         public static HttpClient CreateHttpClient()
         {
+            // 비활성화 상태에서는 인터셉션 없는 일반 HttpClient 반환
+            if (_disabled)
+                return new HttpClient();
+
             if (!_initialized)
                 throw new InvalidOperationException("SharpInspect must be initialized before creating an HttpClient.");
 
@@ -222,9 +307,14 @@ namespace SharpInspect
 
         /// <summary>
         ///     HttpClient에서 사용할 수 있는 SharpInspectHandler를 생성합니다.
+        ///     비활성화 상태에서는 일반 HttpClientHandler를 반환합니다.
         /// </summary>
-        public static SharpInspectHandler CreateHandler()
+        public static DelegatingHandler CreateHandler()
         {
+            // 비활성화 상태에서는 패스스루 핸들러 반환
+            if (_disabled)
+                return new PassThroughHandler();
+
             if (!_initialized)
                 throw new InvalidOperationException("SharpInspect must be initialized before creating a handler.");
 
@@ -233,13 +323,33 @@ namespace SharpInspect
 
         /// <summary>
         ///     커스텀 내부 핸들러를 사용하는 SharpInspectHandler를 생성합니다.
+        ///     비활성화 상태에서는 내부 핸들러를 래핑한 패스스루 핸들러를 반환합니다.
         /// </summary>
-        public static SharpInspectHandler CreateHandler(HttpMessageHandler innerHandler)
+        public static DelegatingHandler CreateHandler(HttpMessageHandler innerHandler)
         {
+            // 비활성화 상태에서는 패스스루 핸들러 반환
+            if (_disabled)
+                return new PassThroughHandler(innerHandler);
+
             if (!_initialized)
                 throw new InvalidOperationException("SharpInspect must be initialized before creating a handler.");
 
             return new SharpInspectHandler(_store, Options, EventBus, innerHandler);
+        }
+
+        /// <summary>
+        ///     비활성화 상태에서 사용되는 패스스루 핸들러.
+        ///     요청을 인터셉션 없이 그대로 전달합니다.
+        /// </summary>
+        private class PassThroughHandler : DelegatingHandler
+        {
+            public PassThroughHandler() : base(new HttpClientHandler())
+            {
+            }
+
+            public PassThroughHandler(HttpMessageHandler innerHandler) : base(innerHandler)
+            {
+            }
         }
 #endif
     }

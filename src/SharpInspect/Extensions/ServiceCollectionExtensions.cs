@@ -3,6 +3,7 @@ using System;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SharpInspect.Core.Configuration;
+using SharpInspect.Core.EnvironmentDetection;
 using SharpInspect.Core.Events;
 using SharpInspect.Core.Interceptors;
 using SharpInspect.Core.Logging;
@@ -38,6 +39,7 @@ namespace SharpInspect.Extensions
 
         /// <summary>
         /// 옵션과 함께 서비스 컬렉션에 SharpInspect 서비스를 추가합니다.
+        /// 개발 환경이 아닌 경우 서비스 등록을 스킵합니다.
         /// </summary>
         public static IServiceCollection AddSharpInspect(
             this IServiceCollection services,
@@ -45,6 +47,10 @@ namespace SharpInspect.Extensions
         {
             if (options == null)
                 options = new SharpInspectOptions();
+
+            // 개발 환경 체크 - 프로덕션이면 서비스 등록 스킵
+            if (!DevelopmentEnvironmentDetector.IsDevelopment(options))
+                return services;
 
             // 핵심 서비스 등록
             services.AddSingleton(options);
