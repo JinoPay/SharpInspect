@@ -2,7 +2,7 @@
 
 **Chrome DevTools-like inspector for any .NET application**
 
-Just like pressing F12 in a browser to see Network tab and Console, SharpInspect lets you monitor HTTP requests/responses and logs in real-time from any .NET app.
+SharpInspect lets you monitor HTTP requests/responses and logs in real-time from any .NET app.
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![.NET](https://img.shields.io/badge/.NET-4.6.2%20%7C%206.0%20%7C%208.0%20%7C%209.0-purple.svg)
@@ -255,7 +255,6 @@ DevTools 서버가 제공하는 REST API:
 - [x] Chrome DevTools 스타일 UI
 - [ ] Performance 탭 (GC, 메모리, CPU)
 - [ ] Application 탭 (앱 정보, 환경변수)
-- [ ] F12 글로벌 핫키
 - [ ] HAR 형식 내보내기
 - [ ] 커스텀 패널 플러그인 시스템
 
