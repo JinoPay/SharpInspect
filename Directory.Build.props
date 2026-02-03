@@ -21,7 +21,6 @@
     <!-- .NET 3.5 specific settings -->
     <PropertyGroup Condition="'$(TargetFramework)' == 'net35'">
         <DefineConstants>$(DefineConstants);NET35;LEGACY</DefineConstants>
-        <LangVersion>7.3</LangVersion>
     </PropertyGroup>
 
     <!-- .NET Framework 4.x settings -->
