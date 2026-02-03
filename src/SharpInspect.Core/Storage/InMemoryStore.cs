@@ -19,16 +19,22 @@ namespace SharpInspect.Core.Storage
         /// </summary>
         public const int DefaultNetworkCapacity = 1000;
 
+        /// <summary>
+        ///     Default capacity for performance entries.
+        /// </summary>
+        public const int DefaultPerformanceCapacity = 2000;
+
         private readonly Dictionary<string, NetworkEntry> _networkIndex;
         private readonly object _networkIndexLock = new();
         private readonly RingBuffer<ConsoleEntry> _consoleEntries;
         private readonly RingBuffer<NetworkEntry> _networkEntries;
+        private readonly RingBuffer<PerformanceEntry> _performanceEntries;
 
         /// <summary>
         ///     Creates a new in-memory store with default capacities.
         /// </summary>
         public InMemoryStore()
-            : this(DefaultNetworkCapacity, DefaultConsoleCapacity)
+            : this(DefaultNetworkCapacity, DefaultConsoleCapacity, DefaultPerformanceCapacity)
         {
         }
 
@@ -36,9 +42,18 @@ namespace SharpInspect.Core.Storage
         ///     Creates a new in-memory store with specified capacities.
         /// </summary>
         public InMemoryStore(int networkCapacity, int consoleCapacity)
+            : this(networkCapacity, consoleCapacity, DefaultPerformanceCapacity)
+        {
+        }
+
+        /// <summary>
+        ///     Creates a new in-memory store with specified capacities for all entry types.
+        /// </summary>
+        public InMemoryStore(int networkCapacity, int consoleCapacity, int performanceCapacity)
         {
             _networkEntries = new RingBuffer<NetworkEntry>(networkCapacity);
             _consoleEntries = new RingBuffer<ConsoleEntry>(consoleCapacity);
+            _performanceEntries = new RingBuffer<PerformanceEntry>(performanceCapacity);
             _networkIndex = new Dictionary<string, NetworkEntry>();
         }
 
@@ -59,6 +74,9 @@ namespace SharpInspect.Core.Storage
 
         /// <inheritdoc />
         public int NetworkEntryCount => _networkEntries.Count;
+
+        /// <inheritdoc />
+        public int PerformanceEntryCount => _performanceEntries.Count;
 
         /// <inheritdoc />
         public NetworkEntry GetNetworkEntry(string id)
@@ -84,6 +102,18 @@ namespace SharpInspect.Core.Storage
         public NetworkEntry[] GetNetworkEntries(int offset, int limit)
         {
             return _networkEntries.GetRange(offset, limit);
+        }
+
+        /// <inheritdoc />
+        public PerformanceEntry[] GetPerformanceEntries()
+        {
+            return _performanceEntries.GetAll();
+        }
+
+        /// <inheritdoc />
+        public PerformanceEntry[] GetPerformanceEntries(int offset, int limit)
+        {
+            return _performanceEntries.GetRange(offset, limit);
         }
 
         /// <inheritdoc />
@@ -113,10 +143,20 @@ namespace SharpInspect.Core.Storage
         }
 
         /// <inheritdoc />
+        public void AddPerformanceEntry(PerformanceEntry entry)
+        {
+            if (entry == null)
+                throw new ArgumentNullException("entry");
+
+            _performanceEntries.Add(entry);
+        }
+
+        /// <inheritdoc />
         public void ClearAll()
         {
             ClearNetworkEntries();
             ClearConsoleEntries();
+            ClearPerformanceEntries();
         }
 
         /// <inheritdoc />
@@ -133,6 +173,12 @@ namespace SharpInspect.Core.Storage
             {
                 _networkIndex.Clear();
             }
+        }
+
+        /// <inheritdoc />
+        public void ClearPerformanceEntries()
+        {
+            _performanceEntries.Clear();
         }
 
         private void RebuildNetworkIndex()

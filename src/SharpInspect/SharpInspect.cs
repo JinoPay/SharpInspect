@@ -26,6 +26,7 @@ namespace SharpInspect
         private static ISharpInspectServer _server;
 #endif
         private static readonly object _lock = new();
+        private static PerformanceInterceptor _performanceInterceptor;
         private static TraceHook _traceHook;
 
         /// <summary>
@@ -93,7 +94,7 @@ namespace SharpInspect
 
                 Options = options ?? new SharpInspectOptions();
                 EventBus = new EventBus();
-                _store = new InMemoryStore(Options.MaxNetworkEntries, Options.MaxConsoleEntries);
+                _store = new InMemoryStore(Options.MaxNetworkEntries, Options.MaxConsoleEntries, Options.MaxPerformanceEntries);
 
                 // Initialize HTTP interceptor for .NET Framework
                 HttpWebRequestInterceptor.Initialize(_store, Options, EventBus);
@@ -103,6 +104,12 @@ namespace SharpInspect
                 {
                     _consoleHook = new ConsoleHook(_store, Options, EventBus);
                     _traceHook = new TraceHook(_store, Options, EventBus);
+                }
+
+                // Initialize performance capture
+                if (Options.EnablePerformanceCapture)
+                {
+                    _performanceInterceptor = new PerformanceInterceptor(_store, Options, EventBus);
                 }
 
 #if !NET35
@@ -150,6 +157,9 @@ namespace SharpInspect
 
                 _traceHook?.Dispose();
                 _traceHook = null;
+
+                _performanceInterceptor?.Dispose();
+                _performanceInterceptor = null;
 
                 _store?.ClearAll();
                 EventBus?.ClearAll();
