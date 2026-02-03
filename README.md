@@ -254,14 +254,6 @@ dotnet run --project samples/Sample.ConsoleApp
 - [x] Development-only mode with multiple detection strategies
 - [x] Multi-framework support (.NET Framework 3.5 ~ .NET 9.0)
 
-### Planned
-- [ ] HAR export
-- [ ] Custom panel plugin system
-- [ ] Request replay
-- [ ] Performance timeline view
-- [ ] Dark mode UI
-- [ ] NuGet package release
-
 ## Contributing
 
 Issues and PRs welcome!
