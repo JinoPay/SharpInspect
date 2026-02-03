@@ -21,6 +21,9 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpInspect.Core.Tests", "tests\SharpInspect.Core.Tests\SharpInspect.Core.Tests.csproj", "{01234567-89AB-CDEF-0123-456789ABCDEF}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpInspect.Server.Tests", "tests\SharpInspect.Server.Tests\SharpInspect.Server.Tests.csproj", "{12345678-9ABC-DEF0-1234-56789ABCDEF0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.Wpf", "samples\Sample.Wpf\Sample.Wpf.csproj", "{C9D0E1F2-A3B4-5678-2345-789012345678}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.Avalonia", "samples\Sample.Avalonia\Sample.Avalonia.csproj", "{D0E1F2A3-B4C5-6789-3456-890123456789}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -56,6 +59,14 @@ Global
 		{12345678-9ABC-DEF0-1234-56789ABCDEF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{12345678-9ABC-DEF0-1234-56789ABCDEF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{12345678-9ABC-DEF0-1234-56789ABCDEF0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C9D0E1F2-A3B4-5678-2345-789012345678}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C9D0E1F2-A3B4-5678-2345-789012345678}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C9D0E1F2-A3B4-5678-2345-789012345678}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C9D0E1F2-A3B4-5678-2345-789012345678}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D0E1F2A3-B4C5-6789-3456-890123456789}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D0E1F2A3-B4C5-6789-3456-890123456789}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D0E1F2A3-B4C5-6789-3456-890123456789}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D0E1F2A3-B4C5-6789-3456-890123456789}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -68,6 +79,8 @@ Global
 		{B8C9D0E1-F2A3-4567-1234-678901234567} = {B2C3D4E5-F6A7-8901-BCDE-F12345678901}
 		{01234567-89AB-CDEF-0123-456789ABCDEF} = {C3D4E5F6-A7B8-9012-CDEF-123456789012}
 		{12345678-9ABC-DEF0-1234-56789ABCDEF0} = {C3D4E5F6-A7B8-9012-CDEF-123456789012}
+		{C9D0E1F2-A3B4-5678-2345-789012345678} = {B2C3D4E5-F6A7-8901-BCDE-F12345678901}
+		{D0E1F2A3-B4C5-6789-3456-890123456789} = {B2C3D4E5-F6A7-8901-BCDE-F12345678901}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {12345678-9ABC-DEF0-1234-567890ABCDEF}

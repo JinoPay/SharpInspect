@@ -243,16 +243,23 @@ public class WebSocketManager : IDisposable
         foreach (var client in clients)
             try
             {
-                if (client.WebSocket.State == WebSocketState.Open)
-                    client.WebSocket.CloseAsync(
-                        WebSocketCloseStatus.NormalClosure,
-                        "Server shutting down",
-                        CancellationToken.None).Wait(1000);
-                client.WebSocket.Dispose();
+                // Graceful close를 시도하지 않고 즉시 연결 중단
+                // CloseAsync는 클라이언트 응답을 기다려 앱 종료가 지연될 수 있음
+                client.WebSocket.Abort();
             }
             catch
             {
                 // 닫기 중 오류 무시
+            }
+            finally
+            {
+                try
+                {
+                    client.WebSocket.Dispose();
+                }
+                catch
+                {
+                }
             }
 #endif
     }
