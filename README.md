@@ -1,67 +1,67 @@
 # SharpInspect
 
-**Chrome DevTools-like inspector for any .NET application**
+**Chrome DevTools-style inspector for any .NET application**
 
-SharpInspect lets you monitor HTTP requests/responses and logs in real-time from any .NET app.
+Monitor HTTP requests, console logs, performance metrics, and application info in real-time.
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![.NET](https://img.shields.io/badge/.NET-4.6.2%20%7C%206.0%20%7C%208.0%20%7C%209.0-purple.svg)
+![.NET](https://img.shields.io/badge/.NET-3.5%20%7C%204.6.2%20%7C%206.0%20%7C%208.0%20%7C%209.0-purple.svg)
 
 **English** | [한국어](README.ko.md)
 
-## ✨ 특징
+## Features
 
-- **프레임워크 무관**: WinForms, WPF, 콘솔 앱, ASP.NET Core 등 어디서든 동작
-- **한 줄 설정**: `SharpInspectDevTools.Initialize()` 한 줄로 시작
-- **실시간 모니터링**: WebSocket을 통한 실시간 데이터 스트리밍
-- **Chrome DevTools 스타일 UI**: 익숙한 인터페이스
-- **비침투적**: 프로덕션 코드에 영향 없음
+- **Framework Agnostic**: Works with WinForms, WPF, Console, ASP.NET Core, and more
+- **One-Line Setup**: Start with `SharpInspectDevTools.Initialize()`
+- **Real-Time Monitoring**: WebSocket-powered live data streaming
+- **Chrome DevTools UI**: Familiar, intuitive interface
+- **Zero Dependencies**: No external NuGet packages required
+- **Development-Only by Default**: Automatically disabled in production environments
 
-## 📦 지원 플랫폼
+## Supported Platforms
 
-| 플랫폼 | 버전 |
-|--------|------|
-| .NET Framework | 4.6.2+ |
+| Platform | Version |
+|----------|---------|
+| .NET Framework | 3.5+, 4.6.2+ |
 | .NET | 6.0, 8.0, 9.0 |
 | .NET Standard | 2.0 |
 
-## 🚀 빠른 시작
+## Quick Start
 
-### 1. 설치
+### 1. Install
 
 ```bash
-# NuGet (준비 중)
+# NuGet (coming soon)
 dotnet add package SharpInspect
 
-# 또는 프로젝트 참조
+# Or add project reference
 ```
 
-### 2. 초기화
+### 2. Initialize
 
 ```csharp
 using SharpInspect;
 
-// 앱 시작 시 초기화
+// Initialize at app startup
 SharpInspectDevTools.Initialize();
 
-// 옵션 지정
+// Or with options
 SharpInspectDevTools.Initialize(options =>
 {
-    options.Port = 9229;                    // 기본 포트
-    options.EnableNetworkCapture = true;    // 네트워크 캡처
-    options.EnableConsoleCapture = true;    // 콘솔 로그 캡처
+    options.Port = 9229;
+    options.AutoOpenBrowser = true;
 });
 ```
 
-### 3. 브라우저에서 확인
+### 3. Open in Browser
 
 ```
 http://localhost:9229
 ```
 
-## 📖 사용법
+## Usage Examples
 
-### 콘솔 앱 예제
+### Console App
 
 ```csharp
 using SharpInspect;
@@ -70,28 +70,25 @@ class Program
 {
     static async Task Main()
     {
-        // SharpInspect 초기화
         SharpInspectDevTools.Initialize();
 
-        // HttpClient 생성 (자동 캡처)
+        // Create HttpClient with automatic capture
         using var client = SharpInspectDevTools.CreateHttpClient();
 
-        // HTTP 요청 - DevTools에서 확인 가능
+        // HTTP requests appear in DevTools Network tab
         var response = await client.GetStringAsync("https://api.example.com/data");
 
-        // 콘솔 로그 - DevTools Console 탭에서 확인 가능
-        Console.WriteLine("데이터 수신 완료");
+        // Console output appears in DevTools Console tab
+        Console.WriteLine("Data received!");
 
-        // 종료
         SharpInspectDevTools.Shutdown();
     }
 }
 ```
 
-### WinForms / WPF 예제
+### WinForms / WPF
 
 ```csharp
-// Program.cs 또는 App.xaml.cs
 public partial class App : Application
 {
     protected override void OnStartup(StartupEventArgs e)
@@ -108,160 +105,167 @@ public partial class App : Application
 }
 ```
 
-### using 문으로 자동 종료
+### Using Statement (Auto-Shutdown)
 
 ```csharp
 using (new SharpInspectSession())
 {
-    // 앱 로직
-    // 블록 종료 시 자동으로 Shutdown 호출
+    // Your app logic
+    // Automatically shuts down when block exits
 }
 ```
 
-## 🔧 설정 옵션
+## Configuration
 
 ```csharp
 SharpInspectDevTools.Initialize(options =>
 {
-    // 서버 설정
-    options.Port = 9229;                        // DevTools 포트
-    options.Host = "localhost";                 // 호스트 (보안상 localhost 권장)
-    options.AutoOpenBrowser = false;            // 자동 브라우저 열기
+    // Server
+    options.Port = 9229;
+    options.Host = "localhost";
+    options.AutoOpenBrowser = true;
+    options.OpenInAppMode = true;  // Opens as standalone window (Chrome/Edge)
 
-    // 캡처 설정
-    options.EnableNetworkCapture = true;        // 네트워크 캡처 활성화
-    options.EnableConsoleCapture = true;        // 콘솔 로그 캡처 활성화
+    // Capture toggles
+    options.EnableNetworkCapture = true;
+    options.EnableConsoleCapture = true;
+    options.EnablePerformanceCapture = true;
+    options.EnableApplicationCapture = true;
 
-    // 네트워크 설정
-    options.MaxNetworkEntries = 1000;           // 최대 저장 요청 수
-    options.MaxBodySizeBytes = 1048576;         // 최대 바디 크기 (1MB)
-    options.CaptureRequestBody = true;          // 요청 바디 캡처
-    options.CaptureResponseBody = true;         // 응답 바디 캡처
-    options.IgnoreUrlPatterns.Add("health");    // 무시할 URL 패턴
+    // Storage limits (ring buffer)
+    options.MaxNetworkEntries = 1000;
+    options.MaxConsoleEntries = 5000;
+    options.MaxPerformanceEntries = 2000;
+    options.MaxBodySizeBytes = 1048576;  // 1MB
 
-    // 콘솔 설정
-    options.MaxConsoleEntries = 5000;           // 최대 로그 수
-    options.MinLogLevel = SharpInspectLogLevel.Trace;  // 최소 로그 레벨
+    // Development-only mode (enabled by default)
+    options.EnableInDevelopmentOnly = true;
+    options.DevelopmentDetectionMode = DevelopmentDetectionMode.Auto;
 
-    // 보안
-    options.MaskedHeaders.Add("Authorization"); // 마스킹할 헤더
-    options.AccessToken = "my-secret-token";    // 접근 토큰 (선택)
+    // Security
+    options.MaskedHeaders.Add("X-API-Key");
+    options.AccessToken = "my-secret-token";
 });
 ```
 
-## 🔌 RestSharp / 커스텀 HTTP 클라이언트 통합
+### Development Detection Modes
 
-기존 HTTP 클라이언트(RestSharp 등)를 사용하는 경우, 인터셉터를 구현하여 통합할 수 있습니다:
+SharpInspect runs only in development environments by default:
 
 ```csharp
-public class SharpInspectInterceptor : IRequestInterceptor
-{
-    public int Order => 50;
+// Auto (default): Environment variable first, then debugger attached
+options.DevelopmentDetectionMode = DevelopmentDetectionMode.Auto;
 
-    public async Task<RestResponse> InterceptAsync(
-        IRestClient client,
-        RestRequest request,
-        Func<Task<RestResponse>> next)
-    {
-        var entry = new NetworkEntry
-        {
-            Method = request.Method.ToString(),
-            Url = client.BuildUri(request).ToString(),
-            Timestamp = DateTime.UtcNow
-        };
+// Environment variable only: DOTNET_ENVIRONMENT or ASPNETCORE_ENVIRONMENT = "Development"
+options.DevelopmentDetectionMode = DevelopmentDetectionMode.EnvironmentVariableOnly;
 
-        var sw = Stopwatch.StartNew();
-        var response = await next();
-        sw.Stop();
+// Debugger only: Debugger.IsAttached
+options.DevelopmentDetectionMode = DevelopmentDetectionMode.DebuggerOnly;
 
-        entry.StatusCode = (int)response.StatusCode;
-        entry.TotalMs = sw.ElapsedMilliseconds;
-        entry.ResponseBody = response.Content;
+// Custom: Your own logic
+options.DevelopmentDetectionMode = DevelopmentDetectionMode.Custom;
+options.CustomDevelopmentCheck = () => MyConfig.IsDevMode;
 
-        // SharpInspect에 기록
-        SharpInspectDevTools.Store?.AddNetworkEntry(entry);
-
-        return response;
-    }
-}
+// Force enable in all environments
+options.EnableInDevelopmentOnly = false;
 ```
 
-## 🖥️ DevTools UI 기능
+## DevTools UI Features
 
-### Network 탭
-- 요청/응답 목록 (시간순)
-- 상태 코드별 색상 구분 (2xx 초록, 4xx 주황, 5xx 빨강)
-- 요청/응답 헤더 상세 보기
-- 요청/응답 바디 (JSON 포맷팅)
-- 타이밍 정보 (DNS, TCP, TLS, TTFB 등)
-- 필터링 및 검색
-- Clear 버튼
+### Network Tab
+- Request/response list with timing info
+- Status code color coding (2xx green, 4xx orange, 5xx red)
+- Headers and body inspection (JSON formatted)
+- Timing breakdown (DNS, TCP, TLS, TTFB)
+- Filtering and search
+- Clear button
 
-### Console 탭
-- 로그 레벨별 색상 구분
-- 실시간 스트리밍
-- 필터링 및 검색
-- 예외 스택 트레이스 표시
+### Console Tab
+- Log level color coding
+- Real-time streaming
+- Stack trace display for exceptions
+- Filtering and search
 
-## 📁 프로젝트 구조
+### Performance Tab
+- CPU usage monitoring
+- Memory metrics (working set, GC heap)
+- GC collection counts
+- Thread count tracking
+
+### Application Tab
+- App info (name, version, runtime, PID)
+- Environment variables
+- Loaded assemblies list
+
+## REST API
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/status` | GET | Server status |
+| `/api/network` | GET | Network entries (paginated) |
+| `/api/network/{id}` | GET | Single network entry |
+| `/api/network/clear` | POST | Clear network logs |
+| `/api/console` | GET | Console entries (paginated) |
+| `/api/console/clear` | POST | Clear console logs |
+| `/api/performance` | GET | Performance entries (paginated) |
+| `/api/performance/clear` | POST | Clear performance logs |
+| `/api/application` | GET | Application info |
+| `/ws` | WebSocket | Real-time event stream |
+
+## Project Structure
 
 ```
 SharpInspect/
 ├── src/
-│   ├── SharpInspect.Core/       # 핵심 로직 (모델, 스토리지, 이벤트)
-│   ├── SharpInspect.Server/     # 내장 웹서버 (REST API, WebSocket)
-│   └── SharpInspect/            # 통합 패키지 (진입점, DI 확장)
+│   ├── SharpInspect.Core/       # Core models, storage, events, interceptors
+│   ├── SharpInspect.Server/     # Embedded web server (REST API, WebSocket)
+│   └── SharpInspect/            # Public API, DI extensions
 └── samples/
-    ├── Sample.ConsoleApp/       # 콘솔 앱 예제 (.NET 8)
-    └── Sample.WinForms/         # WinForms 예제 (.NET Framework 4.6.2)
+    ├── Sample.ConsoleApp/       # .NET 8 console example
+    └── Sample.WinForms/         # .NET Framework 4.6.2 WinForms example
 ```
 
-## 🛠️ 빌드
+## Build
 
 ```bash
-# 전체 빌드
+# Build all
 dotnet build SharpInspect.sln
 
-# 샘플 실행
+# Run sample
 dotnet run --project samples/Sample.ConsoleApp
 ```
 
-## 📋 API 엔드포인트
+## Security Considerations
 
-DevTools 서버가 제공하는 REST API:
+- Binds to `localhost` only by default
+- Auto-disabled in production (EnableInDevelopmentOnly = true)
+- Sensitive headers masked automatically (Authorization, Cookie)
+- Optional token-based authentication
 
-| 엔드포인트 | 메서드 | 설명 |
-|-----------|--------|------|
-| `/api/status` | GET | 서버 상태 |
-| `/api/network` | GET | 네트워크 엔트리 목록 |
-| `/api/network/{id}` | GET | 특정 엔트리 상세 |
-| `/api/network/clear` | POST | 네트워크 기록 초기화 |
-| `/api/console` | GET | 콘솔 로그 목록 |
-| `/api/console/clear` | POST | 콘솔 로그 초기화 |
-| `/ws` | WebSocket | 실시간 이벤트 스트리밍 |
+## Roadmap
 
-## 🔒 보안 고려사항
+### Completed
+- [x] Network Tab (HTTP capture with timing)
+- [x] Console Tab (log capture)
+- [x] Performance Tab (CPU, memory, GC metrics)
+- [x] Application Tab (app info, env vars, assemblies)
+- [x] Real-time WebSocket streaming
+- [x] Chrome DevTools-style UI
+- [x] Development-only mode with multiple detection strategies
+- [x] Multi-framework support (.NET Framework 3.5 ~ .NET 9.0)
 
-- 기본적으로 `localhost`에서만 접근 가능
-- 프로덕션 환경에서는 비활성화 권장
-- 민감한 헤더(Authorization, Cookie 등) 자동 마스킹
-- 선택적 토큰 인증 지원
+### Planned
+- [ ] HAR export
+- [ ] Custom panel plugin system
+- [ ] Request replay
+- [ ] Performance timeline view
+- [ ] Dark mode UI
+- [ ] NuGet package release
 
-## 📝 로드맵
+## Contributing
 
-- [x] Network 탭 (HTTP 캡처)
-- [x] Console 탭 (로그 캡처)
-- [x] 실시간 WebSocket 스트리밍
-- [x] Chrome DevTools 스타일 UI
-- [ ] Performance 탭 (GC, 메모리, CPU)
-- [ ] Application 탭 (앱 정보, 환경변수)
-- [ ] HAR 형식 내보내기
-- [ ] 커스텀 패널 플러그인 시스템
+Issues and PRs welcome!
 
-## 🤝 기여
-
-이슈와 PR을 환영합니다!
-
-## 📄 라이선스
+## License
 
 MIT License
