@@ -318,6 +318,10 @@ public class EmbeddedResourceProvider
             color: #d4d4d4;
             margin-bottom: 8px;
         }
+        .perf-card canvas {
+            width: 100%;
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -480,6 +484,9 @@ public class EmbeddedResourceProvider
                     Object.keys(panels).forEach(k => {
                         panels[k].style.display = k === currentTab ? 'flex' : 'none';
                     });
+                    if (currentTab === 'performance') {
+                        setTimeout(renderPerfCharts, 50);
+                    }
                 });
             });
 
@@ -529,8 +536,9 @@ public class EmbeddedResourceProvider
                 const canvas = document.getElementById(canvasId);
                 if (!canvas) return;
                 const ctx = canvas.getContext('2d');
-                const w = canvas.width = canvas.offsetWidth;
+                const w = canvas.width = canvas.offsetWidth || canvas.parentElement.offsetWidth || 300;
                 const h = canvas.height = 120;
+                if (w <= 0) return;
                 ctx.clearRect(0, 0, w, h);
 
                 if (data.length < 2) return;
@@ -614,8 +622,10 @@ public class EmbeddedResourceProvider
                 document.getElementById('perf-status').textContent =
                     'Last update: ' + new Date(entry.timestamp).toLocaleTimeString();
 
-                // Redraw charts
-                renderPerfCharts();
+                // Redraw charts only if performance tab is visible
+                if (currentTab === 'performance') {
+                    renderPerfCharts();
+                }
             }
 
             // Filter
