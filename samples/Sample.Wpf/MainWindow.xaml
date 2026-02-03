@@ -1,0 +1,36 @@
+<Window x:Class="Sample.Wpf.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="SharpInspect - WPF Sample"
+        Width="700" Height="500"
+        WindowStartupLocation="CenterScreen">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- 상단 버튼 패널 -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="10">
+            <Button x:Name="RequestButton" Content="Make HTTP Request"
+                    Width="140" Height="30" Margin="0,0,10,0"
+                    Click="RequestButton_Click"/>
+            <Button x:Name="LogButton" Content="Write Log"
+                    Width="100" Height="30" Margin="0,0,10,0"
+                    Click="LogButton_Click"/>
+            <Button x:Name="OpenDevToolsButton" Content="Open DevTools"
+                    Width="110" Height="30"
+                    Click="OpenDevToolsButton_Click"/>
+        </StackPanel>
+
+        <!-- 로그 출력 영역 -->
+        <TextBox x:Name="LogTextBox" Grid.Row="1"
+                 Margin="10,0,10,10"
+                 IsReadOnly="True"
+                 VerticalScrollBarVisibility="Auto"
+                 HorizontalScrollBarVisibility="Auto"
+                 TextWrapping="Wrap"
+                 FontFamily="Consolas"
+                 FontSize="12"/>
+    </Grid>
+</Window>
