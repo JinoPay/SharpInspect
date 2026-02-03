@@ -2,7 +2,7 @@
 
 **.NET 애플리케이션을 위한 Chrome DevTools 스타일 디버그 도구**
 
-브라우저에서 F12를 누르면 Network 탭, Console 등을 볼 수 있듯이, .NET 앱에서도 네트워크 요청/응답, 로그 등을 실시간으로 확인할 수 있습니다.
+.NET 앱에서 네트워크 요청/응답, 로그 등을 실시간으로 확인할 수 있습니다.
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![.NET](https://img.shields.io/badge/.NET-4.6.2%20%7C%206.0%20%7C%208.0%20%7C%209.0-purple.svg)
@@ -255,7 +255,6 @@ DevTools 서버가 제공하는 REST API:
 - [x] Chrome DevTools 스타일 UI
 - [ ] Performance 탭 (GC, 메모리, CPU)
 - [ ] Application 탭 (앱 정보, 환경변수)
-- [ ] F12 글로벌 핫키
 - [ ] HAR 형식 내보내기
 - [ ] 커스텀 패널 플러그인 시스템
 
