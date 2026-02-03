@@ -21,6 +21,8 @@ namespace SharpInspect.Core.Configuration
             EnableNetworkCapture = true;
             EnableConsoleCapture = true;
             EnablePerformanceCapture = true;
+            EnableApplicationCapture = true;
+            ApplicationRefreshIntervalMs = 30000;
             MaxNetworkEntries = 1000;
             MaxBodySizeBytes = 1048576; // 1MB
             IgnoreUrlPatterns = new List<string>();
@@ -78,6 +80,12 @@ namespace SharpInspect.Core.Configuration
         public bool EnableNetworkCapture { get; set; }
 
         /// <summary>
+        ///     애플리케이션 정보 캡처 여부를 가져오거나 설정합니다.
+        ///     기본값: true
+        /// </summary>
+        public bool EnableApplicationCapture { get; set; }
+
+        /// <summary>
         ///     성능 메트릭 캡처 여부를 가져오거나 설정합니다.
         ///     기본값: true
         /// </summary>
@@ -106,6 +114,13 @@ namespace SharpInspect.Core.Configuration
         ///     기본값: 2000
         /// </summary>
         public int MaxPerformanceEntries { get; set; }
+
+        /// <summary>
+        ///     애플리케이션 정보 갱신 간격(밀리초)을 가져오거나 설정합니다.
+        ///     주로 로드된 어셈블리 목록 갱신에 사용됩니다.
+        ///     기본값: 30000 (30초)
+        /// </summary>
+        public int ApplicationRefreshIntervalMs { get; set; }
 
         /// <summary>
         ///     성능 메트릭 캡처 간격(밀리초)을 가져오거나 설정합니다.
@@ -169,6 +184,8 @@ namespace SharpInspect.Core.Configuration
                 EnableNetworkCapture = EnableNetworkCapture,
                 EnableConsoleCapture = EnableConsoleCapture,
                 EnablePerformanceCapture = EnablePerformanceCapture,
+                EnableApplicationCapture = EnableApplicationCapture,
+                ApplicationRefreshIntervalMs = ApplicationRefreshIntervalMs,
                 MaxNetworkEntries = MaxNetworkEntries,
                 MaxBodySizeBytes = MaxBodySizeBytes,
                 CaptureRequestBody = CaptureRequestBody,

@@ -264,6 +264,30 @@ public class HttpListenerServer : ISharpInspectServer
             return;
         }
 
+        // GET /api/application
+        if (path == "/api/application" && method == "GET")
+        {
+            var info = _store.GetApplicationInfo();
+            if (info != null)
+            {
+                WriteJson(response, info);
+            }
+            else
+            {
+                response.StatusCode = 404;
+                WriteJson(response, new MessageResponse { Success = false, Message = "Application info not available" });
+            }
+
+            return;
+        }
+
+        // POST /api/application/refresh
+        if (path == "/api/application/refresh" && method == "POST")
+        {
+            WriteJson(response, new MessageResponse { Success = true, Message = "Application info refresh requested" });
+            return;
+        }
+
         // 찾을 수 없음
         response.StatusCode = 404;
         WriteJson(response, new MessageResponse { Success = false, Message = "API endpoint not found" });
