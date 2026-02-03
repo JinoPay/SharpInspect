@@ -10,8 +10,8 @@ using SharpInspect.Core.Storage;
 namespace SharpInspect.Core.Logging
 {
     /// <summary>
-    ///     Hooks Debug.WriteLine and Trace.WriteLine to capture trace output.
-    ///     Compatible with .NET Framework 3.5+.
+    ///     Debug.WriteLine과 Trace.WriteLine을 후킹하여 트레이스 출력을 캡처합니다.
+    ///     .NET Framework 3.5+ 호환.
     /// </summary>
     public class TraceHook : TraceListener, IDisposable
     {
@@ -22,7 +22,7 @@ namespace SharpInspect.Core.Logging
         private bool _disposed;
 
         /// <summary>
-        ///     Creates a new TraceHook and registers it as a trace listener.
+        ///     새 TraceHook을 생성하고 트레이스 리스너로 등록합니다.
         /// </summary>
         public TraceHook(
             ISharpInspectStore store,
@@ -34,7 +34,7 @@ namespace SharpInspect.Core.Logging
             _eventBus = eventBus ?? EventBus.Instance;
             _buffer = new StringBuilder();
 
-            // Add this listener to the trace listeners collection
+            // 이 리스너를 트레이스 리스너 컬렉션에 추가
             Trace.Listeners.Add(this);
 #if NETFRAMEWORK || NET35
             Debug.Listeners.Add(this);
@@ -42,12 +42,12 @@ namespace SharpInspect.Core.Logging
         }
 
         /// <summary>
-        ///     Gets the name of this listener.
+        ///     이 리스너의 이름을 가져옵니다.
         /// </summary>
         public override string Name => "SharpInspectTraceHook";
 
         /// <summary>
-        ///     Writes trace information including category.
+        ///     카테고리를 포함한 트레이스 정보를 작성합니다.
         /// </summary>
         public override void TraceEvent(TraceEventCache eventCache, string source, TraceEventType eventType, int id,
             string message)
@@ -77,7 +77,7 @@ namespace SharpInspect.Core.Logging
         }
 
         /// <summary>
-        ///     Writes trace information with formatted message.
+        ///     서식이 지정된 메시지로 트레이스 정보를 작성합니다.
         /// </summary>
         public override void TraceEvent(TraceEventCache eventCache, string source, TraceEventType eventType, int id,
             string format, params object[] args)
@@ -98,7 +98,7 @@ namespace SharpInspect.Core.Logging
         }
 
         /// <summary>
-        ///     Writes a message to the trace output.
+        ///     트레이스 출력에 메시지를 작성합니다.
         /// </summary>
         public override void Write(string message)
         {
@@ -112,7 +112,7 @@ namespace SharpInspect.Core.Logging
         }
 
         /// <summary>
-        ///     Writes a message followed by a line terminator.
+        ///     메시지에 줄 종결자를 붙여 작성합니다.
         /// </summary>
         public override void WriteLine(string message)
         {
@@ -152,7 +152,7 @@ namespace SharpInspect.Core.Logging
         }
 
         /// <summary>
-        ///     Disposes the hook and removes it from the trace listeners.
+        ///     후킹을 해제하고 트레이스 리스너에서 제거합니다.
         /// </summary>
         protected override void Dispose(bool disposing)
         {
@@ -211,7 +211,7 @@ namespace SharpInspect.Core.Logging
 
                     var typeName = declaringType.FullName ?? "";
 
-                    // Skip SharpInspect and System internal frames
+                    // SharpInspect 및 System 내부 프레임 건너뛰기
                     if (typeName.StartsWith("SharpInspect.") ||
                         typeName.StartsWith("System."))
                         continue;

@@ -3,10 +3,10 @@ using System;
 namespace SharpInspect.Core.Storage
 {
     /// <summary>
-    ///     A thread-safe ring buffer (circular buffer) that overwrites oldest items when capacity is reached.
-    ///     Compatible with .NET Framework 3.5+.
+    ///     용량에 도달하면 가장 오래된 항목을 덮어쓰는 스레드 안전 링 버퍼(순환 버퍼).
+    ///     .NET Framework 3.5+ 호환.
     /// </summary>
-    /// <typeparam name="T">The type of elements in the buffer.</typeparam>
+    /// <typeparam name="T">버퍼 요소의 타입.</typeparam>
     public class RingBuffer<T>
     {
         private readonly object _lock = new();
@@ -16,9 +16,9 @@ namespace SharpInspect.Core.Storage
         private int _tail;
 
         /// <summary>
-        ///     Creates a new ring buffer with the specified capacity.
+        ///     지정된 용량으로 새 링 버퍼를 생성합니다.
         /// </summary>
-        /// <param name="capacity">Maximum number of items the buffer can hold.</param>
+        /// <param name="capacity">버퍼가 보관할 수 있는 최대 항목 수.</param>
         public RingBuffer(int capacity)
         {
             if (capacity <= 0)
@@ -32,12 +32,12 @@ namespace SharpInspect.Core.Storage
         }
 
         /// <summary>
-        ///     Gets the maximum capacity of the buffer.
+        ///     버퍼의 최대 용량을 가져옵니다.
         /// </summary>
         public int Capacity { get; }
 
         /// <summary>
-        ///     Gets the current number of items in the buffer.
+        ///     버퍼의 현재 항목 수를 가져옵니다.
         /// </summary>
         public int Count
         {
@@ -51,10 +51,10 @@ namespace SharpInspect.Core.Storage
         }
 
         /// <summary>
-        ///     Tries to get the most recently added item.
+        ///     가장 최근에 추가된 항목을 가져오려고 시도합니다.
         /// </summary>
-        /// <param name="item">The most recent item if available.</param>
-        /// <returns>True if an item was found, false if the buffer is empty.</returns>
+        /// <param name="item">사용 가능한 경우 가장 최근 항목.</param>
+        /// <returns>항목을 찾으면 true, 버퍼가 비어있으면 false.</returns>
         public bool TryGetLatest(out T item)
         {
             lock (_lock)
@@ -72,9 +72,9 @@ namespace SharpInspect.Core.Storage
         }
 
         /// <summary>
-        ///     Returns all items in the buffer as an array, ordered from oldest to newest.
+        ///     버퍼의 모든 항목을 가장 오래된 것부터 최신 순서로 배열로 반환합니다.
         /// </summary>
-        /// <returns>An array containing all items in the buffer.</returns>
+        /// <returns>버퍼의 모든 항목을 포함하는 배열.</returns>
         public T[] GetAll()
         {
             lock (_lock)
@@ -96,11 +96,11 @@ namespace SharpInspect.Core.Storage
         }
 
         /// <summary>
-        ///     Returns items from the buffer starting at the specified offset.
+        ///     지정된 오프셋부터 버퍼의 항목을 반환합니다.
         /// </summary>
-        /// <param name="offset">Number of items to skip from the oldest.</param>
-        /// <param name="limit">Maximum number of items to return. If 0, returns all remaining items.</param>
-        /// <returns>An array containing the requested items.</returns>
+        /// <param name="offset">가장 오래된 것부터 건너뛸 항목 수.</param>
+        /// <param name="limit">반환할 최대 항목 수. 0이면 나머지 전부 반환.</param>
+        /// <returns>요청된 항목을 포함하는 배열.</returns>
         public T[] GetRange(int offset, int limit)
         {
             lock (_lock)
@@ -125,9 +125,9 @@ namespace SharpInspect.Core.Storage
         }
 
         /// <summary>
-        ///     Adds an item to the buffer. If the buffer is full, the oldest item is overwritten.
+        ///     버퍼에 항목을 추가합니다. 버퍼가 가득 차면 가장 오래된 항목을 덮어씁니다.
         /// </summary>
-        /// <param name="item">The item to add.</param>
+        /// <param name="item">추가할 항목.</param>
         public void Add(T item)
         {
             lock (_lock)
@@ -136,7 +136,7 @@ namespace SharpInspect.Core.Storage
                 _tail = (_tail + 1) % Capacity;
 
                 if (_count == Capacity)
-                    // Buffer is full, move head forward (overwrite oldest)
+                    // 버퍼가 가득 참, 헤드를 앞으로 이동 (가장 오래된 항목 덮어쓰기)
                     _head = (_head + 1) % Capacity;
                 else
                     _count++;
@@ -144,13 +144,13 @@ namespace SharpInspect.Core.Storage
         }
 
         /// <summary>
-        ///     Clears all items from the buffer.
+        ///     버퍼의 모든 항목을 지웁니다.
         /// </summary>
         public void Clear()
         {
             lock (_lock)
             {
-                // Clear references to allow GC
+                // GC 허용을 위해 참조 해제
                 for (var i = 0; i < Capacity; i++) _buffer[i] = default;
                 _head = 0;
                 _tail = 0;

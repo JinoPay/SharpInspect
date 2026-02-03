@@ -14,7 +14,7 @@ using SharpInspect.Server.WebServer;
 namespace SharpInspect
 {
     /// <summary>
-    ///     Main entry point for SharpInspect DevTools.
+    ///     SharpInspect DevTools의 메인 진입점.
     /// </summary>
     public static class SharpInspectDevTools
     {
@@ -30,7 +30,7 @@ namespace SharpInspect
         private static TraceHook _traceHook;
 
         /// <summary>
-        ///     Gets whether SharpInspect has been initialized.
+        ///     SharpInspect가 초기화되었는지 여부를 가져옵니다.
         /// </summary>
         public static bool IsInitialized
         {
@@ -44,27 +44,27 @@ namespace SharpInspect
         }
 
         /// <summary>
-        ///     Gets the event bus instance.
+        ///     이벤트 버스 인스턴스를 가져옵니다.
         /// </summary>
         public static EventBus EventBus { get; private set; }
 
         /// <summary>
-        ///     Gets the storage instance.
+        ///     스토리지 인스턴스를 가져옵니다.
         /// </summary>
         public static ISharpInspectStore Store => _store;
 
         /// <summary>
-        ///     Gets the current options.
+        ///     현재 설정 옵션을 가져옵니다.
         /// </summary>
         public static SharpInspectOptions Options { get; private set; }
 
         /// <summary>
-        ///     Gets the DevTools URL.
+        ///     DevTools URL을 가져옵니다.
         /// </summary>
         public static string DevToolsUrl => Options?.GetDevToolsUrl();
 
         /// <summary>
-        ///     Initializes SharpInspect with default options.
+        ///     기본 옵션으로 SharpInspect를 초기화합니다.
         /// </summary>
         public static void Initialize()
         {
@@ -72,7 +72,7 @@ namespace SharpInspect
         }
 
         /// <summary>
-        ///     Initializes SharpInspect with a configuration action.
+        ///     설정 액션을 사용하여 SharpInspect를 초기화합니다.
         /// </summary>
         public static void Initialize(Action<SharpInspectOptions> configure)
         {
@@ -82,7 +82,7 @@ namespace SharpInspect
         }
 
         /// <summary>
-        ///     Initializes SharpInspect with the specified options.
+        ///     지정된 옵션으로 SharpInspect를 초기화합니다.
         /// </summary>
         public static void Initialize(SharpInspectOptions options)
         {
@@ -96,24 +96,24 @@ namespace SharpInspect
                 EventBus = new EventBus();
                 _store = new InMemoryStore(Options.MaxNetworkEntries, Options.MaxConsoleEntries, Options.MaxPerformanceEntries);
 
-                // Initialize HTTP interceptor for .NET Framework
+                // .NET Framework용 HTTP 인터셉터 초기화
                 HttpWebRequestInterceptor.Initialize(_store, Options, EventBus);
 
-                // Initialize console hook
+                // 콘솔 후킹 초기화
                 if (Options.EnableConsoleCapture)
                 {
                     _consoleHook = new ConsoleHook(_store, Options, EventBus);
                     _traceHook = new TraceHook(_store, Options, EventBus);
                 }
 
-                // Initialize performance capture
+                // 성능 캡처 초기화
                 if (Options.EnablePerformanceCapture)
                 {
                     _performanceInterceptor = new PerformanceInterceptor(_store, Options, EventBus);
                 }
 
 #if !NET35
-                // Start web server
+                // 웹 서버 시작
                 _server = new HttpListenerServer(_store, Options, EventBus);
                 _server.Start();
 
@@ -127,7 +127,7 @@ namespace SharpInspect
         }
 
         /// <summary>
-        ///     Opens the DevTools in the default browser.
+        ///     기본 브라우저에서 DevTools를 엽니다.
         /// </summary>
         public static void OpenDevTools()
         {
@@ -138,7 +138,7 @@ namespace SharpInspect
         }
 
         /// <summary>
-        ///     Shuts down SharpInspect and releases resources.
+        ///     SharpInspect를 종료하고 리소스를 해제합니다.
         /// </summary>
         public static void Shutdown()
         {
@@ -175,7 +175,7 @@ namespace SharpInspect
 #if NETFRAMEWORK
                 Process.Start(url);
 #else
-                // Cross-platform browser opening
+                // 크로스 플랫폼 브라우저 열기
                 if (RuntimeInformation.IsOSPlatform(
                         OSPlatform.Windows))
                     Process.Start(new ProcessStartInfo
@@ -193,13 +193,13 @@ namespace SharpInspect
             }
             catch
             {
-                // Ignore browser open failures
+                // 브라우저 열기 실패 무시
             }
         }
 
 #if !NET35
         /// <summary>
-        ///     Creates a new HttpClient with SharpInspect interception enabled.
+        ///     SharpInspect 인터셉션이 활성화된 새 HttpClient를 생성합니다.
         /// </summary>
         public static HttpClient CreateHttpClient()
         {
@@ -211,7 +211,7 @@ namespace SharpInspect
         }
 
         /// <summary>
-        ///     Creates a SharpInspectHandler that can be used with HttpClient.
+        ///     HttpClient에서 사용할 수 있는 SharpInspectHandler를 생성합니다.
         /// </summary>
         public static SharpInspectHandler CreateHandler()
         {
@@ -222,7 +222,7 @@ namespace SharpInspect
         }
 
         /// <summary>
-        ///     Creates a SharpInspectHandler with a custom inner handler.
+        ///     커스텀 내부 핸들러를 사용하는 SharpInspectHandler를 생성합니다.
         /// </summary>
         public static SharpInspectHandler CreateHandler(HttpMessageHandler innerHandler)
         {
@@ -235,14 +235,14 @@ namespace SharpInspect
     }
 
     /// <summary>
-    ///     Disposable wrapper for SharpInspect that shuts down on dispose.
+    ///     Dispose 시 SharpInspect를 종료하는 일회용 래퍼 클래스.
     /// </summary>
     public class SharpInspectSession : IDisposable
     {
         private bool _disposed;
 
         /// <summary>
-        ///     Creates and initializes a new SharpInspect session.
+        ///     새 SharpInspect 세션을 생성하고 초기화합니다.
         /// </summary>
         public SharpInspectSession()
         {
@@ -250,7 +250,7 @@ namespace SharpInspect
         }
 
         /// <summary>
-        ///     Creates and initializes a new SharpInspect session with options.
+        ///     옵션을 지정하여 새 SharpInspect 세션을 생성하고 초기화합니다.
         /// </summary>
         public SharpInspectSession(SharpInspectOptions options)
         {
@@ -258,7 +258,7 @@ namespace SharpInspect
         }
 
         /// <summary>
-        ///     Creates and initializes a new SharpInspect session with configuration.
+        ///     설정 액션을 사용하여 새 SharpInspect 세션을 생성하고 초기화합니다.
         /// </summary>
         public SharpInspectSession(Action<SharpInspectOptions> configure)
         {
@@ -266,7 +266,7 @@ namespace SharpInspect
         }
 
         /// <summary>
-        ///     Disposes the session and shuts down SharpInspect.
+        ///     세션을 해제하고 SharpInspect를 종료합니다.
         /// </summary>
         public void Dispose()
         {

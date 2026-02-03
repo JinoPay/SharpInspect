@@ -7,15 +7,15 @@ using System.Threading;
 namespace SharpInspect.Core.Events
 {
     /// <summary>
-    ///     Delegate for handling SharpInspect events.
+    ///     SharpInspect 이벤트 처리를 위한 대리자.
     /// </summary>
-    /// <typeparam name="T">The type of event.</typeparam>
-    /// <param name="evt">The event instance.</param>
+    /// <typeparam name="T">이벤트의 타입.</typeparam>
+    /// <param name="evt">이벤트 인스턴스.</param>
     public delegate void EventHandler<T>(T evt) where T : ISharpInspectEvent;
 
     /// <summary>
-    ///     A simple in-process event bus for SharpInspect events.
-    ///     Thread-safe and compatible with .NET 3.5+.
+    ///     SharpInspect 이벤트를 위한 간단한 인프로세스 이벤트 버스.
+    ///     스레드 안전하며 .NET 3.5+ 호환.
     /// </summary>
     public class EventBus
     {
@@ -26,7 +26,7 @@ namespace SharpInspect.Core.Events
         private readonly object _handlersLock = new();
 
         /// <summary>
-        ///     Creates a new event bus instance.
+        ///     새 이벤트 버스 인스턴스를 생성합니다.
         /// </summary>
         public EventBus()
         {
@@ -34,7 +34,7 @@ namespace SharpInspect.Core.Events
         }
 
         /// <summary>
-        ///     Gets the singleton instance of the event bus.
+        ///     이벤트 버스의 싱글턴 인스턴스를 가져옵니다.
         /// </summary>
         public static EventBus Instance
         {
@@ -51,11 +51,11 @@ namespace SharpInspect.Core.Events
         }
 
         /// <summary>
-        ///     Subscribes a handler to events of type T.
+        ///     T 타입의 이벤트에 핸들러를 구독합니다.
         /// </summary>
-        /// <typeparam name="T">The type of event to subscribe to.</typeparam>
-        /// <param name="handler">The handler to invoke when an event is published.</param>
-        /// <returns>An IDisposable that unsubscribes the handler when disposed.</returns>
+        /// <typeparam name="T">구독할 이벤트 타입.</typeparam>
+        /// <param name="handler">이벤트가 발행될 때 호출할 핸들러.</param>
+        /// <returns>해제 시 핸들러 구독을 취소하는 IDisposable.</returns>
         public IDisposable Subscribe<T>(EventHandler<T> handler) where T : ISharpInspectEvent
         {
             if (handler == null)
@@ -79,7 +79,7 @@ namespace SharpInspect.Core.Events
         }
 
         /// <summary>
-        ///     Gets the number of subscribers for a specific event type.
+        ///     특정 이벤트 타입의 구독자 수를 가져옵니다.
         /// </summary>
         public int GetSubscriberCount<T>() where T : ISharpInspectEvent
         {
@@ -93,7 +93,7 @@ namespace SharpInspect.Core.Events
         }
 
         /// <summary>
-        ///     Clears all subscriptions.
+        ///     모든 구독을 지웁니다.
         /// </summary>
         public void ClearAll()
         {
@@ -104,10 +104,10 @@ namespace SharpInspect.Core.Events
         }
 
         /// <summary>
-        ///     Publishes an event to all subscribed handlers.
+        ///     모든 구독된 핸들러에 이벤트를 발행합니다.
         /// </summary>
-        /// <typeparam name="T">The type of event.</typeparam>
-        /// <param name="evt">The event to publish.</param>
+        /// <typeparam name="T">이벤트의 타입.</typeparam>
+        /// <param name="evt">발행할 이벤트.</param>
         public void Publish<T>(T evt) where T : ISharpInspectEvent
         {
             if (evt == null)
@@ -133,16 +133,16 @@ namespace SharpInspect.Core.Events
                 }
                 catch
                 {
-                    // Swallow exceptions from handlers to prevent breaking the publish loop
+                    // 발행 루프 중단 방지를 위해 핸들러 예외 무시
                 }
         }
 
 #if !NET35
         /// <summary>
-        ///     Publishes an event asynchronously on the thread pool.
+        ///     스레드 풀에서 이벤트를 비동기로 발행합니다.
         /// </summary>
-        /// <typeparam name="T">The type of event.</typeparam>
-        /// <param name="evt">The event to publish.</param>
+        /// <typeparam name="T">이벤트의 타입.</typeparam>
+        /// <param name="evt">발행할 이벤트.</param>
         public void PublishAsync<T>(T evt) where T : ISharpInspectEvent
         {
             if (evt == null)
@@ -153,10 +153,10 @@ namespace SharpInspect.Core.Events
 #endif
 
         /// <summary>
-        ///     Unsubscribes a handler from events of type T.
+        ///     T 타입의 이벤트에서 핸들러 구독을 취소합니다.
         /// </summary>
-        /// <typeparam name="T">The type of event to unsubscribe from.</typeparam>
-        /// <param name="handler">The handler to remove.</param>
+        /// <typeparam name="T">구독 취소할 이벤트 타입.</typeparam>
+        /// <param name="handler">제거할 핸들러.</param>
         public void Unsubscribe<T>(EventHandler<T> handler) where T : ISharpInspectEvent
         {
             if (handler == null)

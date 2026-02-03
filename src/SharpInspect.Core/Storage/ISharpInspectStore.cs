@@ -3,92 +3,92 @@ using SharpInspect.Core.Models;
 namespace SharpInspect.Core.Storage
 {
     /// <summary>
-    ///     Interface for storing and retrieving captured data.
+    ///     캡처된 데이터를 저장하고 조회하기 위한 인터페이스.
     /// </summary>
     public interface ISharpInspectStore
     {
         /// <summary>
-        ///     Gets the count of console entries.
+        ///     콘솔 엔트리 수를 가져옵니다.
         /// </summary>
         int ConsoleEntryCount { get; }
 
         /// <summary>
-        ///     Gets the count of network entries.
+        ///     네트워크 엔트리 수를 가져옵니다.
         /// </summary>
         int NetworkEntryCount { get; }
 
         /// <summary>
-        ///     Gets the count of performance entries.
+        ///     성능 엔트리 수를 가져옵니다.
         /// </summary>
         int PerformanceEntryCount { get; }
 
         /// <summary>
-        ///     Gets all console entries.
+        ///     모든 콘솔 엔트리를 가져옵니다.
         /// </summary>
         ConsoleEntry[] GetConsoleEntries();
 
         /// <summary>
-        ///     Gets console entries with pagination.
+        ///     페이지네이션으로 콘솔 엔트리를 가져옵니다.
         /// </summary>
         ConsoleEntry[] GetConsoleEntries(int offset, int limit);
 
         /// <summary>
-        ///     Gets a specific network entry by ID.
+        ///     ID로 특정 네트워크 엔트리를 가져옵니다.
         /// </summary>
         NetworkEntry GetNetworkEntry(string id);
 
         /// <summary>
-        ///     Gets all network entries.
+        ///     모든 네트워크 엔트리를 가져옵니다.
         /// </summary>
         NetworkEntry[] GetNetworkEntries();
 
         /// <summary>
-        ///     Gets network entries with pagination.
+        ///     페이지네이션으로 네트워크 엔트리를 가져옵니다.
         /// </summary>
         NetworkEntry[] GetNetworkEntries(int offset, int limit);
 
         /// <summary>
-        ///     Gets all performance entries.
+        ///     모든 성능 엔트리를 가져옵니다.
         /// </summary>
         PerformanceEntry[] GetPerformanceEntries();
 
         /// <summary>
-        ///     Gets performance entries with pagination.
+        ///     페이지네이션으로 성능 엔트리를 가져옵니다.
         /// </summary>
         PerformanceEntry[] GetPerformanceEntries(int offset, int limit);
 
         /// <summary>
-        ///     Adds a console entry to the store.
+        ///     스토어에 콘솔 엔트리를 추가합니다.
         /// </summary>
         void AddConsoleEntry(ConsoleEntry entry);
 
         /// <summary>
-        ///     Adds a network entry to the store.
+        ///     스토어에 네트워크 엔트리를 추가합니다.
         /// </summary>
         void AddNetworkEntry(NetworkEntry entry);
 
         /// <summary>
-        ///     Adds a performance entry to the store.
+        ///     스토어에 성능 엔트리를 추가합니다.
         /// </summary>
         void AddPerformanceEntry(PerformanceEntry entry);
 
         /// <summary>
-        ///     Clears all stored data.
+        ///     저장된 모든 데이터를 지웁니다.
         /// </summary>
         void ClearAll();
 
         /// <summary>
-        ///     Clears all console entries.
+        ///     모든 콘솔 엔트리를 지웁니다.
         /// </summary>
         void ClearConsoleEntries();
 
         /// <summary>
-        ///     Clears all network entries.
+        ///     모든 네트워크 엔트리를 지웁니다.
         /// </summary>
         void ClearNetworkEntries();
 
         /// <summary>
-        ///     Clears all performance entries.
+        ///     모든 성능 엔트리를 지웁니다.
         /// </summary>
         void ClearPerformanceEntries();
     }

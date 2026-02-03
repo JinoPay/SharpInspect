@@ -12,12 +12,12 @@ using SharpInspect.Server.WebServer;
 namespace SharpInspect.Extensions
 {
     /// <summary>
-    /// Extension methods for IServiceCollection.
+    /// IServiceCollection 확장 메서드.
     /// </summary>
     public static class ServiceCollectionExtensions
     {
         /// <summary>
-        /// Adds SharpInspect services to the service collection.
+        /// 서비스 컬렉션에 SharpInspect 서비스를 추가합니다.
         /// </summary>
         public static IServiceCollection AddSharpInspect(this IServiceCollection services)
         {
@@ -25,7 +25,7 @@ namespace SharpInspect.Extensions
         }
 
         /// <summary>
-        /// Adds SharpInspect services to the service collection with configuration.
+        /// 설정과 함께 서비스 컬렉션에 SharpInspect 서비스를 추가합니다.
         /// </summary>
         public static IServiceCollection AddSharpInspect(
             this IServiceCollection services,
@@ -37,7 +37,7 @@ namespace SharpInspect.Extensions
         }
 
         /// <summary>
-        /// Adds SharpInspect services to the service collection with options.
+        /// 옵션과 함께 서비스 컬렉션에 SharpInspect 서비스를 추가합니다.
         /// </summary>
         public static IServiceCollection AddSharpInspect(
             this IServiceCollection services,
@@ -46,23 +46,23 @@ namespace SharpInspect.Extensions
             if (options == null)
                 options = new SharpInspectOptions();
 
-            // Register core services
+            // 핵심 서비스 등록
             services.AddSingleton(options);
             services.AddSingleton<EventBus>();
             services.AddSingleton<ISharpInspectStore>(sp =>
                 new InMemoryStore(options.MaxNetworkEntries, options.MaxConsoleEntries, options.MaxPerformanceEntries));
 
-            // Register server
+            // 서버 등록
             services.AddSingleton<ISharpInspectServer, HttpListenerServer>();
 
-            // Register logger provider
+            // 로거 프로바이더 등록
             services.AddSingleton<ILoggerProvider, SharpInspectLoggerProvider>();
 
             return services;
         }
 
         /// <summary>
-        /// Adds a named HttpClient with SharpInspect interception.
+        /// SharpInspect 인터셉션이 포함된 명명된 HttpClient를 추가합니다.
         /// </summary>
         public static IHttpClientBuilder AddSharpInspectHttpClient(
             this IServiceCollection services,

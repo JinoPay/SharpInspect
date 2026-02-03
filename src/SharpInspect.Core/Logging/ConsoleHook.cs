@@ -10,8 +10,8 @@ using SharpInspect.Core.Storage;
 namespace SharpInspect.Core.Logging
 {
     /// <summary>
-    ///     Hooks Console.WriteLine and Console.Write to capture console output.
-    ///     Compatible with .NET Framework 3.5+.
+    ///     Console.WriteLine과 Console.Write를 후킹하여 콘솔 출력을 캡처합니다.
+    ///     .NET Framework 3.5+ 호환.
     /// </summary>
     public class ConsoleHook : IDisposable
     {
@@ -25,7 +25,7 @@ namespace SharpInspect.Core.Logging
         private bool _disposed;
 
         /// <summary>
-        ///     Creates a new ConsoleHook and starts intercepting console output.
+        ///     새 ConsoleHook을 생성하고 콘솔 출력 인터셉션을 시작합니다.
         /// </summary>
         public ConsoleHook(
             ISharpInspectStore store,
@@ -36,11 +36,11 @@ namespace SharpInspect.Core.Logging
             _options = options ?? throw new ArgumentNullException("options");
             _eventBus = eventBus ?? EventBus.Instance;
 
-            // Save original writers
+            // 원본 Writer 저장
             _originalOut = Console.Out;
             _originalError = Console.Error;
 
-            // Create intercepting writers
+            // 인터셉팅 Writer 생성
             _interceptedOut = new InterceptingTextWriter(
                 _originalOut,
                 msg => OnConsoleWrite(msg, SharpInspectLogLevel.Information));
@@ -49,13 +49,13 @@ namespace SharpInspect.Core.Logging
                 _originalError,
                 msg => OnConsoleWrite(msg, SharpInspectLogLevel.Error));
 
-            // Replace console writers
+            // 콘솔 Writer 교체
             Console.SetOut(_interceptedOut);
             Console.SetError(_interceptedError);
         }
 
         /// <summary>
-        ///     Disposes the hook and restores original console writers.
+        ///     후킹을 해제하고 원본 콘솔 Writer를 복원합니다.
         /// </summary>
         public void Dispose()
         {
@@ -90,7 +90,7 @@ namespace SharpInspect.Core.Logging
 
                     var typeName = declaringType.FullName ?? "";
 
-                    // Skip SharpInspect and System internal frames
+                    // SharpInspect 및 System 내부 프레임 건너뛰기
                     if (typeName.StartsWith("SharpInspect.") ||
                         typeName.StartsWith("System."))
                         continue;
@@ -141,7 +141,7 @@ namespace SharpInspect.Core.Logging
         }
 
         /// <summary>
-        ///     TextWriter that intercepts writes and forwards them to both the original writer and a callback.
+        ///     쓰기를 인터셉트하여 원본 Writer와 콜백 모두에 전달하는 TextWriter.
         /// </summary>
         private class InterceptingTextWriter : TextWriter
         {
@@ -209,7 +209,7 @@ namespace SharpInspect.Core.Logging
                     }
                     catch
                     {
-                        // Ignore errors in callback
+                        // 콜백 오류 무시
                     }
 
                     _lineBuffer.Length = 0;
