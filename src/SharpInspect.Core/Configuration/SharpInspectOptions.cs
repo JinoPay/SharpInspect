@@ -1,8 +1,41 @@
+using System;
 using System.Collections.Generic;
 using SharpInspect.Core.Models;
 
 namespace SharpInspect.Core.Configuration
 {
+    /// <summary>
+    ///     개발 환경 감지 모드.
+    /// </summary>
+    public enum DevelopmentDetectionMode
+    {
+        /// <summary>
+        ///     환경 변수 우선, 디버거 연결 폴백 (기본값).
+        ///     DOTNET_ENVIRONMENT 또는 ASPNETCORE_ENVIRONMENT 환경 변수를 먼저 확인하고,
+        ///     설정되지 않은 경우 Debugger.IsAttached 상태로 판단합니다.
+        /// </summary>
+        Auto,
+
+        /// <summary>
+        ///     환경 변수만 확인.
+        ///     DOTNET_ENVIRONMENT 또는 ASPNETCORE_ENVIRONMENT가 "Development"인 경우에만 개발 환경으로 판단합니다.
+        ///     환경 변수가 설정되지 않은 경우 프로덕션으로 간주합니다.
+        /// </summary>
+        EnvironmentVariableOnly,
+
+        /// <summary>
+        ///     디버거 연결 상태만 확인.
+        ///     Debugger.IsAttached가 true인 경우에만 개발 환경으로 판단합니다.
+        /// </summary>
+        DebuggerOnly,
+
+        /// <summary>
+        ///     커스텀 판별 함수 사용.
+        ///     CustomDevelopmentCheck 함수를 통해 개발 환경 여부를 판단합니다.
+        /// </summary>
+        Custom
+    }
+
     /// <summary>
     ///     SharpInspect 설정 옵션.
     /// </summary>
@@ -16,8 +49,7 @@ namespace SharpInspect.Core.Configuration
             Port = 9229;
             Host = "localhost";
             AutoOpenBrowser = false;
-            EnableHotkey = true;
-            Hotkey = "F12";
+            OpenInAppMode = true;
             EnableNetworkCapture = true;
             EnableConsoleCapture = true;
             EnablePerformanceCapture = true;
@@ -33,6 +65,8 @@ namespace SharpInspect.Core.Configuration
             PerformanceCaptureIntervalMs = 1000;
             MinLogLevel = SharpInspectLogLevel.Trace;
             EnableInDevelopmentOnly = true;
+            DevelopmentDetectionMode = DevelopmentDetectionMode.Auto;
+            CustomDevelopmentCheck = null;
             AccessToken = null;
             MaskedHeaders = new List<string> { "Authorization", "Cookie", "Set-Cookie" };
         }
@@ -42,6 +76,14 @@ namespace SharpInspect.Core.Configuration
         ///     기본값: false
         /// </summary>
         public bool AutoOpenBrowser { get; set; }
+
+        /// <summary>
+        ///     브라우저를 앱 모드(주소창/탭 없는 독립 창)로 열지 여부를 가져오거나 설정합니다.
+        ///     Chrome/Edge의 --app 플래그를 사용합니다.
+        ///     앱 모드 실패 시 기본 브라우저로 폴백합니다.
+        ///     기본값: true
+        /// </summary>
+        public bool OpenInAppMode { get; set; }
 
         /// <summary>
         ///     요청 본문 캡처 여부를 가져오거나 설정합니다.
@@ -62,16 +104,26 @@ namespace SharpInspect.Core.Configuration
         public bool EnableConsoleCapture { get; set; }
 
         /// <summary>
-        ///     글로벌 핫키 기능 활성화 여부를 가져오거나 설정합니다.
-        ///     기본값: true
-        /// </summary>
-        public bool EnableHotkey { get; set; }
-
-        /// <summary>
         ///     개발 환경에서만 활성화 여부를 가져오거나 설정합니다.
+        ///     true인 경우, 개발 환경이 아니면 SharpInspect가 초기화되지 않습니다.
         ///     기본값: true
         /// </summary>
         public bool EnableInDevelopmentOnly { get; set; }
+
+        /// <summary>
+        ///     개발 환경 감지 모드를 가져오거나 설정합니다.
+        ///     EnableInDevelopmentOnly가 true일 때 사용됩니다.
+        ///     기본값: Auto (환경 변수 우선, 디버거 연결 폴백)
+        /// </summary>
+        public DevelopmentDetectionMode DevelopmentDetectionMode { get; set; }
+
+        /// <summary>
+        ///     커스텀 개발 환경 판별 함수를 가져오거나 설정합니다.
+        ///     DevelopmentDetectionMode가 Custom일 때 사용됩니다.
+        ///     함수가 true를 반환하면 개발 환경으로 판단합니다.
+        ///     기본값: null
+        /// </summary>
+        public Func<bool> CustomDevelopmentCheck { get; set; }
 
         /// <summary>
         ///     네트워크 요청 캡처 여부를 가져오거나 설정합니다.
@@ -164,12 +216,6 @@ namespace SharpInspect.Core.Configuration
         public string Host { get; set; }
 
         /// <summary>
-        ///     DevTools를 여는 핫키를 가져오거나 설정합니다.
-        ///     기본값: F12
-        /// </summary>
-        public string Hotkey { get; set; }
-
-        /// <summary>
         ///     현재 옵션의 복사본을 생성합니다.
         /// </summary>
         public SharpInspectOptions Clone()
@@ -179,8 +225,7 @@ namespace SharpInspect.Core.Configuration
                 Port = Port,
                 Host = Host,
                 AutoOpenBrowser = AutoOpenBrowser,
-                EnableHotkey = EnableHotkey,
-                Hotkey = Hotkey,
+                OpenInAppMode = OpenInAppMode,
                 EnableNetworkCapture = EnableNetworkCapture,
                 EnableConsoleCapture = EnableConsoleCapture,
                 EnablePerformanceCapture = EnablePerformanceCapture,
@@ -195,6 +240,8 @@ namespace SharpInspect.Core.Configuration
                 PerformanceCaptureIntervalMs = PerformanceCaptureIntervalMs,
                 MinLogLevel = MinLogLevel,
                 EnableInDevelopmentOnly = EnableInDevelopmentOnly,
+                DevelopmentDetectionMode = DevelopmentDetectionMode,
+                CustomDevelopmentCheck = CustomDevelopmentCheck,
                 AccessToken = AccessToken
             };
 

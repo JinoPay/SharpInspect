@@ -3,6 +3,7 @@ using System;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using SharpInspect.Core.Configuration;
+using SharpInspect.Core.EnvironmentDetection;
 using SharpInspect.Server.WebServer;
 
 namespace SharpInspect.Extensions
@@ -34,6 +35,7 @@ namespace SharpInspect.Extensions
 
         /// <summary>
         /// Adds SharpInspect to the host builder with options.
+        /// IHostEnvironment를 통해 환경을 감지하여 개발 환경에서만 활성화합니다.
         /// </summary>
         public static IHostBuilder UseSharpInspect(
             this IHostBuilder hostBuilder,
@@ -41,6 +43,23 @@ namespace SharpInspect.Extensions
         {
             return hostBuilder.ConfigureServices((context, services) =>
             {
+                if (options == null)
+                    options = new SharpInspectOptions();
+
+                // IHostEnvironment를 통한 환경 감지 (Auto 모드일 때 우선 적용)
+                if (options.EnableInDevelopmentOnly &&
+                    options.DevelopmentDetectionMode == DevelopmentDetectionMode.Auto)
+                {
+                    // IHostEnvironment가 있으면 해당 정보 사용
+                    if (!context.HostingEnvironment.IsDevelopment())
+                        return;
+                }
+                else if (!DevelopmentEnvironmentDetector.IsDevelopment(options))
+                {
+                    // 다른 모드는 기존 로직 사용
+                    return;
+                }
+
                 services.AddSharpInspect(options);
 
                 // Add hosted service to start/stop the server with the host
