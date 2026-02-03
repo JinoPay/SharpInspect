@@ -14,8 +14,8 @@ using SharpInspect.Server.WebSocket;
 namespace SharpInspect.Server.WebServer;
 
 /// <summary>
-///     HTTP server implementation using HttpListener.
-///     Compatible with .NET Framework 4.6.2+ and .NET Standard 2.0+.
+///     HttpListener를 사용하는 HTTP 서버 구현체.
+///     .NET Framework 4.6.2+ 및 .NET Standard 2.0+ 호환.
 /// </summary>
 public class HttpListenerServer : ISharpInspectServer
 {
@@ -32,7 +32,7 @@ public class HttpListenerServer : ISharpInspectServer
     private Thread _listenerThread;
 
     /// <summary>
-    ///     Creates a new HttpListenerServer.
+    ///     새 HttpListenerServer를 생성합니다.
     /// </summary>
     public HttpListenerServer(
         ISharpInspectStore store,
@@ -47,7 +47,7 @@ public class HttpListenerServer : ISharpInspectServer
     }
 
     /// <summary>
-    ///     Disposes the server.
+    ///     서버를 해제합니다.
     /// </summary>
     public void Dispose()
     {
@@ -55,7 +55,7 @@ public class HttpListenerServer : ISharpInspectServer
     }
 
     /// <summary>
-    ///     Gets whether the server is running.
+    ///     서버가 실행 중인지 여부를 가져옵니다.
     /// </summary>
     public bool IsRunning
     {
@@ -69,12 +69,12 @@ public class HttpListenerServer : ISharpInspectServer
     }
 
     /// <summary>
-    ///     Gets the base URL of the server.
+    ///     서버의 기본 URL을 가져옵니다.
     /// </summary>
     public string BaseUrl => string.Format("http://{0}:{1}/", _options.Host, _options.Port);
 
     /// <summary>
-    ///     Starts the server.
+    ///     서버를 시작합니다.
     /// </summary>
     public void Start()
     {
@@ -112,7 +112,7 @@ public class HttpListenerServer : ISharpInspectServer
     }
 
     /// <summary>
-    ///     Stops the server.
+    ///     서버를 중지합니다.
     /// </summary>
     public void Stop()
     {
@@ -130,7 +130,7 @@ public class HttpListenerServer : ISharpInspectServer
             }
             catch
             {
-                // Ignore errors during shutdown
+                // 종료 중 오류 무시
             }
 
             _webSocketManager.CloseAll();
@@ -164,6 +164,7 @@ public class HttpListenerServer : ISharpInspectServer
                 UptimeSeconds = (DateTime.UtcNow - _startTime).TotalSeconds,
                 NetworkEntryCount = _store.NetworkEntryCount,
                 ConsoleEntryCount = _store.ConsoleEntryCount,
+                PerformanceEntryCount = _store.PerformanceEntryCount,
                 WebSocketClients = _webSocketManager.ClientCount
             };
             WriteJson(response, status);
@@ -238,7 +239,56 @@ public class HttpListenerServer : ISharpInspectServer
             return;
         }
 
-        // Not found
+        // GET /api/performance
+        if (path == "/api/performance" && method == "GET")
+        {
+            var offset = GetQueryInt(request, "offset", 0);
+            var limit = GetQueryInt(request, "limit", 100);
+            var entries = _store.GetPerformanceEntries(offset, limit);
+            var pagedResponse = new PagedResponse<PerformanceEntry>
+            {
+                Items = entries,
+                Total = _store.PerformanceEntryCount,
+                Offset = offset,
+                Limit = limit
+            };
+            WriteJson(response, pagedResponse);
+            return;
+        }
+
+        // POST /api/performance/clear
+        if (path == "/api/performance/clear" && method == "POST")
+        {
+            _store.ClearPerformanceEntries();
+            WriteJson(response, new MessageResponse { Success = true, Message = "Performance entries cleared" });
+            return;
+        }
+
+        // GET /api/application
+        if (path == "/api/application" && method == "GET")
+        {
+            var info = _store.GetApplicationInfo();
+            if (info != null)
+            {
+                WriteJson(response, info);
+            }
+            else
+            {
+                response.StatusCode = 404;
+                WriteJson(response, new MessageResponse { Success = false, Message = "Application info not available" });
+            }
+
+            return;
+        }
+
+        // POST /api/application/refresh
+        if (path == "/api/application/refresh" && method == "POST")
+        {
+            WriteJson(response, new MessageResponse { Success = true, Message = "Application info refresh requested" });
+            return;
+        }
+
+        // 찾을 수 없음
         response.StatusCode = 404;
         WriteJson(response, new MessageResponse { Success = false, Message = "API endpoint not found" });
     }
@@ -250,12 +300,12 @@ public class HttpListenerServer : ISharpInspectServer
             var request = context.Request;
             var response = context.Response;
 
-            // Add CORS headers
+            // CORS 헤더 추가
             response.Headers.Add("Access-Control-Allow-Origin", "*");
             response.Headers.Add("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS");
             response.Headers.Add("Access-Control-Allow-Headers", "Content-Type, Authorization");
 
-            // Handle preflight
+            // 프리플라이트 요청 처리
             if (request.HttpMethod == "OPTIONS")
             {
                 response.StatusCode = 204;
@@ -263,7 +313,7 @@ public class HttpListenerServer : ISharpInspectServer
                 return;
             }
 
-            // Check authentication if configured
+            // 인증이 설정된 경우 확인
             if (!string.IsNullOrEmpty(_options.AccessToken))
             {
                 var authHeader = request.Headers["Authorization"];
@@ -277,7 +327,7 @@ public class HttpListenerServer : ISharpInspectServer
 
             var path = request.Url.AbsolutePath.ToLowerInvariant();
 
-            // Route request
+            // 요청 라우팅
             if (path.StartsWith("/api/"))
                 HandleApiRequest(request, response, path);
             else if (path == "/ws")
@@ -298,14 +348,14 @@ public class HttpListenerServer : ISharpInspectServer
             }
             catch
             {
-                // Ignore errors writing error response
+                // 오류 응답 작성 중 오류 무시
             }
         }
     }
 
     private void HandleStaticRequest(HttpListenerRequest request, HttpListenerResponse response, string path)
     {
-        // Default to index.html
+        // index.html로 기본 설정
         if (path == "/" || path == "") path = "/index.html";
 
         var content = _staticFiles.GetContent(path);
@@ -351,7 +401,7 @@ public class HttpListenerServer : ISharpInspectServer
             }
             catch (HttpListenerException)
             {
-                // Listener was stopped
+                // 리스너가 중지됨
                 break;
             }
             catch (ObjectDisposedException)
@@ -360,7 +410,7 @@ public class HttpListenerServer : ISharpInspectServer
             }
             catch
             {
-                // Continue listening on other errors
+                // 기타 오류에서 리스닝 계속
             }
     }
 

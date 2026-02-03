@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 namespace SharpInspect.Server.WebSocket;
 
 /// <summary>
-///     Manages WebSocket connections and broadcasts events to connected clients.
+///     WebSocket 연결을 관리하고 연결된 클라이언트에 이벤트를 브로드캐스트합니다.
 /// </summary>
 public class WebSocketManager : IDisposable
 {
@@ -22,10 +22,12 @@ public class WebSocketManager : IDisposable
     private readonly object _clientsLock = new();
     private readonly IDisposable _networkSubscription;
     private readonly IDisposable _consoleSubscription;
+    private readonly IDisposable _performanceSubscription;
+    private readonly IDisposable _applicationSubscription;
     private bool _disposed;
 
     /// <summary>
-    ///     Gets the number of connected clients.
+    ///     연결된 클라이언트 수를 가져옵니다.
     /// </summary>
     public int ClientCount
     {
@@ -39,21 +41,23 @@ public class WebSocketManager : IDisposable
     }
 
     /// <summary>
-    ///     Creates a new WebSocketManager.
+    ///     새 WebSocketManager를 생성합니다.
     /// </summary>
     public WebSocketManager(EventBus eventBus)
     {
         _eventBus = eventBus ?? EventBus.Instance;
         _clients = new List<WebSocketClient>();
 
-        // Subscribe to events
+        // 이벤트 구독
         _networkSubscription = _eventBus.Subscribe<NetworkEntryEvent>(OnNetworkEntry);
         _consoleSubscription = _eventBus.Subscribe<ConsoleEntryEvent>(OnConsoleEntry);
+        _performanceSubscription = _eventBus.Subscribe<PerformanceEntryEvent>(OnPerformanceEntry);
+        _applicationSubscription = _eventBus.Subscribe<ApplicationInfoEvent>(OnApplicationInfo);
     }
 
 #if NET45_OR_GREATER || NETSTANDARD2_0 || NETCOREAPP
     /// <summary>
-    ///     Accepts a WebSocket connection.
+    ///     WebSocket 연결을 수락합니다.
     /// </summary>
     public async void AcceptWebSocket(HttpListenerContext context)
     {
@@ -71,19 +75,19 @@ public class WebSocketManager : IDisposable
                 _clients.Add(client);
             }
 
-            // Send welcome message
+            // 환영 메시지 전송
             await SendMessage(client, new WebSocketMessage
             {
                 Type = "connected",
                 Data = new { message = "Welcome to SharpInspect" }
             }).ConfigureAwait(false);
 
-            // Keep connection alive and handle incoming messages
+            // 연결 유지 및 수신 메시지 처리
             await ReceiveLoop(client).ConfigureAwait(false);
         }
         catch (Exception)
         {
-            // Connection failed
+            // 연결 실패
         }
         finally
         {
@@ -119,13 +123,13 @@ public class WebSocketManager : IDisposable
                     break;
                 }
 
-                // We don't process incoming messages currently
-                // but could add subscribe/unsubscribe functionality here
+                // 현재 수신 메시지를 처리하지 않음
+                // 향후 구독/구독취소 기능 추가 가능
             }
         }
         catch
         {
-            // Connection error
+            // 연결 오류
         }
         finally
         {
@@ -161,12 +165,12 @@ public class WebSocketManager : IDisposable
         }
 
         foreach (var client in clients)
-            // Fire and forget
+            // 실행 후 잊기
             Task.Run(() => SendMessage(client, message));
     }
 #else
         /// <summary>
-        /// WebSocket is not supported in this .NET version.
+        /// 이 .NET 버전에서는 WebSocket이 지원되지 않습니다.
         /// </summary>
         public void AcceptWebSocket(HttpListenerContext context)
         {
@@ -175,7 +179,7 @@ public class WebSocketManager : IDisposable
 
         private void Broadcast(WebSocketMessage message)
         {
-            // Not supported
+            // 지원되지 않음
         }
 #endif
 
@@ -197,6 +201,24 @@ public class WebSocketManager : IDisposable
         });
     }
 
+    private void OnPerformanceEntry(PerformanceEntryEvent evt)
+    {
+        Broadcast(new WebSocketMessage
+        {
+            Type = "performance:entry",
+            Data = evt.Entry
+        });
+    }
+
+    private void OnApplicationInfo(ApplicationInfoEvent evt)
+    {
+        Broadcast(new WebSocketMessage
+        {
+            Type = "application:info",
+            Data = evt.Info
+        });
+    }
+
     private void RemoveClient(WebSocketClient client)
     {
         lock (_clientsLock)
@@ -206,7 +228,7 @@ public class WebSocketManager : IDisposable
     }
 
     /// <summary>
-    ///     Closes all WebSocket connections.
+    ///     모든 WebSocket 연결을 닫습니다.
     /// </summary>
     public void CloseAll()
     {
@@ -230,13 +252,13 @@ public class WebSocketManager : IDisposable
             }
             catch
             {
-                // Ignore errors during close
+                // 닫기 중 오류 무시
             }
 #endif
     }
 
     /// <summary>
-    ///     Disposes the manager.
+    ///     매니저를 해제합니다.
     /// </summary>
     public void Dispose()
     {
@@ -245,30 +267,32 @@ public class WebSocketManager : IDisposable
             _disposed = true;
             _networkSubscription?.Dispose();
             _consoleSubscription?.Dispose();
+            _performanceSubscription?.Dispose();
+            _applicationSubscription?.Dispose();
             CloseAll();
         }
     }
 }
 
 /// <summary>
-///     Represents a WebSocket message.
+///     WebSocket 메시지를 나타냅니다.
 /// </summary>
 public class WebSocketMessage
 {
     /// <summary>
-    ///     Gets or sets the message data.
+    ///     메시지 데이터를 가져오거나 설정합니다.
     /// </summary>
     public object Data { get; set; }
 
     /// <summary>
-    ///     Gets or sets the message type.
+    ///     메시지 타입을 가져오거나 설정합니다.
     /// </summary>
     public string Type { get; set; }
 }
 
 #if NET45_OR_GREATER || NETSTANDARD2_0 || NETCOREAPP
 /// <summary>
-///     Represents a connected WebSocket client.
+///     연결된 WebSocket 클라이언트를 나타냅니다.
 /// </summary>
 internal class WebSocketClient
 {

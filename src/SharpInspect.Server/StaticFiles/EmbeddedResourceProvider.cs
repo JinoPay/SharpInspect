@@ -7,7 +7,7 @@ using System.Text;
 namespace SharpInspect.Server.StaticFiles;
 
 /// <summary>
-///     Provides static file content from embedded resources.
+///     임베디드 리소스에서 정적 파일 콘텐츠를 제공합니다.
 /// </summary>
 public class EmbeddedResourceProvider
 {
@@ -17,7 +17,7 @@ public class EmbeddedResourceProvider
     private readonly string _resourcePrefix;
 
     /// <summary>
-    ///     Creates a new EmbeddedResourceProvider.
+    ///     새 EmbeddedResourceProvider를 생성합니다.
     /// </summary>
     public EmbeddedResourceProvider()
     {
@@ -25,19 +25,19 @@ public class EmbeddedResourceProvider
         _assembly = typeof(EmbeddedResourceProvider).Assembly;
         _resourcePrefix = "SharpInspect.Server.wwwroot";
 
-        // Pre-load embedded resources
+        // 임베디드 리소스 사전 로드
         LoadEmbeddedResources();
     }
 
     /// <summary>
-    ///     Gets the content for a path, or null if not found.
+    ///     경로의 콘텐츠를 가져오거나, 찾을 수 없으면 null 반환.
     /// </summary>
     public byte[] GetContent(string path)
     {
         if (string.IsNullOrEmpty(path))
             return null;
 
-        // Normalize path
+        // 경로 정규화
         path = path.TrimStart('/').Replace('/', '.').Replace('\\', '.');
 
         lock (_cacheLock)
@@ -46,7 +46,7 @@ public class EmbeddedResourceProvider
             if (_cache.TryGetValue(path, out content)) return content;
         }
 
-        // If not in cache, try to load from embedded resources
+        // 캐시에 없으면 임베디드 리소스에서 로드 시도
         var resourceName = _resourcePrefix + "." + path;
         using (var stream = _assembly.GetManifestResourceStream(resourceName))
         {
@@ -66,7 +66,7 @@ public class EmbeddedResourceProvider
     }
 
     /// <summary>
-    ///     Gets the content type for a file path.
+    ///     파일 경로의 콘텐츠 타입을 가져옵니다.
     /// </summary>
     public string GetContentType(string path)
     {
@@ -119,7 +119,7 @@ public class EmbeddedResourceProvider
 
     private string GetDefaultIndexHtml()
     {
-        // Return a placeholder HTML that will be replaced by the actual UI build
+        // 실제 UI 빌드로 대체될 플레이스홀더 HTML 반환
         return @"<!DOCTYPE html>
 <html lang=""en"">
 <head>
@@ -299,6 +299,29 @@ public class EmbeddedResourceProvider
             display: flex;
             flex-direction: column;
         }
+        .perf-card {
+            background: #252526;
+            border: 1px solid #3c3c3c;
+            border-radius: 6px;
+            padding: 12px;
+        }
+        .perf-card-title {
+            font-size: 11px;
+            color: #969696;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+        .perf-card-value {
+            font-size: 24px;
+            font-weight: 600;
+            color: #d4d4d4;
+            margin-bottom: 8px;
+        }
+        .perf-card canvas {
+            width: 100%;
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -308,6 +331,8 @@ public class EmbeddedResourceProvider
             <div class=""tabs"">
                 <button class=""tab active"" data-tab=""network"">Network</button>
                 <button class=""tab"" data-tab=""console"">Console</button>
+                <button class=""tab"" data-tab=""performance"">Performance</button>
+                <button class=""tab"" data-tab=""application"">Application</button>
             </div>
             <div style=""flex: 1""></div>
             <div class=""ws-indicator"" id=""ws-status"" title=""WebSocket disconnected""></div>
@@ -350,6 +375,116 @@ public class EmbeddedResourceProvider
             <div class=""list-container"" id=""console-list"">
             </div>
         </div>
+        <div class=""content"" id=""performance-panel"" style=""display: none"">
+            <div class=""toolbar"">
+                <button id=""perf-clear-btn"">Clear</button>
+                <span id=""perf-status"" style=""font-size: 12px; color: #969696; margin-left: 8px""></span>
+            </div>
+            <div class=""list-container"" style=""padding: 12px; overflow: auto"">
+                <div style=""display: grid; grid-template-columns: 1fr 1fr; gap: 12px"">
+                    <div class=""perf-card"">
+                        <div class=""perf-card-title"">CPU Usage</div>
+                        <div class=""perf-card-value"" id=""perf-cpu"">-</div>
+                        <canvas id=""chart-cpu"" height=""120""></canvas>
+                    </div>
+                    <div class=""perf-card"">
+                        <div class=""perf-card-title"">Memory (Working Set)</div>
+                        <div class=""perf-card-value"" id=""perf-memory"">-</div>
+                        <canvas id=""chart-memory"" height=""120""></canvas>
+                    </div>
+                    <div class=""perf-card"">
+                        <div class=""perf-card-title"">GC Heap (Managed)</div>
+                        <div class=""perf-card-value"" id=""perf-gc-heap"">-</div>
+                        <canvas id=""chart-gc-heap"" height=""120""></canvas>
+                    </div>
+                    <div class=""perf-card"">
+                        <div class=""perf-card-title"">Thread Count</div>
+                        <div class=""perf-card-value"" id=""perf-threads"">-</div>
+                        <canvas id=""chart-threads"" height=""120""></canvas>
+                    </div>
+                </div>
+                <div style=""margin-top: 12px"">
+                    <div class=""perf-card"">
+                        <div class=""perf-card-title"">GC Collections</div>
+                        <div style=""display: flex; gap: 24px; margin-top: 8px"">
+                            <div style=""text-align: center"">
+                                <div style=""font-size: 20px; color: #4ec9b0"" id=""perf-gen0"">-</div>
+                                <div style=""font-size: 11px; color: #969696"">Gen 0</div>
+                            </div>
+                            <div style=""text-align: center"">
+                                <div style=""font-size: 20px; color: #dcdcaa"" id=""perf-gen1"">-</div>
+                                <div style=""font-size: 11px; color: #969696"">Gen 1</div>
+                            </div>
+                            <div style=""text-align: center"">
+                                <div style=""font-size: 20px; color: #ce9178"" id=""perf-gen2"">-</div>
+                                <div style=""font-size: 11px; color: #969696"">Gen 2</div>
+                            </div>
+                            <div style=""text-align: center"">
+                                <div style=""font-size: 20px; color: #569cd6"" id=""perf-gc-pause"">-</div>
+                                <div style=""font-size: 11px; color: #969696"">GC Pause %</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div style=""margin-top: 12px"">
+                    <div class=""perf-card"">
+                        <div class=""perf-card-title"">Thread Pool</div>
+                        <div style=""display: flex; gap: 24px; margin-top: 8px"">
+                            <div style=""text-align: center"">
+                                <div style=""font-size: 20px; color: #4ec9b0"" id=""perf-tp-worker"">-</div>
+                                <div style=""font-size: 11px; color: #969696"">Worker Threads</div>
+                            </div>
+                            <div style=""text-align: center"">
+                                <div style=""font-size: 20px; color: #569cd6"" id=""perf-tp-io"">-</div>
+                                <div style=""font-size: 11px; color: #969696"">IO Threads</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class=""content"" id=""application-panel"" style=""display: none"">
+            <div class=""toolbar"">
+                <button id=""app-refresh-btn"">Refresh</button>
+                <span id=""app-status"" style=""font-size: 12px; color: #969696; margin-left: 8px""></span>
+            </div>
+            <div class=""list-container"" style=""padding: 12px; overflow: auto"">
+                <div class=""perf-card"" style=""margin-bottom: 12px"">
+                    <div class=""perf-card-title"">App Info</div>
+                    <div id=""app-info-content"" class=""detail-content"" style=""padding: 8px 0""></div>
+                </div>
+                <div class=""perf-card"" style=""margin-bottom: 12px"">
+                    <div class=""perf-card-title"" style=""display: flex; align-items: center; gap: 8px"">
+                        Environment Variables (<span id=""env-count"">0</span>)
+                        <input type=""text"" placeholder=""Filter..."" id=""env-filter""
+                            style=""background: #3c3c3c; border: none; padding: 2px 6px;
+                            color: #d4d4d4; border-radius: 4px; font-size: 11px; width: 150px"">
+                    </div>
+                    <div id=""env-vars-content"" style=""max-height: 300px; overflow: auto; margin-top: 8px""></div>
+                </div>
+                <div class=""perf-card"">
+                    <div class=""perf-card-title"" style=""display: flex; align-items: center; gap: 8px"">
+                        Loaded Assemblies (<span id=""assembly-count"">0</span>)
+                        <input type=""text"" placeholder=""Filter..."" id=""asm-filter""
+                            style=""background: #3c3c3c; border: none; padding: 2px 6px;
+                            color: #d4d4d4; border-radius: 4px; font-size: 11px; width: 150px"">
+                    </div>
+                    <div id=""assemblies-content"" style=""max-height: 400px; overflow: auto; margin-top: 8px"">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Version</th>
+                                    <th>Location</th>
+                                    <th style=""width: 60px"">Dynamic</th>
+                                </tr>
+                            </thead>
+                            <tbody id=""assembly-list""></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -363,6 +498,13 @@ public class EmbeddedResourceProvider
             let currentDetailTab = 'headers';
             let currentTab = 'network';
 
+            // Performance chart data (keep last 60 data points)
+            const PERF_MAX_POINTS = 60;
+            let perfCpuData = [];
+            let perfMemoryData = [];
+            let perfGcHeapData = [];
+            let perfThreadData = [];
+
             // DOM elements
             const wsStatus = document.getElementById('ws-status');
             const networkList = document.getElementById('network-list');
@@ -373,20 +515,21 @@ public class EmbeddedResourceProvider
             const detailContent = document.getElementById('detail-content');
             const networkPanel = document.getElementById('network-panel');
             const consolePanel = document.getElementById('console-panel');
+            const performancePanel = document.getElementById('performance-panel');
+            const applicationPanel = document.getElementById('application-panel');
 
             // Tab switching
+            const panels = { network: networkPanel, console: consolePanel, performance: performancePanel, application: applicationPanel };
             document.querySelectorAll('.tab').forEach(tab => {
                 tab.addEventListener('click', () => {
                     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
                     tab.classList.add('active');
                     currentTab = tab.dataset.tab;
-
-                    if (currentTab === 'network') {
-                        networkPanel.style.display = 'flex';
-                        consolePanel.style.display = 'none';
-                    } else {
-                        networkPanel.style.display = 'none';
-                        consolePanel.style.display = 'flex';
+                    Object.keys(panels).forEach(k => {
+                        panels[k].style.display = k === currentTab ? 'flex' : 'none';
+                    });
+                    if (currentTab === 'performance') {
+                        setTimeout(renderPerfCharts, 50);
                     }
                 });
             });
@@ -419,6 +562,115 @@ public class EmbeddedResourceProvider
                         renderConsoleList();
                     });
             });
+
+            document.getElementById('perf-clear-btn').addEventListener('click', () => {
+                fetch(API_BASE + '/api/performance/clear', { method: 'POST', headers: {'Content-Length': '0'} })
+                    .then(() => {
+                        perfCpuData = [];
+                        perfMemoryData = [];
+                        perfGcHeapData = [];
+                        perfThreadData = [];
+                        renderPerfCharts();
+                        document.getElementById('perf-status').textContent = 'Cleared';
+                    });
+            });
+
+            // Mini chart drawing
+            function drawChart(canvasId, data, color, formatLabel) {
+                const canvas = document.getElementById(canvasId);
+                if (!canvas) return;
+                const ctx = canvas.getContext('2d');
+                const w = canvas.width = canvas.offsetWidth || canvas.parentElement.offsetWidth || 300;
+                const h = canvas.height = 120;
+                if (w <= 0) return;
+                ctx.clearRect(0, 0, w, h);
+
+                if (data.length < 2) return;
+
+                const max = Math.max(...data) * 1.1 || 1;
+                const min = 0;
+                const range = max - min || 1;
+
+                // Grid lines
+                ctx.strokeStyle = '#333';
+                ctx.lineWidth = 0.5;
+                for (let i = 0; i <= 4; i++) {
+                    const y = (h / 4) * i;
+                    ctx.beginPath();
+                    ctx.moveTo(0, y);
+                    ctx.lineTo(w, y);
+                    ctx.stroke();
+                }
+
+                // Data line
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                const step = w / (PERF_MAX_POINTS - 1);
+                const offset = PERF_MAX_POINTS - data.length;
+                for (let i = 0; i < data.length; i++) {
+                    const x = (offset + i) * step;
+                    const y = h - ((data[i] - min) / range) * (h - 4) - 2;
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+
+                // Fill under line
+                ctx.lineTo((offset + data.length - 1) * step, h);
+                ctx.lineTo(offset * step, h);
+                ctx.closePath();
+                ctx.fillStyle = color.replace(')', ', 0.1)').replace('rgb', 'rgba');
+                ctx.fill();
+            }
+
+            function renderPerfCharts() {
+                drawChart('chart-cpu', perfCpuData, 'rgb(78, 201, 176)', v => v.toFixed(1) + '%');
+                drawChart('chart-memory', perfMemoryData, 'rgb(86, 156, 214)', formatBytes);
+                drawChart('chart-gc-heap', perfGcHeapData, 'rgb(220, 220, 170)', formatBytes);
+                drawChart('chart-threads', perfThreadData, 'rgb(206, 145, 120)', v => v.toString());
+            }
+
+            function updatePerformanceUI(entry) {
+                // Push data into chart arrays
+                perfCpuData.push(entry.cpuUsagePercent);
+                perfMemoryData.push(entry.workingSetBytes);
+                perfGcHeapData.push(entry.totalMemoryBytes);
+                perfThreadData.push(entry.threadCount);
+
+                if (perfCpuData.length > PERF_MAX_POINTS) perfCpuData.shift();
+                if (perfMemoryData.length > PERF_MAX_POINTS) perfMemoryData.shift();
+                if (perfGcHeapData.length > PERF_MAX_POINTS) perfGcHeapData.shift();
+                if (perfThreadData.length > PERF_MAX_POINTS) perfThreadData.shift();
+
+                // Update value labels
+                document.getElementById('perf-cpu').textContent = entry.cpuUsagePercent.toFixed(1) + '%';
+                document.getElementById('perf-memory').textContent = formatBytes(entry.workingSetBytes);
+                document.getElementById('perf-gc-heap').textContent = formatBytes(entry.totalMemoryBytes);
+                document.getElementById('perf-threads').textContent = entry.threadCount;
+
+                // GC collections
+                document.getElementById('perf-gen0').textContent = entry.gen0Collections;
+                document.getElementById('perf-gen1').textContent = entry.gen1Collections;
+                document.getElementById('perf-gen2').textContent = entry.gen2Collections;
+                document.getElementById('perf-gc-pause').textContent =
+                    entry.gcPauseTimePercent >= 0 ? entry.gcPauseTimePercent.toFixed(2) + '%' : 'N/A';
+
+                // Thread pool
+                document.getElementById('perf-tp-worker').textContent =
+                    entry.threadPoolWorkerThreads >= 0 ? entry.threadPoolWorkerThreads : 'N/A';
+                document.getElementById('perf-tp-io').textContent =
+                    entry.threadPoolCompletionPortThreads >= 0 ? entry.threadPoolCompletionPortThreads : 'N/A';
+
+                // Status
+                document.getElementById('perf-status').textContent =
+                    'Last update: ' + new Date(entry.timestamp).toLocaleTimeString();
+
+                // Redraw charts only if performance tab is visible
+                if (currentTab === 'performance') {
+                    renderPerfCharts();
+                }
+            }
 
             // Filter
             filterInput.addEventListener('input', () => renderNetworkList());
@@ -554,6 +806,81 @@ Content Download: ${formatTime(e.contentDownloadMs)}`;
                 return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
             }
 
+            // Application tab
+            let applicationInfo = null;
+
+            function renderApplicationInfo() {
+                if (!applicationInfo) return;
+                const info = applicationInfo;
+
+                // App Info section
+                const appInfoHtml = [
+                    ['Assembly', (info.assemblyName || 'N/A') + ' v' + (info.assemblyVersion || 'N/A')],
+                    ['Location', info.assemblyLocation || 'N/A'],
+                    ['Runtime', info.frameworkDescription || info.runtimeVersion || 'N/A'],
+                    ['OS', info.osDescription || 'N/A'],
+                    ['Architecture', info.processArchitecture || 'N/A'],
+                    ['Process ID', info.processId],
+                    ['Machine', info.machineName || 'N/A'],
+                    ['User', info.userName || 'N/A'],
+                    ['Start Time', info.processStartTime ? new Date(info.processStartTime).toLocaleString() : 'N/A'],
+                    ['Working Dir', info.workingDirectory || 'N/A'],
+                    ['Processors', info.processorCount],
+                    ['Server GC', info.isServerGC ? 'Yes' : 'No'],
+                    ['Command Line', (info.commandLineArgs || []).join(' ') || 'N/A']
+                ].map(([k, v]) => '<div style=""display:flex;padding:2px 0""><span style=""color:#969696;min-width:120px"">' + escapeHtml(k) + ':</span><span>' + escapeHtml(String(v)) + '</span></div>').join('');
+                document.getElementById('app-info-content').innerHTML = appInfoHtml;
+
+                renderEnvironmentVariables();
+                renderAssemblies();
+
+                document.getElementById('app-status').textContent =
+                    'Last update: ' + new Date(info.timestamp).toLocaleTimeString();
+            }
+
+            function renderEnvironmentVariables() {
+                if (!applicationInfo) return;
+                const filter = (document.getElementById('env-filter').value || '').toLowerCase();
+                const envVars = applicationInfo.environmentVariables || {};
+                const keys = Object.keys(envVars).sort();
+                const filtered = keys.filter(k => !filter || k.toLowerCase().includes(filter) || envVars[k].toLowerCase().includes(filter));
+
+                document.getElementById('env-count').textContent = keys.length;
+
+                const html = '<table><thead><tr><th style=""width:30%"">Key</th><th>Value</th></tr></thead><tbody>' +
+                    filtered.map(k => '<tr><td style=""color:#4ec9b0"">' + escapeHtml(k) + '</td><td style=""word-break:break-all;white-space:normal"">' + escapeHtml(envVars[k]) + '</td></tr>').join('') +
+                    '</tbody></table>';
+                document.getElementById('env-vars-content').innerHTML = html;
+            }
+
+            function renderAssemblies() {
+                if (!applicationInfo) return;
+                const filter = (document.getElementById('asm-filter').value || '').toLowerCase();
+                const assemblies = applicationInfo.loadedAssemblies || [];
+                const filtered = assemblies.filter(a => !filter || (a.name || '').toLowerCase().includes(filter) || (a.location || '').toLowerCase().includes(filter));
+
+                document.getElementById('assembly-count').textContent = assemblies.length;
+
+                document.getElementById('assembly-list').innerHTML = filtered.map(a =>
+                    '<tr><td title=""' + escapeHtml(a.fullName || '') + '"">' + escapeHtml(a.name || '') + '</td>' +
+                    '<td>' + escapeHtml(a.version || '') + '</td>' +
+                    '<td style=""word-break:break-all;white-space:normal;max-width:400px"" title=""' + escapeHtml(a.location || '') + '"">' + escapeHtml(a.location || '') + '</td>' +
+                    '<td>' + (a.isDynamic ? 'Yes' : '') + '</td></tr>'
+                ).join('');
+            }
+
+            // Application tab event listeners
+            document.getElementById('app-refresh-btn').addEventListener('click', function() {
+                fetch(API_BASE + '/api/application/refresh', { method: 'POST' });
+                fetch(API_BASE + '/api/application')
+                    .then(function(r) { return r.json(); })
+                    .then(function(data) { applicationInfo = data; renderApplicationInfo(); })
+                    .catch(console.error);
+            });
+
+            document.getElementById('env-filter').addEventListener('input', renderEnvironmentVariables);
+            document.getElementById('asm-filter').addEventListener('input', renderAssemblies);
+
             // Connect WebSocket
             function connectWebSocket() {
                 const wsUrl = `ws://${window.location.host}/ws`;
@@ -589,6 +916,11 @@ Content Download: ${formatTime(e.contentDownloadMs)}`;
                                 consoleEntries.shift();
                             }
                             renderConsoleList();
+                        } else if (msg.type === 'performance:entry') {
+                            updatePerformanceUI(msg.data);
+                        } else if (msg.type === 'application:info') {
+                            applicationInfo = msg.data;
+                            renderApplicationInfo();
                         }
                     } catch {}
                 };
@@ -611,6 +943,22 @@ Content Download: ${formatTime(e.contentDownloadMs)}`;
                 })
                 .catch(console.error);
 
+            fetch(API_BASE + '/api/performance?limit=' + PERF_MAX_POINTS)
+                .then(r => r.json())
+                .then(data => {
+                    const items = data.items || [];
+                    items.forEach(entry => updatePerformanceUI(entry));
+                })
+                .catch(console.error);
+
+            fetch(API_BASE + '/api/application')
+                .then(r => r.json())
+                .then(data => {
+                    applicationInfo = data;
+                    renderApplicationInfo();
+                })
+                .catch(console.error);
+
             connectWebSocket();
         })();
     </script>
@@ -620,7 +968,7 @@ Content Download: ${formatTime(e.contentDownloadMs)}`;
 
     private void LoadEmbeddedResources()
     {
-        // Load default index.html if no embedded resources exist
+        // 임베디드 리소스가 없으면 기본 index.html 로드
         var indexContent = GetDefaultIndexHtml();
         lock (_cacheLock)
         {

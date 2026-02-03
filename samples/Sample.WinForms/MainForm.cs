@@ -125,12 +125,12 @@ public class MainForm : Form
         {
             AppendLog("Making HTTP requests...");
 
-            // GET request
+            // GET 요청
             AppendLog("  GET https://jsonplaceholder.typicode.com/posts/1");
             var response = await _httpClient.GetStringAsync("https://jsonplaceholder.typicode.com/posts/1");
             AppendLog($"  Response received: {response.Length} bytes");
 
-            // POST request
+            // POST 요청
             AppendLog("  POST https://jsonplaceholder.typicode.com/posts");
             var content = new StringContent(
                 "{\"title\": \"test\", \"body\": \"test body\", \"userId\": 1}",

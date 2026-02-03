@@ -5,40 +5,57 @@ using SharpInspect.Core.Models;
 namespace SharpInspect.Core.Storage
 {
     /// <summary>
-    ///     In-memory implementation of ISharpInspectStore using ring buffers.
+    ///     링 버퍼를 사용하는 ISharpInspectStore의 인메모리 구현체.
     /// </summary>
     public class InMemoryStore : ISharpInspectStore
     {
         /// <summary>
-        ///     Default capacity for console entries.
+        ///     콘솔 엔트리의 기본 용량.
         /// </summary>
         public const int DefaultConsoleCapacity = 5000;
 
         /// <summary>
-        ///     Default capacity for network entries.
+        ///     네트워크 엔트리의 기본 용량.
         /// </summary>
         public const int DefaultNetworkCapacity = 1000;
 
+        /// <summary>
+        ///     성능 엔트리의 기본 용량.
+        /// </summary>
+        public const int DefaultPerformanceCapacity = 2000;
+
         private readonly Dictionary<string, NetworkEntry> _networkIndex;
         private readonly object _networkIndexLock = new();
+        private readonly object _applicationInfoLock = new();
         private readonly RingBuffer<ConsoleEntry> _consoleEntries;
         private readonly RingBuffer<NetworkEntry> _networkEntries;
+        private readonly RingBuffer<PerformanceEntry> _performanceEntries;
+        private ApplicationInfo _applicationInfo;
 
         /// <summary>
-        ///     Creates a new in-memory store with default capacities.
+        ///     기본 용량으로 새 인메모리 스토어를 생성합니다.
         /// </summary>
         public InMemoryStore()
-            : this(DefaultNetworkCapacity, DefaultConsoleCapacity)
+            : this(DefaultNetworkCapacity, DefaultConsoleCapacity, DefaultPerformanceCapacity)
         {
         }
 
         /// <summary>
-        ///     Creates a new in-memory store with specified capacities.
+        ///     지정된 용량으로 새 인메모리 스토어를 생성합니다.
         /// </summary>
         public InMemoryStore(int networkCapacity, int consoleCapacity)
+            : this(networkCapacity, consoleCapacity, DefaultPerformanceCapacity)
+        {
+        }
+
+        /// <summary>
+        ///     모든 엔트리 타입에 대해 지정된 용량으로 새 인메모리 스토어를 생성합니다.
+        /// </summary>
+        public InMemoryStore(int networkCapacity, int consoleCapacity, int performanceCapacity)
         {
             _networkEntries = new RingBuffer<NetworkEntry>(networkCapacity);
             _consoleEntries = new RingBuffer<ConsoleEntry>(consoleCapacity);
+            _performanceEntries = new RingBuffer<PerformanceEntry>(performanceCapacity);
             _networkIndex = new Dictionary<string, NetworkEntry>();
         }
 
@@ -59,6 +76,9 @@ namespace SharpInspect.Core.Storage
 
         /// <inheritdoc />
         public int NetworkEntryCount => _networkEntries.Count;
+
+        /// <inheritdoc />
+        public int PerformanceEntryCount => _performanceEntries.Count;
 
         /// <inheritdoc />
         public NetworkEntry GetNetworkEntry(string id)
@@ -87,6 +107,18 @@ namespace SharpInspect.Core.Storage
         }
 
         /// <inheritdoc />
+        public PerformanceEntry[] GetPerformanceEntries()
+        {
+            return _performanceEntries.GetAll();
+        }
+
+        /// <inheritdoc />
+        public PerformanceEntry[] GetPerformanceEntries(int offset, int limit)
+        {
+            return _performanceEntries.GetRange(offset, limit);
+        }
+
+        /// <inheritdoc />
         public void AddConsoleEntry(ConsoleEntry entry)
         {
             if (entry == null)
@@ -107,9 +139,18 @@ namespace SharpInspect.Core.Storage
             {
                 _networkIndex[entry.Id] = entry;
 
-                // Clean up old entries from index if it gets too large
+                // 인덱스가 너무 커지면 오래된 엔트리 정리
                 if (_networkIndex.Count > _networkEntries.Capacity * 2) RebuildNetworkIndex();
             }
+        }
+
+        /// <inheritdoc />
+        public void AddPerformanceEntry(PerformanceEntry entry)
+        {
+            if (entry == null)
+                throw new ArgumentNullException("entry");
+
+            _performanceEntries.Add(entry);
         }
 
         /// <inheritdoc />
@@ -117,6 +158,7 @@ namespace SharpInspect.Core.Storage
         {
             ClearNetworkEntries();
             ClearConsoleEntries();
+            ClearPerformanceEntries();
         }
 
         /// <inheritdoc />
@@ -132,6 +174,30 @@ namespace SharpInspect.Core.Storage
             lock (_networkIndexLock)
             {
                 _networkIndex.Clear();
+            }
+        }
+
+        /// <inheritdoc />
+        public void ClearPerformanceEntries()
+        {
+            _performanceEntries.Clear();
+        }
+
+        /// <inheritdoc />
+        public ApplicationInfo GetApplicationInfo()
+        {
+            lock (_applicationInfoLock)
+            {
+                return _applicationInfo;
+            }
+        }
+
+        /// <inheritdoc />
+        public void SetApplicationInfo(ApplicationInfo info)
+        {
+            lock (_applicationInfoLock)
+            {
+                _applicationInfo = info;
             }
         }
 

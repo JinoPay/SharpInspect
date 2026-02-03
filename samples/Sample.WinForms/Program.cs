@@ -9,7 +9,7 @@ internal static class Program
     [STAThread]
     private static void Main()
     {
-        // Initialize SharpInspect before the application starts
+        // 애플리케이션 시작 전 SharpInspect 초기화
         SharpInspectDevTools.Initialize(options =>
         {
             options.Port = 9229;
@@ -21,7 +21,7 @@ internal static class Program
         Application.SetCompatibleTextRenderingDefault(false);
         Application.Run(new MainForm());
 
-        // Shutdown SharpInspect when the application closes
+        // 애플리케이션 종료 시 SharpInspect 종료
         SharpInspectDevTools.Shutdown();
     }
 }
