@@ -4,12 +4,12 @@ using SharpInspect.Core.Models;
 namespace SharpInspect.Core.Events
 {
     /// <summary>
-    ///     Event raised when a new performance entry is captured.
+    ///     새 성능 엔트리가 캡처될 때 발생하는 이벤트.
     /// </summary>
     public class PerformanceEntryEvent : SharpInspectEventBase
     {
         /// <summary>
-        ///     Creates a new performance entry event.
+        ///     새 성능 엔트리 이벤트를 생성합니다.
         /// </summary>
         public PerformanceEntryEvent(PerformanceEntry entry)
         {
@@ -20,12 +20,12 @@ namespace SharpInspect.Core.Events
         }
 
         /// <summary>
-        ///     Gets the captured performance entry.
+        ///     캡처된 성능 엔트리를 가져옵니다.
         /// </summary>
         public PerformanceEntry Entry { get; private set; }
 
         /// <summary>
-        ///     Gets the event type name.
+        ///     이벤트 타입 이름을 가져옵니다.
         /// </summary>
         public override string EventType => "performance:entry";
     }

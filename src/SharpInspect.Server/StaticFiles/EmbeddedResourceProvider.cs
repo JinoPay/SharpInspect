@@ -7,7 +7,7 @@ using System.Text;
 namespace SharpInspect.Server.StaticFiles;
 
 /// <summary>
-///     Provides static file content from embedded resources.
+///     임베디드 리소스에서 정적 파일 콘텐츠를 제공합니다.
 /// </summary>
 public class EmbeddedResourceProvider
 {
@@ -17,7 +17,7 @@ public class EmbeddedResourceProvider
     private readonly string _resourcePrefix;
 
     /// <summary>
-    ///     Creates a new EmbeddedResourceProvider.
+    ///     새 EmbeddedResourceProvider를 생성합니다.
     /// </summary>
     public EmbeddedResourceProvider()
     {
@@ -25,19 +25,19 @@ public class EmbeddedResourceProvider
         _assembly = typeof(EmbeddedResourceProvider).Assembly;
         _resourcePrefix = "SharpInspect.Server.wwwroot";
 
-        // Pre-load embedded resources
+        // 임베디드 리소스 사전 로드
         LoadEmbeddedResources();
     }
 
     /// <summary>
-    ///     Gets the content for a path, or null if not found.
+    ///     경로의 콘텐츠를 가져오거나, 찾을 수 없으면 null 반환.
     /// </summary>
     public byte[] GetContent(string path)
     {
         if (string.IsNullOrEmpty(path))
             return null;
 
-        // Normalize path
+        // 경로 정규화
         path = path.TrimStart('/').Replace('/', '.').Replace('\\', '.');
 
         lock (_cacheLock)
@@ -46,7 +46,7 @@ public class EmbeddedResourceProvider
             if (_cache.TryGetValue(path, out content)) return content;
         }
 
-        // If not in cache, try to load from embedded resources
+        // 캐시에 없으면 임베디드 리소스에서 로드 시도
         var resourceName = _resourcePrefix + "." + path;
         using (var stream = _assembly.GetManifestResourceStream(resourceName))
         {
@@ -66,7 +66,7 @@ public class EmbeddedResourceProvider
     }
 
     /// <summary>
-    ///     Gets the content type for a file path.
+    ///     파일 경로의 콘텐츠 타입을 가져옵니다.
     /// </summary>
     public string GetContentType(string path)
     {
@@ -119,7 +119,7 @@ public class EmbeddedResourceProvider
 
     private string GetDefaultIndexHtml()
     {
-        // Return a placeholder HTML that will be replaced by the actual UI build
+        // 실제 UI 빌드로 대체될 플레이스홀더 HTML 반환
         return @"<!DOCTYPE html>
 <html lang=""en"">
 <head>
@@ -838,7 +838,7 @@ Content Download: ${formatTime(e.contentDownloadMs)}`;
 
     private void LoadEmbeddedResources()
     {
-        // Load default index.html if no embedded resources exist
+        // 임베디드 리소스가 없으면 기본 index.html 로드
         var indexContent = GetDefaultIndexHtml();
         lock (_cacheLock)
         {

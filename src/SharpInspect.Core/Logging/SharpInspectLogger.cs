@@ -11,8 +11,8 @@ using SharpInspect.Core.Storage;
 namespace SharpInspect.Core.Logging
 {
     /// <summary>
-    ///     ILogger implementation that captures log entries for SharpInspect.
-    ///     Available for .NET Standard 2.0+ and .NET 6+.
+    ///     SharpInspect용 로그 엔트리를 캡처하는 ILogger 구현체.
+    ///     .NET Standard 2.0+ 및 .NET 6+에서 사용 가능.
     /// </summary>
     public class SharpInspectLogger : ILogger
     {
@@ -22,7 +22,7 @@ namespace SharpInspect.Core.Logging
         private readonly string _categoryName;
 
         /// <summary>
-        ///     Creates a new SharpInspectLogger.
+        ///     새 SharpInspectLogger를 생성합니다.
         /// </summary>
         public SharpInspectLogger(
             string categoryName,
@@ -49,7 +49,7 @@ namespace SharpInspect.Core.Logging
         /// <inheritdoc />
         public IDisposable BeginScope<TState>(TState state)
         {
-            // Scopes are not captured currently
+            // 스코프는 현재 캡처되지 않음
             return NullScope.Instance;
         }
 
@@ -151,7 +151,7 @@ namespace SharpInspect.Core.Logging
 
                     var typeName = declaringType.FullName ?? "";
 
-                    // Skip SharpInspect and Microsoft.Extensions.Logging internal frames
+                    // SharpInspect 및 Microsoft.Extensions.Logging 내부 프레임 건너뛰기
                     if (typeName.StartsWith("SharpInspect.") ||
                         typeName.StartsWith("Microsoft.Extensions.Logging"))
                         continue;
@@ -183,7 +183,7 @@ namespace SharpInspect.Core.Logging
     }
 
     /// <summary>
-    ///     ILoggerProvider that creates SharpInspectLogger instances.
+    ///     SharpInspectLogger 인스턴스를 생성하는 ILoggerProvider.
     /// </summary>
     public class SharpInspectLoggerProvider : ILoggerProvider
     {
@@ -192,7 +192,7 @@ namespace SharpInspect.Core.Logging
         private readonly SharpInspectOptions _options;
 
         /// <summary>
-        ///     Creates a new SharpInspectLoggerProvider.
+        ///     새 SharpInspectLoggerProvider를 생성합니다.
         /// </summary>
         public SharpInspectLoggerProvider(
             ISharpInspectStore store,
@@ -207,7 +207,7 @@ namespace SharpInspect.Core.Logging
         /// <inheritdoc />
         public void Dispose()
         {
-            // Nothing to dispose
+            // 해제할 리소스 없음
         }
 
         /// <inheritdoc />

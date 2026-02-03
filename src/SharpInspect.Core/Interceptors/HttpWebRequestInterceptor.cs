@@ -11,8 +11,8 @@ using SharpInspect.Core.Storage;
 namespace SharpInspect.Core.Interceptors
 {
     /// <summary>
-    ///     Utility class for intercepting HttpWebRequest operations.
-    ///     Compatible with .NET Framework 3.5+.
+    ///     HttpWebRequest 작업을 인터셉트하기 위한 유틸리티 클래스.
+    ///     .NET Framework 3.5+ 호환.
     /// </summary>
     public static class HttpWebRequestInterceptor
     {
@@ -23,7 +23,7 @@ namespace SharpInspect.Core.Interceptors
         private static SharpInspectOptions _options;
 
         /// <summary>
-        ///     Creates a wrapper around HttpWebRequest that captures the request/response.
+        ///     요청/응답을 캡처하는 HttpWebRequest 래퍼를 생성합니다.
         /// </summary>
         public static HttpWebResponse GetResponseWithCapture(HttpWebRequest request)
         {
@@ -36,18 +36,18 @@ namespace SharpInspect.Core.Interceptors
 
             try
             {
-                // Capture request
+                // 요청 캡처
                 CaptureRequest(entry, request);
 
-                // Get response
+                // 응답 가져오기
                 var response = (HttpWebResponse)request.GetResponse();
 
                 stopwatch.Stop();
 
-                // Capture response
+                // 응답 캡처
                 CaptureResponse(entry, response, stopwatch.Elapsed);
 
-                // Store and publish
+                // 저장 및 발행
                 StoreAndPublish(entry);
 
                 return response;
@@ -80,8 +80,8 @@ namespace SharpInspect.Core.Interceptors
         }
 
         /// <summary>
-        ///     Wraps a synchronous request/response capture for any HttpWebRequest.
-        ///     Usage: Use this before manually calling GetResponse().
+        ///     HttpWebRequest의 동기 요청/응답 캡처를 래핑합니다.
+        ///     사용법: GetResponse()를 수동 호출하기 전에 사용합니다.
         /// </summary>
         public static NetworkEntry CaptureRequestStart(HttpWebRequest request)
         {
@@ -95,7 +95,7 @@ namespace SharpInspect.Core.Interceptors
         }
 
         /// <summary>
-        ///     Completes the capture after receiving a response.
+        ///     응답 수신 후 캡처를 완료합니다.
         /// </summary>
         public static void CaptureRequestEnd(NetworkEntry entry, HttpWebResponse response, TimeSpan elapsed)
         {
@@ -107,7 +107,7 @@ namespace SharpInspect.Core.Interceptors
         }
 
         /// <summary>
-        ///     Completes the capture after an error.
+        ///     오류 발생 후 캡처를 완료합니다.
         /// </summary>
         public static void CaptureRequestError(NetworkEntry entry, Exception ex, TimeSpan elapsed)
         {
@@ -119,7 +119,7 @@ namespace SharpInspect.Core.Interceptors
         }
 
         /// <summary>
-        ///     Initializes the interceptor with the specified dependencies.
+        ///     지정된 의존성으로 인터셉터를 초기화합니다.
         /// </summary>
         public static void Initialize(
             ISharpInspectStore store,
@@ -181,7 +181,7 @@ namespace SharpInspect.Core.Interceptors
 
                     var typeName = declaringType.FullName ?? "";
 
-                    // Skip SharpInspect and System.Net internal frames
+                    // SharpInspect 및 System.Net 내부 프레임 건너뛰기
                     if (typeName.StartsWith("SharpInspect.") ||
                         typeName.StartsWith("System.Net"))
                         continue;
@@ -195,7 +195,7 @@ namespace SharpInspect.Core.Interceptors
                     else
                         sb.AppendFormat("at {0}.{1}()\n", typeName, method.Name);
 
-                    // Only capture first few frames
+                    // 처음 몇 개 프레임만 캡처
                     if (sb.Length > 500)
                         break;
                 }
@@ -217,8 +217,8 @@ namespace SharpInspect.Core.Interceptors
                     if (stream == null)
                         return null;
 
-                    // We need to buffer the stream to allow the caller to read it again
-                    // This is a limitation - for large responses, consider not capturing
+                    // 호출자가 다시 읽을 수 있도록 스트림을 버퍼링해야 함
+                    // 이는 제한사항 - 큰 응답의 경우 캡처하지 않는 것을 고려
                     using (var reader = new StreamReader(stream, Encoding.UTF8))
                     {
                         return reader.ReadToEnd();
@@ -246,7 +246,7 @@ namespace SharpInspect.Core.Interceptors
             entry.Path = request.RequestUri.AbsolutePath;
             entry.QueryString = request.RequestUri.Query;
 
-            // Capture headers
+            // 헤더 캡처
             if (request.Headers != null)
                 foreach (var key in request.Headers.AllKeys)
                 {
@@ -267,7 +267,7 @@ namespace SharpInspect.Core.Interceptors
             entry.TotalMs = elapsed.TotalMilliseconds;
             entry.Protocol = "HTTP/" + response.ProtocolVersion;
 
-            // Capture headers
+            // 헤더 캡처
             if (response.Headers != null)
                 foreach (var key in response.Headers.AllKeys)
                 {
@@ -279,7 +279,7 @@ namespace SharpInspect.Core.Interceptors
             entry.ResponseContentType = response.ContentType;
             entry.ResponseContentLength = response.ContentLength;
 
-            // Capture response body if enabled and within size limit
+            // 캡처가 활성화되어 있고 크기 제한 이내인 경우 응답 본문 캡처
             if (_options.CaptureResponseBody &&
                 response.ContentLength <= _options.MaxBodySizeBytes &&
                 response.ContentLength != -1)
@@ -293,7 +293,7 @@ namespace SharpInspect.Core.Interceptors
             if (_eventBus != null)
             {
 #if NET35
-                // Synchronous publish for .NET 3.5
+                // .NET 3.5용 동기 발행
                 _eventBus.Publish(new NetworkEntryEvent(entry));
 #else
                 _eventBus.PublishAsync(new NetworkEntryEvent(entry));

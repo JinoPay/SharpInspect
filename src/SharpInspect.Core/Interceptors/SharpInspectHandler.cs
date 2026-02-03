@@ -13,8 +13,8 @@ using SharpInspect.Core.Storage;
 namespace SharpInspect.Core.Interceptors
 {
     /// <summary>
-    ///     HttpClient DelegatingHandler that intercepts and captures HTTP requests/responses.
-    ///     Available for .NET 4.5+ and .NET Standard 2.0+.
+    ///     HTTP 요청/응답을 인터셉트하고 캡처하는 HttpClient DelegatingHandler.
+    ///     .NET 4.5+ 및 .NET Standard 2.0+에서 사용 가능.
     /// </summary>
     public class SharpInspectHandler : DelegatingHandler
     {
@@ -23,7 +23,7 @@ namespace SharpInspect.Core.Interceptors
         private readonly SharpInspectOptions _options;
 
         /// <summary>
-        ///     Creates a new SharpInspectHandler with the specified dependencies.
+        ///     지정된 의존성으로 새 SharpInspectHandler를 생성합니다.
         /// </summary>
         public SharpInspectHandler(
             ISharpInspectStore store,
@@ -34,7 +34,7 @@ namespace SharpInspect.Core.Interceptors
         }
 
         /// <summary>
-        ///     Creates a new SharpInspectHandler with the specified dependencies and inner handler.
+        ///     지정된 의존성과 내부 핸들러로 새 SharpInspectHandler를 생성합니다.
         /// </summary>
         public SharpInspectHandler(
             ISharpInspectStore store,
@@ -61,15 +61,15 @@ namespace SharpInspect.Core.Interceptors
 
             try
             {
-                // Capture request details
+                // 요청 상세 정보 캡처
                 await CaptureRequest(entry, request).ConfigureAwait(false);
 
-                // Send the request
+                // 요청 전송
                 var response = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
 
                 stopwatch.Stop();
 
-                // Capture response details
+                // 응답 상세 정보 캡처
                 await CaptureResponse(entry, response, stopwatch.Elapsed).ConfigureAwait(false);
 
                 return response;
@@ -82,7 +82,7 @@ namespace SharpInspect.Core.Interceptors
             }
             finally
             {
-                // Store and publish the entry
+                // 엔트리 저장 및 발행
                 _store.AddNetworkEntry(entry);
                 _eventBus.PublishAsync(new NetworkEntryEvent(entry));
             }
@@ -135,7 +135,7 @@ namespace SharpInspect.Core.Interceptors
 
                     var typeName = declaringType.FullName ?? "";
 
-                    // Skip SharpInspect internal frames
+                    // SharpInspect 내부 프레임 건너뛰기
                     if (typeName.StartsWith("SharpInspect.") || typeName.StartsWith("System.Net.Http")) continue;
 
                     skip = false;
@@ -149,7 +149,7 @@ namespace SharpInspect.Core.Interceptors
                     else
                         sb.AppendFormat("at {0}.{1}()\n", typeName, method.Name);
 
-                    // Only capture first few frames
+                    // 처음 몇 개 프레임만 캡처
                     if (sb.Length > 500)
                         break;
                 }
@@ -170,7 +170,7 @@ namespace SharpInspect.Core.Interceptors
             entry.Path = request.RequestUri.AbsolutePath;
             entry.QueryString = request.RequestUri.Query;
 
-            // Capture headers
+            // 헤더 캡처
             foreach (var header in request.Headers)
             {
                 var value = string.Join(", ", header.Value);
@@ -178,7 +178,7 @@ namespace SharpInspect.Core.Interceptors
                 entry.RequestHeaders[header.Key] = value;
             }
 
-            // Capture content headers and body
+            // 콘텐츠 헤더 및 본문 캡처
             if (request.Content != null)
             {
                 foreach (var header in request.Content.Headers)
@@ -194,7 +194,7 @@ namespace SharpInspect.Core.Interceptors
                     entry.RequestBody = await ReadContentAsString(request.Content).ConfigureAwait(false);
             }
 
-            // Capture initiator (stack trace)
+            // 요청 출처 캡처 (스택 트레이스)
             entry.Initiator = GetInitiator();
         }
 
@@ -210,7 +210,7 @@ namespace SharpInspect.Core.Interceptors
             entry.Protocol = "HTTP/" + response.Version.ToString();
 #endif
 
-            // Capture headers
+            // 헤더 캡처
             foreach (var header in response.Headers)
             {
                 var value = string.Join(", ", header.Value);
@@ -218,7 +218,7 @@ namespace SharpInspect.Core.Interceptors
                 entry.ResponseHeaders[header.Key] = value;
             }
 
-            // Capture content headers and body
+            // 콘텐츠 헤더 및 본문 캡처
             if (response.Content != null)
             {
                 foreach (var header in response.Content.Headers)
@@ -239,7 +239,7 @@ namespace SharpInspect.Core.Interceptors
         {
             try
             {
-                // Buffer the content to allow multiple reads
+                // 다중 읽기를 위해 콘텐츠 버퍼링
                 await content.LoadIntoBufferAsync().ConfigureAwait(false);
                 return await content.ReadAsStringAsync().ConfigureAwait(false);
             }

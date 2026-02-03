@@ -3,12 +3,12 @@ using System;
 namespace SharpInspect.Core.Models
 {
     /// <summary>
-    ///     Represents a captured performance metrics snapshot.
+    ///     캡처된 성능 메트릭 스냅샷을 나타냅니다.
     /// </summary>
     public class PerformanceEntry
     {
         /// <summary>
-        ///     Creates a new PerformanceEntry with a unique ID and current timestamp.
+        ///     고유 ID와 현재 타임스탬프로 새 PerformanceEntry를 생성합니다.
         /// </summary>
         public PerformanceEntry()
         {
@@ -21,72 +21,72 @@ namespace SharpInspect.Core.Models
         }
 
         /// <summary>
-        ///     Timestamp when the metrics snapshot was taken.
+        ///     메트릭 스냅샷이 촬영된 타임스탬프.
         /// </summary>
         public DateTime Timestamp { get; set; }
 
         /// <summary>
-        ///     Process CPU usage percentage (0-100).
+        ///     프로세스 CPU 사용률 (0-100).
         /// </summary>
         public double CpuUsagePercent { get; set; }
 
         /// <summary>
-        ///     GC pause time as a percentage (0-100). Available on .NET 7+ only; -1 if unavailable.
+        ///     GC 일시정지 시간 비율 (0-100). .NET 7+ 전용; 사용 불가 시 -1.
         /// </summary>
         public double GcPauseTimePercent { get; set; }
 
         /// <summary>
-        ///     Number of Gen0 garbage collections since process start.
+        ///     프로세스 시작 이후 0세대 가비지 수집 횟수.
         /// </summary>
         public int Gen0Collections { get; set; }
 
         /// <summary>
-        ///     Number of Gen1 garbage collections since process start.
+        ///     프로세스 시작 이후 1세대 가비지 수집 횟수.
         /// </summary>
         public int Gen1Collections { get; set; }
 
         /// <summary>
-        ///     Number of Gen2 garbage collections since process start.
+        ///     프로세스 시작 이후 2세대 가비지 수집 횟수.
         /// </summary>
         public int Gen2Collections { get; set; }
 
         /// <summary>
-        ///     Total number of threads in the process.
+        ///     프로세스의 총 스레드 수.
         /// </summary>
         public int ThreadCount { get; set; }
 
         /// <summary>
-        ///     Number of available completion port threads in the thread pool. -1 if unavailable.
+        ///     스레드 풀의 사용 가능한 완료 포트 스레드 수. 사용 불가 시 -1.
         /// </summary>
         public int ThreadPoolCompletionPortThreads { get; set; }
 
         /// <summary>
-        ///     Number of available worker threads in the thread pool. -1 if unavailable.
+        ///     스레드 풀의 사용 가능한 작업자 스레드 수. 사용 불가 시 -1.
         /// </summary>
         public int ThreadPoolWorkerThreads { get; set; }
 
         /// <summary>
-        ///     Managed heap size in bytes. Available on .NET 6+ only; -1 if unavailable.
+        ///     관리 힙 크기(바이트). .NET 6+ 전용; 사용 불가 시 -1.
         /// </summary>
         public long ManagedHeapSizeBytes { get; set; }
 
         /// <summary>
-        ///     Process private memory in bytes.
+        ///     프로세스 전용 메모리(바이트).
         /// </summary>
         public long PrivateMemoryBytes { get; set; }
 
         /// <summary>
-        ///     Total managed memory reported by GC in bytes.
+        ///     GC가 보고한 총 관리 메모리(바이트).
         /// </summary>
         public long TotalMemoryBytes { get; set; }
 
         /// <summary>
-        ///     Process working set (physical memory) in bytes.
+        ///     프로세스 작업 세트(물리 메모리, 바이트).
         /// </summary>
         public long WorkingSetBytes { get; set; }
 
         /// <summary>
-        ///     Unique identifier for this entry.
+        ///     이 엔트리의 고유 식별자.
         /// </summary>
         public string Id { get; set; }
     }

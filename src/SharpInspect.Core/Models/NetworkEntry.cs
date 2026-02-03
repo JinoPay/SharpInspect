@@ -4,12 +4,12 @@ using System.Collections.Generic;
 namespace SharpInspect.Core.Models
 {
     /// <summary>
-    ///     Represents a captured HTTP network request/response.
+    ///     캡처된 HTTP 네트워크 요청/응답을 나타냅니다.
     /// </summary>
     public class NetworkEntry
     {
         /// <summary>
-        ///     Creates a new NetworkEntry with a unique ID and current timestamp.
+        ///     고유 ID와 현재 타임스탬프로 새 NetworkEntry를 생성합니다.
         /// </summary>
         public NetworkEntry()
         {
@@ -20,142 +20,142 @@ namespace SharpInspect.Core.Models
         }
 
         /// <summary>
-        ///     Indicates if the request resulted in an error.
+        ///     요청이 오류로 끝났는지 여부.
         /// </summary>
         public bool IsError { get; set; }
 
         /// <summary>
-        ///     Timestamp when the request was initiated.
+        ///     요청이 시작된 타임스탬프.
         /// </summary>
         public DateTime Timestamp { get; set; }
 
         /// <summary>
-        ///     Request headers.
+        ///     요청 헤더.
         /// </summary>
         public Dictionary<string, string> RequestHeaders { get; set; }
 
         /// <summary>
-        ///     Response headers.
+        ///     응답 헤더.
         /// </summary>
         public Dictionary<string, string> ResponseHeaders { get; set; }
 
         /// <summary>
-        ///     Content download time in milliseconds.
+        ///     콘텐츠 다운로드 시간(밀리초).
         /// </summary>
         public double ContentDownloadMs { get; set; }
 
         /// <summary>
-        ///     DNS lookup time in milliseconds.
+        ///     DNS 조회 시간(밀리초).
         /// </summary>
         public double DnsLookupMs { get; set; }
 
         /// <summary>
-        ///     Time spent sending the request in milliseconds.
+        ///     요청 전송에 소요된 시간(밀리초).
         /// </summary>
         public double RequestSentMs { get; set; }
 
         /// <summary>
-        ///     TCP connection time in milliseconds.
+        ///     TCP 연결 시간(밀리초).
         /// </summary>
         public double TcpConnectMs { get; set; }
 
         /// <summary>
-        ///     TLS handshake time in milliseconds.
+        ///     TLS 핸드셰이크 시간(밀리초).
         /// </summary>
         public double TlsHandshakeMs { get; set; }
 
         /// <summary>
-        ///     Total request/response time in milliseconds.
+        ///     총 요청/응답 시간(밀리초).
         /// </summary>
         public double TotalMs { get; set; }
 
         /// <summary>
-        ///     Time waiting for first byte (TTFB) in milliseconds.
+        ///     첫 번째 바이트 대기 시간(TTFB, 밀리초).
         /// </summary>
         public double WaitingMs { get; set; }
 
         /// <summary>
-        ///     HTTP status code of the response.
+        ///     응답의 HTTP 상태 코드.
         /// </summary>
         public int StatusCode { get; set; }
 
         /// <summary>
-        ///     Request content length in bytes.
+        ///     요청 콘텐츠 길이(바이트).
         /// </summary>
         public long RequestContentLength { get; set; }
 
         /// <summary>
-        ///     Response content length in bytes.
+        ///     응답 콘텐츠 길이(바이트).
         /// </summary>
         public long ResponseContentLength { get; set; }
 
         /// <summary>
-        ///     Error message if the request failed.
+        ///     요청 실패 시 오류 메시지.
         /// </summary>
         public string ErrorMessage { get; set; }
 
         /// <summary>
-        ///     Host portion of the URL.
+        ///     URL의 호스트 부분.
         /// </summary>
         public string Host { get; set; }
 
         /// <summary>
-        ///     Unique identifier for this entry.
+        ///     이 엔트리의 고유 식별자.
         /// </summary>
         public string Id { get; set; }
 
         /// <summary>
-        ///     Stack trace of the code that initiated this request.
+        ///     이 요청을 시작한 코드의 스택 트레이스.
         /// </summary>
         public string Initiator { get; set; }
 
         /// <summary>
-        ///     HTTP method (GET, POST, PUT, DELETE, etc.).
+        ///     HTTP 메서드 (GET, POST, PUT, DELETE 등).
         /// </summary>
         public string Method { get; set; }
 
         /// <summary>
-        ///     Path portion of the URL.
+        ///     URL의 경로 부분.
         /// </summary>
         public string Path { get; set; }
 
         /// <summary>
-        ///     Protocol used (HTTP/1.1, HTTP/2, etc.).
+        ///     사용된 프로토콜 (HTTP/1.1, HTTP/2 등).
         /// </summary>
         public string Protocol { get; set; }
 
         /// <summary>
-        ///     Query string portion of the URL.
+        ///     URL의 쿼리 문자열 부분.
         /// </summary>
         public string QueryString { get; set; }
 
         /// <summary>
-        ///     Request body content.
+        ///     요청 본문 내용.
         /// </summary>
         public string RequestBody { get; set; }
 
         /// <summary>
-        ///     Request content type.
+        ///     요청 콘텐츠 타입.
         /// </summary>
         public string RequestContentType { get; set; }
 
         /// <summary>
-        ///     Response body content.
+        ///     응답 본문 내용.
         /// </summary>
         public string ResponseBody { get; set; }
 
         /// <summary>
-        ///     Response content type.
+        ///     응답 콘텐츠 타입.
         /// </summary>
         public string ResponseContentType { get; set; }
 
         /// <summary>
-        ///     HTTP status text (e.g., "OK", "Not Found").
+        ///     HTTP 상태 텍스트.
         /// </summary>
         public string StatusText { get; set; }
 
         /// <summary>
-        ///     Full request URL.
+        ///     전체 요청 URL.
         /// </summary>
         public string Url { get; set; }
     }

@@ -4,12 +4,12 @@ using SharpInspect.Core.Models;
 namespace SharpInspect.Core.Events
 {
     /// <summary>
-    ///     Event raised when a new console entry is captured.
+    ///     새 콘솔 엔트리가 캡처될 때 발생하는 이벤트.
     /// </summary>
     public class ConsoleEntryEvent : SharpInspectEventBase
     {
         /// <summary>
-        ///     Creates a new console entry event.
+        ///     새 콘솔 엔트리 이벤트를 생성합니다.
         /// </summary>
         public ConsoleEntryEvent(ConsoleEntry entry)
         {
@@ -20,12 +20,12 @@ namespace SharpInspect.Core.Events
         }
 
         /// <summary>
-        ///     Gets the captured console entry.
+        ///     캡처된 콘솔 엔트리를 가져옵니다.
         /// </summary>
         public ConsoleEntry Entry { get; private set; }
 
         /// <summary>
-        ///     Gets the event type name.
+        ///     이벤트 타입 이름을 가져옵니다.
         /// </summary>
         public override string EventType => "console:entry";
     }

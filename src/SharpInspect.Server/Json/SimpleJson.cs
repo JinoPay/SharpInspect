@@ -6,13 +6,13 @@ using System.Text;
 namespace SharpInspect.Server.Json;
 
 /// <summary>
-///     Simple JSON serializer/deserializer compatible with .NET Framework 3.5+.
-///     Handles basic types: string, number, bool, null, arrays, and dictionaries.
+///     기본 타입(string, number, bool, null, 배열, 딕셔너리)을 처리하는
+///     .NET Framework 3.5+ 호환 간단한 JSON 직렬화/역직렬화기.
 /// </summary>
 public static class SimpleJson
 {
     /// <summary>
-    ///     Serializes an object to JSON string.
+    ///     객체를 JSON 문자열로 직렬화합니다.
     /// </summary>
     public static string Serialize(object obj)
     {
@@ -81,7 +81,7 @@ public static class SimpleJson
             if (!prop.CanRead)
                 continue;
 
-            // Skip indexers
+            // 인덱서 건너뛰기
             if (prop.GetIndexParameters().Length > 0)
                 continue;
 
@@ -99,7 +99,7 @@ public static class SimpleJson
                 sb.Append(',');
             first = false;
 
-            // Convert property name to camelCase
+            // 속성 이름을 camelCase로 변환
             var name = ToCamelCase(prop.Name);
             SerializeString(name, sb);
             sb.Append(':');

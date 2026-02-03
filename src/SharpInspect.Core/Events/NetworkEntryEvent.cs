@@ -4,12 +4,12 @@ using SharpInspect.Core.Models;
 namespace SharpInspect.Core.Events
 {
     /// <summary>
-    ///     Event raised when a new network entry is captured.
+    ///     새 네트워크 엔트리가 캡처될 때 발생하는 이벤트.
     /// </summary>
     public class NetworkEntryEvent : SharpInspectEventBase
     {
         /// <summary>
-        ///     Creates a new network entry event.
+        ///     새 네트워크 엔트리 이벤트를 생성합니다.
         /// </summary>
         public NetworkEntryEvent(NetworkEntry entry)
         {
@@ -20,12 +20,12 @@ namespace SharpInspect.Core.Events
         }
 
         /// <summary>
-        ///     Gets the captured network entry.
+        ///     캡처된 네트워크 엔트리를 가져옵니다.
         /// </summary>
         public NetworkEntry Entry { get; private set; }
 
         /// <summary>
-        ///     Gets the event type name.
+        ///     이벤트 타입 이름을 가져옵니다.
         /// </summary>
         public override string EventType => "network:entry";
     }

@@ -3,23 +3,23 @@ using System;
 namespace SharpInspect.Core.Events
 {
     /// <summary>
-    ///     Base interface for all SharpInspect events.
+    ///     모든 SharpInspect 이벤트의 기본 인터페이스.
     /// </summary>
     public interface ISharpInspectEvent
     {
         /// <summary>
-        ///     Gets the timestamp when the event occurred.
+        ///     이벤트가 발생한 타임스탬프를 가져옵니다.
         /// </summary>
         DateTime Timestamp { get; }
 
         /// <summary>
-        ///     Gets the event type name.
+        ///     이벤트 타입 이름을 가져옵니다.
         /// </summary>
         string EventType { get; }
     }
 
     /// <summary>
-    ///     Base class for SharpInspect events.
+    ///     SharpInspect 이벤트의 기본 클래스.
     /// </summary>
     public abstract class SharpInspectEventBase : ISharpInspectEvent
     {

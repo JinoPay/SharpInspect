@@ -10,7 +10,7 @@ internal class Program
         Console.WriteLine("=== SharpInspect Sample Console App ===");
         Console.WriteLine();
 
-        // Initialize SharpInspect
+        // SharpInspect 초기화
         SharpInspectDevTools.Initialize(options =>
         {
             options.Port = 9229;
@@ -27,7 +27,7 @@ internal class Program
         Console.WriteLine("Press 'q' to quit");
         Console.WriteLine();
 
-        // Create HttpClient with SharpInspect interception
+        // SharpInspect 인터셉션이 포함된 HttpClient 생성
         using var httpClient = SharpInspectDevTools.CreateHttpClient();
 
         var running = true;
@@ -72,17 +72,17 @@ internal class Program
 
         try
         {
-            // GET request
+            // GET 요청
             Console.WriteLine("  GET https://jsonplaceholder.typicode.com/posts/1");
             var response1 = await httpClient.GetStringAsync("https://jsonplaceholder.typicode.com/posts/1");
             Console.WriteLine($"  Response: {response1.Substring(0, Math.Min(100, response1.Length))}...");
 
-            // GET request with query
+            // 쿼리 포함 GET 요청
             Console.WriteLine("  GET https://jsonplaceholder.typicode.com/comments?postId=1");
             var response2 = await httpClient.GetStringAsync("https://jsonplaceholder.typicode.com/comments?postId=1");
             Console.WriteLine($"  Response: {response2.Substring(0, Math.Min(100, response2.Length))}...");
 
-            // POST request
+            // POST 요청
             Console.WriteLine("  POST https://jsonplaceholder.typicode.com/posts");
             var content = new StringContent(
                 """{"title": "foo", "body": "bar", "userId": 1}""",
@@ -93,7 +93,7 @@ internal class Program
             Console.WriteLine(
                 $"  Response: {response3.StatusCode} - {body3.Substring(0, Math.Min(100, body3.Length))}...");
 
-            // Multiple GET requests
+            // 다중 GET 요청
             Console.WriteLine("  Making 5 more GET requests...");
             for (var i = 1; i <= 5; i++)
             {
@@ -118,7 +118,7 @@ internal class Program
         Console.WriteLine("  [WARNING] This is a warning message");
         Console.Error.WriteLine("  [ERROR] This is an error message");
 
-        // Write some structured output
+        // 구조화된 출력 작성
         Console.WriteLine();
         Console.WriteLine("  Sample data:");
         Console.WriteLine("  {");
@@ -127,7 +127,7 @@ internal class Program
         Console.WriteLine("    \"features\": [\"network\", \"console\", \"performance\"]");
         Console.WriteLine("  }");
 
-        // Simulate some processing
+        // 처리 시뮬레이션
         for (var i = 1; i <= 3; i++) Console.WriteLine($"  Processing step {i}/3...");
 
         Console.WriteLine("  Log messages written! Check the DevTools Console tab.");

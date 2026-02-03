@@ -11,7 +11,7 @@ using System.Threading;
 namespace SharpInspect.Core.Interceptors
 {
     /// <summary>
-    ///     Collects runtime performance metrics on a background timer.
+    ///     백그라운드 타이머로 런타임 성능 메트릭을 수집합니다.
     /// </summary>
     public class PerformanceInterceptor : IDisposable
     {
@@ -21,7 +21,7 @@ namespace SharpInspect.Core.Interceptors
         private readonly ISharpInspectStore _store;
         private bool _disposed;
 
-        // CPU calculation state
+        // CPU 계산 상태
         private DateTime _lastCpuCheckTime;
         private TimeSpan _lastCpuTime;
 
@@ -32,7 +32,7 @@ namespace SharpInspect.Core.Interceptors
 #endif
 
         /// <summary>
-        ///     Creates a new PerformanceInterceptor and starts collection.
+        ///     새 PerformanceInterceptor를 생성하고 수집을 시작합니다.
         /// </summary>
         public PerformanceInterceptor(
             ISharpInspectStore store,
@@ -85,20 +85,20 @@ namespace SharpInspect.Core.Interceptors
 
                 var entry = new PerformanceEntry();
 
-                // GC metrics (available on all frameworks)
+                // GC 메트릭 (모든 프레임워크에서 사용 가능)
                 entry.Gen0Collections = GC.CollectionCount(0);
                 entry.Gen1Collections = GC.CollectionCount(1);
                 entry.Gen2Collections = GC.CollectionCount(2);
                 entry.TotalMemoryBytes = GC.GetTotalMemory(false);
 
-                // Memory metrics
+                // 메모리 메트릭
                 entry.WorkingSetBytes = _currentProcess.WorkingSet64;
                 entry.PrivateMemoryBytes = _currentProcess.PrivateMemorySize64;
 
-                // CPU usage calculation
+                // CPU 사용률 계산
                 entry.CpuUsagePercent = CalculateCpuUsage();
 
-                // Thread metrics
+                // 스레드 메트릭
                 entry.ThreadCount = _currentProcess.Threads.Count;
 
 #if !NET35
@@ -108,7 +108,7 @@ namespace SharpInspect.Core.Interceptors
                 entry.ThreadPoolCompletionPortThreads = completionPortThreads;
 #endif
 
-                // Modern .NET only metrics
+                // 최신 .NET 전용 메트릭
 #if MODERN_DOTNET
                 try
                 {
@@ -117,12 +117,12 @@ namespace SharpInspect.Core.Interceptors
                 }
                 catch
                 {
-                    // Unavailable on this runtime
+                    // 이 런타임에서 사용 불가
                 }
 
                 try
                 {
-                    // GC.GetTotalPauseDuration() is .NET 7+ only, use reflection for net6 compat
+                    // GC.GetTotalPauseDuration()은 .NET 7+ 전용, net6 호환을 위해 리플렉션 사용
                     var method = typeof(GC).GetMethod("GetTotalPauseDuration",
                         System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
                     if (method != null)
@@ -136,7 +136,7 @@ namespace SharpInspect.Core.Interceptors
                 }
                 catch
                 {
-                    // Unavailable on this runtime
+                    // 이 런타임에서 사용 불가
                 }
 #endif
 
@@ -150,7 +150,7 @@ namespace SharpInspect.Core.Interceptors
             }
             catch
             {
-                // Swallow exceptions to prevent timer crash
+                // 타이머 크래시 방지를 위해 예외 무시
             }
         }
 
@@ -180,7 +180,7 @@ namespace SharpInspect.Core.Interceptors
         }
 
         /// <summary>
-        ///     Disposes the interceptor and stops metric collection.
+        ///     인터셉터를 해제하고 메트릭 수집을 중지합니다.
         /// </summary>
         public void Dispose()
         {
