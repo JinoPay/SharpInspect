@@ -5,6 +5,7 @@
     <RootNamespace>SharpInspect.Core</RootNamespace>
     <AssemblyName>SharpInspect.Core</AssemblyName>
     <PackageId>SharpInspect.Core</PackageId>
+    <LangVersion>14</LangVersion>
     <Description>Core components for SharpInspect - HTTP interception, logging, storage, and event system.</Description>
   </PropertyGroup>
 

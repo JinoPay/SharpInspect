@@ -5,6 +5,7 @@
     <RootNamespace>SharpInspect.Server</RootNamespace>
     <AssemblyName>SharpInspect.Server</AssemblyName>
     <PackageId>SharpInspect.Server</PackageId>
+    <LangVersion>14</LangVersion>
     <Description>Embedded web server for SharpInspect - REST API, WebSocket, and static file serving.</Description>
   </PropertyGroup>
 

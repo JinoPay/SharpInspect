@@ -3,7 +3,7 @@ using System;
 namespace SharpInspect.Core.Models
 {
     /// <summary>
-    /// Log level enumeration compatible with all .NET versions.
+    ///     Log level enumeration compatible with all .NET versions.
     /// </summary>
     public enum SharpInspectLogLevel
     {
@@ -16,62 +16,12 @@ namespace SharpInspect.Core.Models
     }
 
     /// <summary>
-    /// Represents a captured console/log entry.
+    ///     Represents a captured console/log entry.
     /// </summary>
     public class ConsoleEntry
     {
         /// <summary>
-        /// Unique identifier for this entry.
-        /// </summary>
-        public string Id { get; set; }
-
-        /// <summary>
-        /// Timestamp when the log entry was created.
-        /// </summary>
-        public DateTime Timestamp { get; set; }
-
-        /// <summary>
-        /// Log level (Trace, Debug, Info, Warning, Error, Critical).
-        /// </summary>
-        public SharpInspectLogLevel Level { get; set; }
-
-        /// <summary>
-        /// Log message content.
-        /// </summary>
-        public string Message { get; set; }
-
-        /// <summary>
-        /// Logger category or source name.
-        /// </summary>
-        public string Category { get; set; }
-
-        /// <summary>
-        /// Source code location that generated this log.
-        /// </summary>
-        public string Source { get; set; }
-
-        /// <summary>
-        /// Stack trace if available.
-        /// </summary>
-        public string StackTrace { get; set; }
-
-        /// <summary>
-        /// Exception type name if an exception was logged.
-        /// </summary>
-        public string ExceptionType { get; set; }
-
-        /// <summary>
-        /// Exception message if an exception was logged.
-        /// </summary>
-        public string ExceptionMessage { get; set; }
-
-        /// <summary>
-        /// Full exception details including inner exceptions.
-        /// </summary>
-        public string ExceptionDetails { get; set; }
-
-        /// <summary>
-        /// Creates a new ConsoleEntry with a unique ID and current timestamp.
+        ///     Creates a new ConsoleEntry with a unique ID and current timestamp.
         /// </summary>
         public ConsoleEntry()
         {
@@ -81,7 +31,7 @@ namespace SharpInspect.Core.Models
         }
 
         /// <summary>
-        /// Creates a new ConsoleEntry with the specified message and level.
+        ///     Creates a new ConsoleEntry with the specified message and level.
         /// </summary>
         public ConsoleEntry(string message, SharpInspectLogLevel level = SharpInspectLogLevel.Information)
             : this()
@@ -91,7 +41,57 @@ namespace SharpInspect.Core.Models
         }
 
         /// <summary>
-        /// Creates a new ConsoleEntry from an exception.
+        ///     Timestamp when the log entry was created.
+        /// </summary>
+        public DateTime Timestamp { get; set; }
+
+        /// <summary>
+        ///     Log level (Trace, Debug, Info, Warning, Error, Critical).
+        /// </summary>
+        public SharpInspectLogLevel Level { get; set; }
+
+        /// <summary>
+        ///     Logger category or source name.
+        /// </summary>
+        public string Category { get; set; }
+
+        /// <summary>
+        ///     Full exception details including inner exceptions.
+        /// </summary>
+        public string ExceptionDetails { get; set; }
+
+        /// <summary>
+        ///     Exception message if an exception was logged.
+        /// </summary>
+        public string ExceptionMessage { get; set; }
+
+        /// <summary>
+        ///     Exception type name if an exception was logged.
+        /// </summary>
+        public string ExceptionType { get; set; }
+
+        /// <summary>
+        ///     Unique identifier for this entry.
+        /// </summary>
+        public string Id { get; set; }
+
+        /// <summary>
+        ///     Log message content.
+        /// </summary>
+        public string Message { get; set; }
+
+        /// <summary>
+        ///     Source code location that generated this log.
+        /// </summary>
+        public string Source { get; set; }
+
+        /// <summary>
+        ///     Stack trace if available.
+        /// </summary>
+        public string StackTrace { get; set; }
+
+        /// <summary>
+        ///     Creates a new ConsoleEntry from an exception.
         /// </summary>
         public static ConsoleEntry FromException(Exception ex, string message = null)
         {

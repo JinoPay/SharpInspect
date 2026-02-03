@@ -1,27 +1,27 @@
 using System;
 using System.Windows.Forms;
+using SharpInspect;
 
-namespace Sample.WinForms
+namespace Sample.WinForms;
+
+internal static class Program
 {
-    static class Program
+    [STAThread]
+    private static void Main()
     {
-        [STAThread]
-        static void Main()
+        // Initialize SharpInspect before the application starts
+        SharpInspectDevTools.Initialize(options =>
         {
-            // Initialize SharpInspect before the application starts
-            SharpInspect.SharpInspectDevTools.Initialize(options =>
-            {
-                options.Port = 9229;
-                options.EnableConsoleCapture = true;
-                options.EnableNetworkCapture = true;
-            });
+            options.Port = 9229;
+            options.EnableConsoleCapture = true;
+            options.EnableNetworkCapture = true;
+        });
 
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new MainForm());
+        Application.EnableVisualStyles();
+        Application.SetCompatibleTextRenderingDefault(false);
+        Application.Run(new MainForm());
 
-            // Shutdown SharpInspect when the application closes
-            SharpInspect.SharpInspectDevTools.Shutdown();
-        }
+        // Shutdown SharpInspect when the application closes
+        SharpInspectDevTools.Shutdown();
     }
 }

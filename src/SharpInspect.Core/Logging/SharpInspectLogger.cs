@@ -11,18 +11,18 @@ using SharpInspect.Core.Storage;
 namespace SharpInspect.Core.Logging
 {
     /// <summary>
-    /// ILogger implementation that captures log entries for SharpInspect.
-    /// Available for .NET Standard 2.0+ and .NET 6+.
+    ///     ILogger implementation that captures log entries for SharpInspect.
+    ///     Available for .NET Standard 2.0+ and .NET 6+.
     /// </summary>
     public class SharpInspectLogger : ILogger
     {
-        private readonly string _categoryName;
+        private readonly EventBus _eventBus;
         private readonly ISharpInspectStore _store;
         private readonly SharpInspectOptions _options;
-        private readonly EventBus _eventBus;
+        private readonly string _categoryName;
 
         /// <summary>
-        /// Creates a new SharpInspectLogger.
+        ///     Creates a new SharpInspectLogger.
         /// </summary>
         public SharpInspectLogger(
             string categoryName,
@@ -36,14 +36,7 @@ namespace SharpInspect.Core.Logging
             _eventBus = eventBus ?? EventBus.Instance;
         }
 
-        /// <inheritdoc/>
-        public IDisposable BeginScope<TState>(TState state)
-        {
-            // Scopes are not captured currently
-            return NullScope.Instance;
-        }
-
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public bool IsEnabled(LogLevel logLevel)
         {
             if (!_options.EnableConsoleCapture)
@@ -53,7 +46,14 @@ namespace SharpInspect.Core.Logging
             return logLevel >= minLevel;
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
+        public IDisposable BeginScope<TState>(TState state)
+        {
+            // Scopes are not captured currently
+            return NullScope.Instance;
+        }
+
+        /// <inheritdoc />
         public void Log<TState>(
             LogLevel logLevel,
             EventId eventId,
@@ -88,27 +88,6 @@ namespace SharpInspect.Core.Logging
             _eventBus.PublishAsync(new ConsoleEntryEvent(entry));
         }
 
-        private SharpInspectLogLevel MapToSharpInspectLevel(LogLevel level)
-        {
-            switch (level)
-            {
-                case LogLevel.Trace:
-                    return SharpInspectLogLevel.Trace;
-                case LogLevel.Debug:
-                    return SharpInspectLogLevel.Debug;
-                case LogLevel.Information:
-                    return SharpInspectLogLevel.Information;
-                case LogLevel.Warning:
-                    return SharpInspectLogLevel.Warning;
-                case LogLevel.Error:
-                    return SharpInspectLogLevel.Error;
-                case LogLevel.Critical:
-                    return SharpInspectLogLevel.Critical;
-                default:
-                    return SharpInspectLogLevel.Information;
-            }
-        }
-
         private LogLevel MapLogLevel(SharpInspectLogLevel level)
         {
             switch (level)
@@ -127,6 +106,27 @@ namespace SharpInspect.Core.Logging
                     return LogLevel.Critical;
                 default:
                     return LogLevel.Information;
+            }
+        }
+
+        private SharpInspectLogLevel MapToSharpInspectLevel(LogLevel level)
+        {
+            switch (level)
+            {
+                case LogLevel.Trace:
+                    return SharpInspectLogLevel.Trace;
+                case LogLevel.Debug:
+                    return SharpInspectLogLevel.Debug;
+                case LogLevel.Information:
+                    return SharpInspectLogLevel.Information;
+                case LogLevel.Warning:
+                    return SharpInspectLogLevel.Warning;
+                case LogLevel.Error:
+                    return SharpInspectLogLevel.Error;
+                case LogLevel.Critical:
+                    return SharpInspectLogLevel.Critical;
+                default:
+                    return SharpInspectLogLevel.Information;
             }
         }
 
@@ -154,17 +154,13 @@ namespace SharpInspect.Core.Logging
                     // Skip SharpInspect and Microsoft.Extensions.Logging internal frames
                     if (typeName.StartsWith("SharpInspect.") ||
                         typeName.StartsWith("Microsoft.Extensions.Logging"))
-                    {
                         continue;
-                    }
 
                     var fileName = frame.GetFileName();
                     var lineNumber = frame.GetFileLineNumber();
 
                     if (!string.IsNullOrEmpty(fileName))
-                    {
                         return $"{typeName}.{method.Name}() in {Path.GetFileName(fileName)}:line {lineNumber}";
-                    }
                     return $"{typeName}.{method.Name}()";
                 }
 
@@ -178,22 +174,25 @@ namespace SharpInspect.Core.Logging
 
         private class NullScope : IDisposable
         {
-            public static NullScope Instance { get; } = new NullScope();
-            public void Dispose() { }
+            public static NullScope Instance { get; } = new();
+
+            public void Dispose()
+            {
+            }
         }
     }
 
     /// <summary>
-    /// ILoggerProvider that creates SharpInspectLogger instances.
+    ///     ILoggerProvider that creates SharpInspectLogger instances.
     /// </summary>
     public class SharpInspectLoggerProvider : ILoggerProvider
     {
+        private readonly EventBus _eventBus;
         private readonly ISharpInspectStore _store;
         private readonly SharpInspectOptions _options;
-        private readonly EventBus _eventBus;
 
         /// <summary>
-        /// Creates a new SharpInspectLoggerProvider.
+        ///     Creates a new SharpInspectLoggerProvider.
         /// </summary>
         public SharpInspectLoggerProvider(
             ISharpInspectStore store,
@@ -205,16 +204,16 @@ namespace SharpInspect.Core.Logging
             _eventBus = eventBus ?? EventBus.Instance;
         }
 
-        /// <inheritdoc/>
-        public ILogger CreateLogger(string categoryName)
-        {
-            return new SharpInspectLogger(categoryName, _store, _options, _eventBus);
-        }
-
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public void Dispose()
         {
             // Nothing to dispose
+        }
+
+        /// <inheritdoc />
+        public ILogger CreateLogger(string categoryName)
+        {
+            return new SharpInspectLogger(categoryName, _store, _options, _eventBus);
         }
     }
 }

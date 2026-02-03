@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
@@ -12,48 +11,25 @@ using SharpInspect.Core.Storage;
 namespace SharpInspect.Core.Interceptors
 {
     /// <summary>
-    /// Utility class for intercepting HttpWebRequest operations.
-    /// Compatible with .NET Framework 3.5+.
+    ///     Utility class for intercepting HttpWebRequest operations.
+    ///     Compatible with .NET Framework 3.5+.
     /// </summary>
     public static class HttpWebRequestInterceptor
     {
-        private static ISharpInspectStore _store;
-        private static SharpInspectOptions _options;
-        private static EventBus _eventBus;
         private static bool _initialized;
-        private static readonly object _initLock = new object();
+        private static EventBus _eventBus;
+        private static ISharpInspectStore _store;
+        private static readonly object _initLock = new();
+        private static SharpInspectOptions _options;
 
         /// <summary>
-        /// Initializes the interceptor with the specified dependencies.
-        /// </summary>
-        public static void Initialize(
-            ISharpInspectStore store,
-            SharpInspectOptions options,
-            EventBus eventBus = null)
-        {
-            lock (_initLock)
-            {
-                _store = store;
-                _options = options;
-                _eventBus = eventBus ?? EventBus.Instance;
-                _initialized = true;
-            }
-        }
-
-        /// <summary>
-        /// Creates a wrapper around HttpWebRequest that captures the request/response.
+        ///     Creates a wrapper around HttpWebRequest that captures the request/response.
         /// </summary>
         public static HttpWebResponse GetResponseWithCapture(HttpWebRequest request)
         {
-            if (!_initialized || !_options.EnableNetworkCapture)
-            {
-                return (HttpWebResponse)request.GetResponse();
-            }
+            if (!_initialized || !_options.EnableNetworkCapture) return (HttpWebResponse)request.GetResponse();
 
-            if (ShouldIgnoreUrl(request.RequestUri))
-            {
-                return (HttpWebResponse)request.GetResponse();
-            }
+            if (ShouldIgnoreUrl(request.RequestUri)) return (HttpWebResponse)request.GetResponse();
 
             var entry = new NetworkEntry();
             var stopwatch = Stopwatch.StartNew();
@@ -104,20 +80,14 @@ namespace SharpInspect.Core.Interceptors
         }
 
         /// <summary>
-        /// Wraps a synchronous request/response capture for any HttpWebRequest.
-        /// Usage: Use this before manually calling GetResponse().
+        ///     Wraps a synchronous request/response capture for any HttpWebRequest.
+        ///     Usage: Use this before manually calling GetResponse().
         /// </summary>
         public static NetworkEntry CaptureRequestStart(HttpWebRequest request)
         {
-            if (!_initialized || !_options.EnableNetworkCapture)
-            {
-                return null;
-            }
+            if (!_initialized || !_options.EnableNetworkCapture) return null;
 
-            if (ShouldIgnoreUrl(request.RequestUri))
-            {
-                return null;
-            }
+            if (ShouldIgnoreUrl(request.RequestUri)) return null;
 
             var entry = new NetworkEntry();
             CaptureRequest(entry, request);
@@ -125,7 +95,7 @@ namespace SharpInspect.Core.Interceptors
         }
 
         /// <summary>
-        /// Completes the capture after receiving a response.
+        ///     Completes the capture after receiving a response.
         /// </summary>
         public static void CaptureRequestEnd(NetworkEntry entry, HttpWebResponse response, TimeSpan elapsed)
         {
@@ -137,7 +107,7 @@ namespace SharpInspect.Core.Interceptors
         }
 
         /// <summary>
-        /// Completes the capture after an error.
+        ///     Completes the capture after an error.
         /// </summary>
         public static void CaptureRequestError(NetworkEntry entry, Exception ex, TimeSpan elapsed)
         {
@@ -148,111 +118,20 @@ namespace SharpInspect.Core.Interceptors
             StoreAndPublish(entry);
         }
 
-        private static void CaptureRequest(NetworkEntry entry, HttpWebRequest request)
+        /// <summary>
+        ///     Initializes the interceptor with the specified dependencies.
+        /// </summary>
+        public static void Initialize(
+            ISharpInspectStore store,
+            SharpInspectOptions options,
+            EventBus eventBus = null)
         {
-            entry.Method = request.Method;
-            entry.Url = request.RequestUri.ToString();
-            entry.Host = request.RequestUri.Host;
-            entry.Path = request.RequestUri.AbsolutePath;
-            entry.QueryString = request.RequestUri.Query;
-
-            // Capture headers
-            if (request.Headers != null)
+            lock (_initLock)
             {
-                foreach (string key in request.Headers.AllKeys)
-                {
-                    var value = request.Headers[key];
-                    if (ShouldMaskHeader(key))
-                    {
-                        value = "***masked***";
-                    }
-                    entry.RequestHeaders[key] = value;
-                }
-            }
-
-            entry.RequestContentType = request.ContentType;
-            entry.RequestContentLength = request.ContentLength;
-            entry.Initiator = GetInitiator();
-        }
-
-        private static void CaptureResponse(NetworkEntry entry, HttpWebResponse response, TimeSpan elapsed)
-        {
-            entry.StatusCode = (int)response.StatusCode;
-            entry.StatusText = response.StatusDescription;
-            entry.TotalMs = elapsed.TotalMilliseconds;
-            entry.Protocol = "HTTP/" + response.ProtocolVersion;
-
-            // Capture headers
-            if (response.Headers != null)
-            {
-                foreach (string key in response.Headers.AllKeys)
-                {
-                    var value = response.Headers[key];
-                    if (ShouldMaskHeader(key))
-                    {
-                        value = "***masked***";
-                    }
-                    entry.ResponseHeaders[key] = value;
-                }
-            }
-
-            entry.ResponseContentType = response.ContentType;
-            entry.ResponseContentLength = response.ContentLength;
-
-            // Capture response body if enabled and within size limit
-            if (_options.CaptureResponseBody &&
-                response.ContentLength <= _options.MaxBodySizeBytes &&
-                response.ContentLength != -1)
-            {
-                entry.ResponseBody = ReadResponseBody(response);
-            }
-        }
-
-        private static void CaptureError(NetworkEntry entry, Exception ex, TimeSpan elapsed)
-        {
-            entry.IsError = true;
-            entry.ErrorMessage = ex.Message;
-            entry.TotalMs = elapsed.TotalMilliseconds;
-        }
-
-        private static string ReadResponseBody(HttpWebResponse response)
-        {
-            try
-            {
-                using (var stream = response.GetResponseStream())
-                {
-                    if (stream == null)
-                        return null;
-
-                    // We need to buffer the stream to allow the caller to read it again
-                    // This is a limitation - for large responses, consider not capturing
-                    using (var reader = new StreamReader(stream, Encoding.UTF8))
-                    {
-                        return reader.ReadToEnd();
-                    }
-                }
-            }
-            catch
-            {
-                return "[Unable to read response body]";
-            }
-        }
-
-        private static void StoreAndPublish(NetworkEntry entry)
-        {
-            if (_store != null)
-            {
-                _store.AddNetworkEntry(entry);
-            }
-
-            if (_eventBus != null)
-            {
-#if NET35
-                // Synchronous publish for .NET 3.5
-                _eventBus.Publish(new NetworkEntryEvent(entry));
-#else
-                _eventBus.PublishAsync(new NetworkEntryEvent(entry));
-#endif
+                _store = store;
+                _options = options;
+                _eventBus = eventBus ?? EventBus.Instance;
+                _initialized = true;
             }
         }
 
@@ -263,10 +142,8 @@ namespace SharpInspect.Core.Interceptors
 
             var url = uri.ToString();
             foreach (var pattern in _options.IgnoreUrlPatterns)
-            {
                 if (url.Contains(pattern))
                     return true;
-            }
             return false;
         }
 
@@ -276,10 +153,8 @@ namespace SharpInspect.Core.Interceptors
                 return false;
 
             foreach (var masked in _options.MaskedHeaders)
-            {
                 if (string.Equals(headerName, masked, StringComparison.OrdinalIgnoreCase))
                     return true;
-            }
             return false;
         }
 
@@ -309,22 +184,16 @@ namespace SharpInspect.Core.Interceptors
                     // Skip SharpInspect and System.Net internal frames
                     if (typeName.StartsWith("SharpInspect.") ||
                         typeName.StartsWith("System.Net"))
-                    {
                         continue;
-                    }
 
                     var fileName = frame.GetFileName();
                     var lineNumber = frame.GetFileLineNumber();
 
                     if (!string.IsNullOrEmpty(fileName))
-                    {
                         sb.AppendFormat("at {0}.{1}() in {2}:line {3}\n",
                             typeName, method.Name, fileName, lineNumber);
-                    }
                     else
-                    {
                         sb.AppendFormat("at {0}.{1}()\n", typeName, method.Name);
-                    }
 
                     // Only capture first few frames
                     if (sb.Length > 500)
@@ -336,6 +205,99 @@ namespace SharpInspect.Core.Interceptors
             catch
             {
                 return null;
+            }
+        }
+
+        private static string ReadResponseBody(HttpWebResponse response)
+        {
+            try
+            {
+                using (var stream = response.GetResponseStream())
+                {
+                    if (stream == null)
+                        return null;
+
+                    // We need to buffer the stream to allow the caller to read it again
+                    // This is a limitation - for large responses, consider not capturing
+                    using (var reader = new StreamReader(stream, Encoding.UTF8))
+                    {
+                        return reader.ReadToEnd();
+                    }
+                }
+            }
+            catch
+            {
+                return "[Unable to read response body]";
+            }
+        }
+
+        private static void CaptureError(NetworkEntry entry, Exception ex, TimeSpan elapsed)
+        {
+            entry.IsError = true;
+            entry.ErrorMessage = ex.Message;
+            entry.TotalMs = elapsed.TotalMilliseconds;
+        }
+
+        private static void CaptureRequest(NetworkEntry entry, HttpWebRequest request)
+        {
+            entry.Method = request.Method;
+            entry.Url = request.RequestUri.ToString();
+            entry.Host = request.RequestUri.Host;
+            entry.Path = request.RequestUri.AbsolutePath;
+            entry.QueryString = request.RequestUri.Query;
+
+            // Capture headers
+            if (request.Headers != null)
+                foreach (var key in request.Headers.AllKeys)
+                {
+                    var value = request.Headers[key];
+                    if (ShouldMaskHeader(key)) value = "***masked***";
+                    entry.RequestHeaders[key] = value;
+                }
+
+            entry.RequestContentType = request.ContentType;
+            entry.RequestContentLength = request.ContentLength;
+            entry.Initiator = GetInitiator();
+        }
+
+        private static void CaptureResponse(NetworkEntry entry, HttpWebResponse response, TimeSpan elapsed)
+        {
+            entry.StatusCode = (int)response.StatusCode;
+            entry.StatusText = response.StatusDescription;
+            entry.TotalMs = elapsed.TotalMilliseconds;
+            entry.Protocol = "HTTP/" + response.ProtocolVersion;
+
+            // Capture headers
+            if (response.Headers != null)
+                foreach (var key in response.Headers.AllKeys)
+                {
+                    var value = response.Headers[key];
+                    if (ShouldMaskHeader(key)) value = "***masked***";
+                    entry.ResponseHeaders[key] = value;
+                }
+
+            entry.ResponseContentType = response.ContentType;
+            entry.ResponseContentLength = response.ContentLength;
+
+            // Capture response body if enabled and within size limit
+            if (_options.CaptureResponseBody &&
+                response.ContentLength <= _options.MaxBodySizeBytes &&
+                response.ContentLength != -1)
+                entry.ResponseBody = ReadResponseBody(response);
+        }
+
+        private static void StoreAndPublish(NetworkEntry entry)
+        {
+            if (_store != null) _store.AddNetworkEntry(entry);
+
+            if (_eventBus != null)
+            {
+#if NET35
+                // Synchronous publish for .NET 3.5
+                _eventBus.Publish(new NetworkEntryEvent(entry));
+#else
+                _eventBus.PublishAsync(new NetworkEntryEvent(entry));
+#endif
             }
         }
     }

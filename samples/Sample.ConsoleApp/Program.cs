@@ -1,14 +1,11 @@
-using System;
-using System.Net.Http;
-using System.Threading.Tasks;
+using System.Text;
 using SharpInspect;
-using SharpInspect.Core.Configuration;
 
 namespace Sample.ConsoleApp;
 
-class Program
+internal class Program
 {
-    static async Task Main(string[] args)
+    private static async Task Main(string[] args)
     {
         Console.WriteLine("=== SharpInspect Sample Console App ===");
         Console.WriteLine();
@@ -69,7 +66,7 @@ class Program
         SharpInspectDevTools.Shutdown();
     }
 
-    static async Task MakeHttpRequests(HttpClient httpClient)
+    private static async Task MakeHttpRequests(HttpClient httpClient)
     {
         Console.WriteLine("Making HTTP requests...");
 
@@ -89,15 +86,16 @@ class Program
             Console.WriteLine("  POST https://jsonplaceholder.typicode.com/posts");
             var content = new StringContent(
                 """{"title": "foo", "body": "bar", "userId": 1}""",
-                System.Text.Encoding.UTF8,
+                Encoding.UTF8,
                 "application/json");
             var response3 = await httpClient.PostAsync("https://jsonplaceholder.typicode.com/posts", content);
             var body3 = await response3.Content.ReadAsStringAsync();
-            Console.WriteLine($"  Response: {response3.StatusCode} - {body3.Substring(0, Math.Min(100, body3.Length))}...");
+            Console.WriteLine(
+                $"  Response: {response3.StatusCode} - {body3.Substring(0, Math.Min(100, body3.Length))}...");
 
             // Multiple GET requests
             Console.WriteLine("  Making 5 more GET requests...");
-            for (int i = 1; i <= 5; i++)
+            for (var i = 1; i <= 5; i++)
             {
                 await httpClient.GetStringAsync($"https://jsonplaceholder.typicode.com/posts/{i}");
                 Console.WriteLine($"    GET posts/{i} completed");
@@ -111,7 +109,7 @@ class Program
         }
     }
 
-    static void WriteLogMessages()
+    private static void WriteLogMessages()
     {
         Console.WriteLine("Writing log messages...");
 
@@ -130,10 +128,7 @@ class Program
         Console.WriteLine("  }");
 
         // Simulate some processing
-        for (int i = 1; i <= 3; i++)
-        {
-            Console.WriteLine($"  Processing step {i}/3...");
-        }
+        for (var i = 1; i <= 3; i++) Console.WriteLine($"  Processing step {i}/3...");
 
         Console.WriteLine("  Log messages written! Check the DevTools Console tab.");
     }

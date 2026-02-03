@@ -4,138 +4,123 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 
-namespace SharpInspect.Server.StaticFiles
+namespace SharpInspect.Server.StaticFiles;
+
+/// <summary>
+///     Provides static file content from embedded resources.
+/// </summary>
+public class EmbeddedResourceProvider
 {
+    private readonly Assembly _assembly;
+    private readonly Dictionary<string, byte[]> _cache;
+    private readonly object _cacheLock = new();
+    private readonly string _resourcePrefix;
+
     /// <summary>
-    /// Provides static file content from embedded resources.
+    ///     Creates a new EmbeddedResourceProvider.
     /// </summary>
-    public class EmbeddedResourceProvider
+    public EmbeddedResourceProvider()
     {
-        private readonly Dictionary<string, byte[]> _cache;
-        private readonly object _cacheLock = new object();
-        private readonly Assembly _assembly;
-        private readonly string _resourcePrefix;
+        _cache = new Dictionary<string, byte[]>(StringComparer.OrdinalIgnoreCase);
+        _assembly = typeof(EmbeddedResourceProvider).Assembly;
+        _resourcePrefix = "SharpInspect.Server.wwwroot";
 
-        /// <summary>
-        /// Creates a new EmbeddedResourceProvider.
-        /// </summary>
-        public EmbeddedResourceProvider()
-        {
-            _cache = new Dictionary<string, byte[]>(StringComparer.OrdinalIgnoreCase);
-            _assembly = typeof(EmbeddedResourceProvider).Assembly;
-            _resourcePrefix = "SharpInspect.Server.wwwroot";
+        // Pre-load embedded resources
+        LoadEmbeddedResources();
+    }
 
-            // Pre-load embedded resources
-            LoadEmbeddedResources();
-        }
-
-        /// <summary>
-        /// Gets the content for a path, or null if not found.
-        /// </summary>
-        public byte[] GetContent(string path)
-        {
-            if (string.IsNullOrEmpty(path))
-                return null;
-
-            // Normalize path
-            path = path.TrimStart('/').Replace('/', '.').Replace('\\', '.');
-
-            lock (_cacheLock)
-            {
-                byte[] content;
-                if (_cache.TryGetValue(path, out content))
-                {
-                    return content;
-                }
-            }
-
-            // If not in cache, try to load from embedded resources
-            var resourceName = _resourcePrefix + "." + path;
-            using (var stream = _assembly.GetManifestResourceStream(resourceName))
-            {
-                if (stream != null)
-                {
-                    var content = ReadStream(stream);
-                    lock (_cacheLock)
-                    {
-                        _cache[path] = content;
-                    }
-                    return content;
-                }
-            }
-
+    /// <summary>
+    ///     Gets the content for a path, or null if not found.
+    /// </summary>
+    public byte[] GetContent(string path)
+    {
+        if (string.IsNullOrEmpty(path))
             return null;
+
+        // Normalize path
+        path = path.TrimStart('/').Replace('/', '.').Replace('\\', '.');
+
+        lock (_cacheLock)
+        {
+            byte[] content;
+            if (_cache.TryGetValue(path, out content)) return content;
         }
 
-        /// <summary>
-        /// Gets the content type for a file path.
-        /// </summary>
-        public string GetContentType(string path)
+        // If not in cache, try to load from embedded resources
+        var resourceName = _resourcePrefix + "." + path;
+        using (var stream = _assembly.GetManifestResourceStream(resourceName))
         {
-            var ext = Path.GetExtension(path).ToLowerInvariant();
-
-            switch (ext)
+            if (stream != null)
             {
-                case ".html":
-                    return "text/html; charset=utf-8";
-                case ".css":
-                    return "text/css; charset=utf-8";
-                case ".js":
-                    return "application/javascript; charset=utf-8";
-                case ".json":
-                    return "application/json; charset=utf-8";
-                case ".png":
-                    return "image/png";
-                case ".jpg":
-                case ".jpeg":
-                    return "image/jpeg";
-                case ".gif":
-                    return "image/gif";
-                case ".svg":
-                    return "image/svg+xml";
-                case ".ico":
-                    return "image/x-icon";
-                case ".woff":
-                    return "font/woff";
-                case ".woff2":
-                    return "font/woff2";
-                case ".ttf":
-                    return "font/ttf";
-                case ".eot":
-                    return "application/vnd.ms-fontobject";
-                default:
-                    return "application/octet-stream";
-            }
-        }
-
-        private void LoadEmbeddedResources()
-        {
-            // Load default index.html if no embedded resources exist
-            var indexContent = GetDefaultIndexHtml();
-            lock (_cacheLock)
-            {
-                _cache["index.html"] = Encoding.UTF8.GetBytes(indexContent);
-            }
-        }
-
-        private byte[] ReadStream(Stream stream)
-        {
-            using (var ms = new MemoryStream())
-            {
-                var buffer = new byte[4096];
-                int read;
-                while ((read = stream.Read(buffer, 0, buffer.Length)) > 0)
+                var content = ReadStream(stream);
+                lock (_cacheLock)
                 {
-                    ms.Write(buffer, 0, read);
+                    _cache[path] = content;
                 }
-                return ms.ToArray();
+
+                return content;
             }
         }
 
-        private string GetDefaultIndexHtml()
+        return null;
+    }
+
+    /// <summary>
+    ///     Gets the content type for a file path.
+    /// </summary>
+    public string GetContentType(string path)
+    {
+        var ext = Path.GetExtension(path).ToLowerInvariant();
+
+        switch (ext)
         {
-            // Return a placeholder HTML that will be replaced by the actual UI build
-            return @"<!DOCTYPE html>
+            case ".html":
+                return "text/html; charset=utf-8";
+            case ".css":
+                return "text/css; charset=utf-8";
+            case ".js":
+                return "application/javascript; charset=utf-8";
+            case ".json":
+                return "application/json; charset=utf-8";
+            case ".png":
+                return "image/png";
+            case ".jpg":
+            case ".jpeg":
+                return "image/jpeg";
+            case ".gif":
+                return "image/gif";
+            case ".svg":
+                return "image/svg+xml";
+            case ".ico":
+                return "image/x-icon";
+            case ".woff":
+                return "font/woff";
+            case ".woff2":
+                return "font/woff2";
+            case ".ttf":
+                return "font/ttf";
+            case ".eot":
+                return "application/vnd.ms-fontobject";
+            default:
+                return "application/octet-stream";
+        }
+    }
+
+    private byte[] ReadStream(Stream stream)
+    {
+        using (var ms = new MemoryStream())
+        {
+            var buffer = new byte[4096];
+            int read;
+            while ((read = stream.Read(buffer, 0, buffer.Length)) > 0) ms.Write(buffer, 0, read);
+            return ms.ToArray();
+        }
+    }
+
+    private string GetDefaultIndexHtml()
+    {
+        // Return a placeholder HTML that will be replaced by the actual UI build
+        return @"<!DOCTYPE html>
 <html lang=""en"">
 <head>
     <meta charset=""UTF-8"">
@@ -631,6 +616,15 @@ Content Download: ${formatTime(e.contentDownloadMs)}`;
     </script>
 </body>
 </html>";
+    }
+
+    private void LoadEmbeddedResources()
+    {
+        // Load default index.html if no embedded resources exist
+        var indexContent = GetDefaultIndexHtml();
+        lock (_cacheLock)
+        {
+            _cache["index.html"] = Encoding.UTF8.GetBytes(indexContent);
         }
     }
 }

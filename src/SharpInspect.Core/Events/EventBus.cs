@@ -7,47 +7,26 @@ using System.Threading;
 namespace SharpInspect.Core.Events
 {
     /// <summary>
-    /// Delegate for handling SharpInspect events.
+    ///     Delegate for handling SharpInspect events.
     /// </summary>
     /// <typeparam name="T">The type of event.</typeparam>
     /// <param name="evt">The event instance.</param>
     public delegate void EventHandler<T>(T evt) where T : ISharpInspectEvent;
 
     /// <summary>
-    /// A simple in-process event bus for SharpInspect events.
-    /// Thread-safe and compatible with .NET 3.5+.
+    ///     A simple in-process event bus for SharpInspect events.
+    ///     Thread-safe and compatible with .NET 3.5+.
     /// </summary>
     public class EventBus
     {
         private static EventBus _instance;
-        private static readonly object _instanceLock = new object();
+        private static readonly object _instanceLock = new();
 
         private readonly Dictionary<Type, List<Delegate>> _handlers;
-        private readonly object _handlersLock = new object();
+        private readonly object _handlersLock = new();
 
         /// <summary>
-        /// Gets the singleton instance of the event bus.
-        /// </summary>
-        public static EventBus Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    lock (_instanceLock)
-                    {
-                        if (_instance == null)
-                        {
-                            _instance = new EventBus();
-                        }
-                    }
-                }
-                return _instance;
-            }
-        }
-
-        /// <summary>
-        /// Creates a new event bus instance.
+        ///     Creates a new event bus instance.
         /// </summary>
         public EventBus()
         {
@@ -55,7 +34,24 @@ namespace SharpInspect.Core.Events
         }
 
         /// <summary>
-        /// Subscribes a handler to events of type T.
+        ///     Gets the singleton instance of the event bus.
+        /// </summary>
+        public static EventBus Instance
+        {
+            get
+            {
+                if (_instance == null)
+                    lock (_instanceLock)
+                    {
+                        if (_instance == null) _instance = new EventBus();
+                    }
+
+                return _instance;
+            }
+        }
+
+        /// <summary>
+        ///     Subscribes a handler to events of type T.
         /// </summary>
         /// <typeparam name="T">The type of event to subscribe to.</typeparam>
         /// <param name="handler">The handler to invoke when an event is published.</param>
@@ -75,6 +71,7 @@ namespace SharpInspect.Core.Events
                     handlers = new List<Delegate>();
                     _handlers[eventType] = handlers;
                 }
+
                 handlers.Add(handler);
             }
 
@@ -82,29 +79,32 @@ namespace SharpInspect.Core.Events
         }
 
         /// <summary>
-        /// Unsubscribes a handler from events of type T.
+        ///     Gets the number of subscribers for a specific event type.
         /// </summary>
-        /// <typeparam name="T">The type of event to unsubscribe from.</typeparam>
-        /// <param name="handler">The handler to remove.</param>
-        public void Unsubscribe<T>(EventHandler<T> handler) where T : ISharpInspectEvent
+        public int GetSubscriberCount<T>() where T : ISharpInspectEvent
         {
-            if (handler == null)
-                return;
-
             var eventType = typeof(T);
-
             lock (_handlersLock)
             {
                 List<Delegate> handlers;
-                if (_handlers.TryGetValue(eventType, out handlers))
-                {
-                    handlers.Remove(handler);
-                }
+                if (_handlers.TryGetValue(eventType, out handlers)) return handlers.Count;
+                return 0;
             }
         }
 
         /// <summary>
-        /// Publishes an event to all subscribed handlers.
+        ///     Clears all subscriptions.
+        /// </summary>
+        public void ClearAll()
+        {
+            lock (_handlersLock)
+            {
+                _handlers.Clear();
+            }
+        }
+
+        /// <summary>
+        ///     Publishes an event to all subscribed handlers.
         /// </summary>
         /// <typeparam name="T">The type of event.</typeparam>
         /// <param name="evt">The event to publish.</param>
@@ -126,25 +126,20 @@ namespace SharpInspect.Core.Events
             }
 
             foreach (var handler in handlersCopy)
-            {
                 try
                 {
                     var typedHandler = handler as EventHandler<T>;
-                    if (typedHandler != null)
-                    {
-                        typedHandler(evt);
-                    }
+                    if (typedHandler != null) typedHandler(evt);
                 }
                 catch
                 {
                     // Swallow exceptions from handlers to prevent breaking the publish loop
                 }
-            }
         }
 
 #if !NET35
         /// <summary>
-        /// Publishes an event asynchronously on the thread pool.
+        ///     Publishes an event asynchronously on the thread pool.
         /// </summary>
         /// <typeparam name="T">The type of event.</typeparam>
         /// <param name="evt">The event to publish.</param>
@@ -158,30 +153,21 @@ namespace SharpInspect.Core.Events
 #endif
 
         /// <summary>
-        /// Clears all subscriptions.
+        ///     Unsubscribes a handler from events of type T.
         /// </summary>
-        public void ClearAll()
+        /// <typeparam name="T">The type of event to unsubscribe from.</typeparam>
+        /// <param name="handler">The handler to remove.</param>
+        public void Unsubscribe<T>(EventHandler<T> handler) where T : ISharpInspectEvent
         {
-            lock (_handlersLock)
-            {
-                _handlers.Clear();
-            }
-        }
+            if (handler == null)
+                return;
 
-        /// <summary>
-        /// Gets the number of subscribers for a specific event type.
-        /// </summary>
-        public int GetSubscriberCount<T>() where T : ISharpInspectEvent
-        {
             var eventType = typeof(T);
+
             lock (_handlersLock)
             {
                 List<Delegate> handlers;
-                if (_handlers.TryGetValue(eventType, out handlers))
-                {
-                    return handlers.Count;
-                }
-                return 0;
+                if (_handlers.TryGetValue(eventType, out handlers)) handlers.Remove(handler);
             }
         }
 
@@ -190,18 +176,15 @@ namespace SharpInspect.Core.Events
             lock (_handlersLock)
             {
                 List<Delegate> handlers;
-                if (_handlers.TryGetValue(eventType, out handlers))
-                {
-                    handlers.Remove(handler);
-                }
+                if (_handlers.TryGetValue(eventType, out handlers)) handlers.Remove(handler);
             }
         }
 
         private class Subscription : IDisposable
         {
+            private readonly Delegate _handler;
             private readonly EventBus _bus;
             private readonly Type _eventType;
-            private readonly Delegate _handler;
             private bool _disposed;
 
             public Subscription(EventBus bus, Type eventType, Delegate handler)

@@ -1,35 +1,35 @@
 using System;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 using SharpInspect.Core.Configuration;
 using SharpInspect.Core.Events;
 using SharpInspect.Core.Interceptors;
 using SharpInspect.Core.Logging;
 using SharpInspect.Core.Storage;
-
 #if !NET35
+using System.Net.Http;
 using SharpInspect.Server.WebServer;
 #endif
 
 namespace SharpInspect
 {
     /// <summary>
-    /// Main entry point for SharpInspect DevTools.
+    ///     Main entry point for SharpInspect DevTools.
     /// </summary>
     public static class SharpInspectDevTools
     {
-        private static readonly object _lock = new object();
         private static bool _initialized;
-        private static SharpInspectOptions _options;
-        private static InMemoryStore _store;
-        private static EventBus _eventBus;
         private static ConsoleHook _consoleHook;
-        private static TraceHook _traceHook;
+        private static InMemoryStore _store;
 
 #if !NET35
         private static ISharpInspectServer _server;
 #endif
+        private static readonly object _lock = new();
+        private static TraceHook _traceHook;
 
         /// <summary>
-        /// Gets whether SharpInspect has been initialized.
+        ///     Gets whether SharpInspect has been initialized.
         /// </summary>
         public static bool IsInitialized
         {
@@ -43,39 +43,27 @@ namespace SharpInspect
         }
 
         /// <summary>
-        /// Gets the current options.
+        ///     Gets the event bus instance.
         /// </summary>
-        public static SharpInspectOptions Options
-        {
-            get { return _options; }
-        }
+        public static EventBus EventBus { get; private set; }
 
         /// <summary>
-        /// Gets the storage instance.
+        ///     Gets the storage instance.
         /// </summary>
-        public static ISharpInspectStore Store
-        {
-            get { return _store; }
-        }
+        public static ISharpInspectStore Store => _store;
 
         /// <summary>
-        /// Gets the event bus instance.
+        ///     Gets the current options.
         /// </summary>
-        public static EventBus EventBus
-        {
-            get { return _eventBus; }
-        }
+        public static SharpInspectOptions Options { get; private set; }
 
         /// <summary>
-        /// Gets the DevTools URL.
+        ///     Gets the DevTools URL.
         /// </summary>
-        public static string DevToolsUrl
-        {
-            get { return _options?.GetDevToolsUrl(); }
-        }
+        public static string DevToolsUrl => Options?.GetDevToolsUrl();
 
         /// <summary>
-        /// Initializes SharpInspect with default options.
+        ///     Initializes SharpInspect with default options.
         /// </summary>
         public static void Initialize()
         {
@@ -83,7 +71,7 @@ namespace SharpInspect
         }
 
         /// <summary>
-        /// Initializes SharpInspect with a configuration action.
+        ///     Initializes SharpInspect with a configuration action.
         /// </summary>
         public static void Initialize(Action<SharpInspectOptions> configure)
         {
@@ -93,50 +81,57 @@ namespace SharpInspect
         }
 
         /// <summary>
-        /// Initializes SharpInspect with the specified options.
+        ///     Initializes SharpInspect with the specified options.
         /// </summary>
         public static void Initialize(SharpInspectOptions options)
         {
             lock (_lock)
             {
                 if (_initialized)
-                {
-                    throw new InvalidOperationException("SharpInspect has already been initialized. Call Shutdown() first.");
-                }
+                    throw new InvalidOperationException(
+                        "SharpInspect has already been initialized. Call Shutdown() first.");
 
-                _options = options ?? new SharpInspectOptions();
-                _eventBus = new EventBus();
-                _store = new InMemoryStore(_options.MaxNetworkEntries, _options.MaxConsoleEntries);
+                Options = options ?? new SharpInspectOptions();
+                EventBus = new EventBus();
+                _store = new InMemoryStore(Options.MaxNetworkEntries, Options.MaxConsoleEntries);
 
                 // Initialize HTTP interceptor for .NET Framework
-                HttpWebRequestInterceptor.Initialize(_store, _options, _eventBus);
+                HttpWebRequestInterceptor.Initialize(_store, Options, EventBus);
 
                 // Initialize console hook
-                if (_options.EnableConsoleCapture)
+                if (Options.EnableConsoleCapture)
                 {
-                    _consoleHook = new ConsoleHook(_store, _options, _eventBus);
-                    _traceHook = new TraceHook(_store, _options, _eventBus);
+                    _consoleHook = new ConsoleHook(_store, Options, EventBus);
+                    _traceHook = new TraceHook(_store, Options, EventBus);
                 }
 
 #if !NET35
                 // Start web server
-                _server = new HttpListenerServer(_store, _options, _eventBus);
+                _server = new HttpListenerServer(_store, Options, EventBus);
                 _server.Start();
 
-                if (_options.AutoOpenBrowser)
-                {
-                    OpenBrowser(_options.GetDevToolsUrl());
-                }
+                if (Options.AutoOpenBrowser) OpenBrowser(Options.GetDevToolsUrl());
 #endif
 
                 _initialized = true;
 
-                Console.WriteLine("SharpInspect DevTools initialized at " + _options.GetDevToolsUrl());
+                Console.WriteLine("SharpInspect DevTools initialized at " + Options.GetDevToolsUrl());
             }
         }
 
         /// <summary>
-        /// Shuts down SharpInspect and releases resources.
+        ///     Opens the DevTools in the default browser.
+        /// </summary>
+        public static void OpenDevTools()
+        {
+            if (!_initialized || Options == null)
+                return;
+
+            OpenBrowser(Options.GetDevToolsUrl());
+        }
+
+        /// <summary>
+        ///     Shuts down SharpInspect and releases resources.
         /// </summary>
         public static void Shutdown()
         {
@@ -157,86 +152,33 @@ namespace SharpInspect
                 _traceHook = null;
 
                 _store?.ClearAll();
-                _eventBus?.ClearAll();
+                EventBus?.ClearAll();
 
                 _initialized = false;
             }
         }
-
-        /// <summary>
-        /// Opens the DevTools in the default browser.
-        /// </summary>
-        public static void OpenDevTools()
-        {
-            if (!_initialized || _options == null)
-                return;
-
-            OpenBrowser(_options.GetDevToolsUrl());
-        }
-
-#if !NET35
-        /// <summary>
-        /// Creates a new HttpClient with SharpInspect interception enabled.
-        /// </summary>
-        public static System.Net.Http.HttpClient CreateHttpClient()
-        {
-            if (!_initialized)
-                throw new InvalidOperationException("SharpInspect must be initialized before creating an HttpClient.");
-
-            var handler = new SharpInspectHandler(_store, _options, _eventBus);
-            return new System.Net.Http.HttpClient(handler);
-        }
-
-        /// <summary>
-        /// Creates a SharpInspectHandler that can be used with HttpClient.
-        /// </summary>
-        public static SharpInspectHandler CreateHandler()
-        {
-            if (!_initialized)
-                throw new InvalidOperationException("SharpInspect must be initialized before creating a handler.");
-
-            return new SharpInspectHandler(_store, _options, _eventBus);
-        }
-
-        /// <summary>
-        /// Creates a SharpInspectHandler with a custom inner handler.
-        /// </summary>
-        public static SharpInspectHandler CreateHandler(System.Net.Http.HttpMessageHandler innerHandler)
-        {
-            if (!_initialized)
-                throw new InvalidOperationException("SharpInspect must be initialized before creating a handler.");
-
-            return new SharpInspectHandler(_store, _options, _eventBus, innerHandler);
-        }
-#endif
 
         private static void OpenBrowser(string url)
         {
             try
             {
 #if NETFRAMEWORK
-                System.Diagnostics.Process.Start(url);
+                Process.Start(url);
 #else
                 // Cross-platform browser opening
-                if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(
-                    System.Runtime.InteropServices.OSPlatform.Windows))
-                {
-                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                if (RuntimeInformation.IsOSPlatform(
+                        OSPlatform.Windows))
+                    Process.Start(new ProcessStartInfo
                     {
                         FileName = url,
                         UseShellExecute = true
                     });
-                }
-                else if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(
-                    System.Runtime.InteropServices.OSPlatform.Linux))
-                {
-                    System.Diagnostics.Process.Start("xdg-open", url);
-                }
-                else if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(
-                    System.Runtime.InteropServices.OSPlatform.OSX))
-                {
-                    System.Diagnostics.Process.Start("open", url);
-                }
+                else if (RuntimeInformation.IsOSPlatform(
+                             OSPlatform.Linux))
+                    Process.Start("xdg-open", url);
+                else if (RuntimeInformation.IsOSPlatform(
+                             OSPlatform.OSX))
+                    Process.Start("open", url);
 #endif
             }
             catch
@@ -244,17 +186,53 @@ namespace SharpInspect
                 // Ignore browser open failures
             }
         }
+
+#if !NET35
+        /// <summary>
+        ///     Creates a new HttpClient with SharpInspect interception enabled.
+        /// </summary>
+        public static HttpClient CreateHttpClient()
+        {
+            if (!_initialized)
+                throw new InvalidOperationException("SharpInspect must be initialized before creating an HttpClient.");
+
+            var handler = new SharpInspectHandler(_store, Options, EventBus);
+            return new HttpClient(handler);
+        }
+
+        /// <summary>
+        ///     Creates a SharpInspectHandler that can be used with HttpClient.
+        /// </summary>
+        public static SharpInspectHandler CreateHandler()
+        {
+            if (!_initialized)
+                throw new InvalidOperationException("SharpInspect must be initialized before creating a handler.");
+
+            return new SharpInspectHandler(_store, Options, EventBus);
+        }
+
+        /// <summary>
+        ///     Creates a SharpInspectHandler with a custom inner handler.
+        /// </summary>
+        public static SharpInspectHandler CreateHandler(HttpMessageHandler innerHandler)
+        {
+            if (!_initialized)
+                throw new InvalidOperationException("SharpInspect must be initialized before creating a handler.");
+
+            return new SharpInspectHandler(_store, Options, EventBus, innerHandler);
+        }
+#endif
     }
 
     /// <summary>
-    /// Disposable wrapper for SharpInspect that shuts down on dispose.
+    ///     Disposable wrapper for SharpInspect that shuts down on dispose.
     /// </summary>
     public class SharpInspectSession : IDisposable
     {
         private bool _disposed;
 
         /// <summary>
-        /// Creates and initializes a new SharpInspect session.
+        ///     Creates and initializes a new SharpInspect session.
         /// </summary>
         public SharpInspectSession()
         {
@@ -262,7 +240,7 @@ namespace SharpInspect
         }
 
         /// <summary>
-        /// Creates and initializes a new SharpInspect session with options.
+        ///     Creates and initializes a new SharpInspect session with options.
         /// </summary>
         public SharpInspectSession(SharpInspectOptions options)
         {
@@ -270,7 +248,7 @@ namespace SharpInspect
         }
 
         /// <summary>
-        /// Creates and initializes a new SharpInspect session with configuration.
+        ///     Creates and initializes a new SharpInspect session with configuration.
         /// </summary>
         public SharpInspectSession(Action<SharpInspectOptions> configure)
         {
@@ -278,7 +256,7 @@ namespace SharpInspect
         }
 
         /// <summary>
-        /// Disposes the session and shuts down SharpInspect.
+        ///     Disposes the session and shuts down SharpInspect.
         /// </summary>
         public void Dispose()
         {
