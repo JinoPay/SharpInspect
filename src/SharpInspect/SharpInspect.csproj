@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net35;net462;netstandard2.0;net6.0;net8.0;net9.0</TargetFrameworks>
+    <RootNamespace>SharpInspect</RootNamespace>
+    <AssemblyName>SharpInspect</AssemblyName>
+    <PackageId>SharpInspect</PackageId>
+    <Description>Chrome DevTools-like inspector for any .NET application. Press F12 to inspect HTTP traffic, logs, and performance in real-time.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SharpInspect.Core\SharpInspect.Core.csproj" />
+  </ItemGroup>
+
+  <!-- Server is not available for .NET 3.5 -->
+  <ItemGroup Condition="'$(TargetFramework)' != 'net35'">
+    <ProjectReference Include="..\SharpInspect.Server\SharpInspect.Server.csproj" />
+  </ItemGroup>
+
+  <!-- .NET Framework 4.x needs System.Net.Http reference -->
+  <ItemGroup Condition="$(TargetFramework.StartsWith('net4'))">
+    <Reference Include="System.Net.Http" />
+  </ItemGroup>
+
+  <!-- Modern .NET DI extensions -->
+  <ItemGroup Condition="$(TargetFramework.StartsWith('net6')) Or $(TargetFramework.StartsWith('net7')) Or $(TargetFramework.StartsWith('net8')) Or $(TargetFramework.StartsWith('net9'))">
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0" />
+  </ItemGroup>
+
+  <!-- .NET Standard 2.0 DI extensions -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="2.1.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="2.1.0" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="2.1.0" />
+  </ItemGroup>
+
+</Project>

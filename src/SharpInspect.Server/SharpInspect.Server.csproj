@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net462;netstandard2.0;net6.0;net8.0;net9.0</TargetFrameworks>
+    <RootNamespace>SharpInspect.Server</RootNamespace>
+    <AssemblyName>SharpInspect.Server</AssemblyName>
+    <PackageId>SharpInspect.Server</PackageId>
+    <Description>Embedded web server for SharpInspect - REST API, WebSocket, and static file serving.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SharpInspect.Core\SharpInspect.Core.csproj" />
+  </ItemGroup>
+
+  <!-- Embed UI resources -->
+  <ItemGroup>
+    <EmbeddedResource Include="wwwroot\**\*" />
+  </ItemGroup>
+
+  <!-- .NET Framework specific references -->
+  <ItemGroup Condition="$(TargetFramework.StartsWith('net4'))">
+    <Reference Include="System.Net.Http" />
+  </ItemGroup>
+
+</Project>

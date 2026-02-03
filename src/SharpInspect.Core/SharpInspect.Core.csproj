@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net35;net462;netstandard2.0;net6.0;net8.0;net9.0</TargetFrameworks>
+    <RootNamespace>SharpInspect.Core</RootNamespace>
+    <AssemblyName>SharpInspect.Core</AssemblyName>
+    <PackageId>SharpInspect.Core</PackageId>
+    <Description>Core components for SharpInspect - HTTP interception, logging, storage, and event system.</Description>
+  </PropertyGroup>
+
+  <!-- .NET 3.5 specific references -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'net35'">
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Web.Extensions" />
+  </ItemGroup>
+
+  <!-- .NET Framework 4.x references -->
+  <ItemGroup Condition="$(TargetFramework.StartsWith('net4'))">
+    <Reference Include="System.Net.Http" />
+  </ItemGroup>
+
+  <!-- Modern .NET dependencies -->
+  <ItemGroup Condition="$(TargetFramework.StartsWith('net6')) Or $(TargetFramework.StartsWith('net7')) Or $(TargetFramework.StartsWith('net8')) Or $(TargetFramework.StartsWith('net9'))">
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
+  </ItemGroup>
+
+  <!-- .NET Standard 2.0 dependencies -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.1.0" />
+  </ItemGroup>
+
+</Project>
