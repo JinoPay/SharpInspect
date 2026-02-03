@@ -48,6 +48,11 @@ public class StatusResponse
     public int NetworkEntryCount { get; set; }
 
     /// <summary>
+    ///     Gets or sets the number of performance entries.
+    /// </summary>
+    public int PerformanceEntryCount { get; set; }
+
+    /// <summary>
     ///     Gets or sets the number of connected WebSocket clients.
     /// </summary>
     public int WebSocketClients { get; set; }

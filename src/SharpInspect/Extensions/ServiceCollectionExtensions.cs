@@ -50,7 +50,7 @@ namespace SharpInspect.Extensions
             services.AddSingleton(options);
             services.AddSingleton<EventBus>();
             services.AddSingleton<ISharpInspectStore>(sp =>
-                new InMemoryStore(options.MaxNetworkEntries, options.MaxConsoleEntries));
+                new InMemoryStore(options.MaxNetworkEntries, options.MaxConsoleEntries, options.MaxPerformanceEntries));
 
             // Register server
             services.AddSingleton<ISharpInspectServer, HttpListenerServer>();

@@ -164,6 +164,7 @@ public class HttpListenerServer : ISharpInspectServer
                 UptimeSeconds = (DateTime.UtcNow - _startTime).TotalSeconds,
                 NetworkEntryCount = _store.NetworkEntryCount,
                 ConsoleEntryCount = _store.ConsoleEntryCount,
+                PerformanceEntryCount = _store.PerformanceEntryCount,
                 WebSocketClients = _webSocketManager.ClientCount
             };
             WriteJson(response, status);
@@ -235,6 +236,31 @@ public class HttpListenerServer : ISharpInspectServer
         {
             _store.ClearConsoleEntries();
             WriteJson(response, new MessageResponse { Success = true, Message = "Console entries cleared" });
+            return;
+        }
+
+        // GET /api/performance
+        if (path == "/api/performance" && method == "GET")
+        {
+            var offset = GetQueryInt(request, "offset", 0);
+            var limit = GetQueryInt(request, "limit", 100);
+            var entries = _store.GetPerformanceEntries(offset, limit);
+            var pagedResponse = new PagedResponse<PerformanceEntry>
+            {
+                Items = entries,
+                Total = _store.PerformanceEntryCount,
+                Offset = offset,
+                Limit = limit
+            };
+            WriteJson(response, pagedResponse);
+            return;
+        }
+
+        // POST /api/performance/clear
+        if (path == "/api/performance/clear" && method == "POST")
+        {
+            _store.ClearPerformanceEntries();
+            WriteJson(response, new MessageResponse { Success = true, Message = "Performance entries cleared" });
             return;
         }
 

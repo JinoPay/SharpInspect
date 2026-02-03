@@ -18,6 +18,11 @@ namespace SharpInspect.Core.Storage
         int NetworkEntryCount { get; }
 
         /// <summary>
+        ///     Gets the count of performance entries.
+        /// </summary>
+        int PerformanceEntryCount { get; }
+
+        /// <summary>
         ///     Gets all console entries.
         /// </summary>
         ConsoleEntry[] GetConsoleEntries();
@@ -43,6 +48,16 @@ namespace SharpInspect.Core.Storage
         NetworkEntry[] GetNetworkEntries(int offset, int limit);
 
         /// <summary>
+        ///     Gets all performance entries.
+        /// </summary>
+        PerformanceEntry[] GetPerformanceEntries();
+
+        /// <summary>
+        ///     Gets performance entries with pagination.
+        /// </summary>
+        PerformanceEntry[] GetPerformanceEntries(int offset, int limit);
+
+        /// <summary>
         ///     Adds a console entry to the store.
         /// </summary>
         void AddConsoleEntry(ConsoleEntry entry);
@@ -51,6 +66,11 @@ namespace SharpInspect.Core.Storage
         ///     Adds a network entry to the store.
         /// </summary>
         void AddNetworkEntry(NetworkEntry entry);
+
+        /// <summary>
+        ///     Adds a performance entry to the store.
+        /// </summary>
+        void AddPerformanceEntry(PerformanceEntry entry);
 
         /// <summary>
         ///     Clears all stored data.
@@ -66,5 +86,10 @@ namespace SharpInspect.Core.Storage
         ///     Clears all network entries.
         /// </summary>
         void ClearNetworkEntries();
+
+        /// <summary>
+        ///     Clears all performance entries.
+        /// </summary>
+        void ClearPerformanceEntries();
     }
 }

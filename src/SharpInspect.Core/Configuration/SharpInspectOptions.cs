@@ -27,6 +27,8 @@ namespace SharpInspect.Core.Configuration
             CaptureRequestBody = true;
             CaptureResponseBody = true;
             MaxConsoleEntries = 5000;
+            MaxPerformanceEntries = 2000;
+            PerformanceCaptureIntervalMs = 1000;
             MinLogLevel = SharpInspectLogLevel.Trace;
             EnableInDevelopmentOnly = true;
             AccessToken = null;
@@ -100,6 +102,18 @@ namespace SharpInspect.Core.Configuration
         public int MaxNetworkEntries { get; set; }
 
         /// <summary>
+        ///     Gets or sets the maximum number of performance entries to store.
+        ///     Default: 2000
+        /// </summary>
+        public int MaxPerformanceEntries { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the performance metrics capture interval in milliseconds.
+        ///     Default: 1000 (1 second)
+        /// </summary>
+        public int PerformanceCaptureIntervalMs { get; set; }
+
+        /// <summary>
         ///     Gets or sets the port for the embedded web server.
         ///     Default: 9229
         /// </summary>
@@ -160,6 +174,8 @@ namespace SharpInspect.Core.Configuration
                 CaptureRequestBody = CaptureRequestBody,
                 CaptureResponseBody = CaptureResponseBody,
                 MaxConsoleEntries = MaxConsoleEntries,
+                MaxPerformanceEntries = MaxPerformanceEntries,
+                PerformanceCaptureIntervalMs = PerformanceCaptureIntervalMs,
                 MinLogLevel = MinLogLevel,
                 EnableInDevelopmentOnly = EnableInDevelopmentOnly,
                 AccessToken = AccessToken
