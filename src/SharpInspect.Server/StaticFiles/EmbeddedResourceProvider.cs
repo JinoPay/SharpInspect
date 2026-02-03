@@ -127,6 +127,49 @@ public class EmbeddedResourceProvider
     <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"">
     <title>SharpInspect DevTools</title>
     <style>
+        /* 테마 CSS 변수 */
+        :root {
+            --bg-primary: #1e1e1e;
+            --bg-secondary: #252526;
+            --bg-hover: #2a2d2e;
+            --bg-active: #37373d;
+            --bg-input: #3c3c3c;
+            --bg-selected: #094771;
+            --border-primary: #3c3c3c;
+            --border-secondary: #2d2d2d;
+            --text-primary: #d4d4d4;
+            --text-secondary: #969696;
+            --text-header: #cccccc;
+            --text-white: #ffffff;
+            --accent-primary: #0e639c;
+            --accent-hover: #1177bb;
+            --status-2xx: #4ec9b0;
+            --status-3xx: #569cd6;
+            --status-4xx: #ce9178;
+            --status-5xx: #f14c4c;
+            --chart-grid: #333333;
+        }
+        [data-theme=""light""] {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f3f3f3;
+            --bg-hover: #e8e8e8;
+            --bg-active: #d4d4d4;
+            --bg-input: #ffffff;
+            --bg-selected: #add6ff;
+            --border-primary: #cecece;
+            --border-secondary: #e0e0e0;
+            --text-primary: #333333;
+            --text-secondary: #616161;
+            --text-header: #1e1e1e;
+            --text-white: #ffffff;
+            --accent-primary: #007acc;
+            --accent-hover: #0098ff;
+            --status-2xx: #008000;
+            --status-3xx: #0070c1;
+            --status-4xx: #a31515;
+            --status-5xx: #d32f2f;
+            --chart-grid: #e0e0e0;
+        }
         * {
             margin: 0;
             padding: 0;
@@ -134,15 +177,15 @@ public class EmbeddedResourceProvider
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: #1e1e1e;
-            color: #d4d4d4;
+            background: var(--bg-primary);
+            color: var(--text-primary);
             height: 100vh;
             display: flex;
             flex-direction: column;
         }
         .header {
-            background: #252526;
-            border-bottom: 1px solid #3c3c3c;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-primary);
             padding: 8px 16px;
             display: flex;
             align-items: center;
@@ -151,7 +194,7 @@ public class EmbeddedResourceProvider
         .header h1 {
             font-size: 14px;
             font-weight: 500;
-            color: #cccccc;
+            color: var(--text-header);
         }
         .tabs {
             display: flex;
@@ -161,18 +204,18 @@ public class EmbeddedResourceProvider
             padding: 6px 12px;
             background: transparent;
             border: none;
-            color: #969696;
+            color: var(--text-secondary);
             cursor: pointer;
             font-size: 12px;
             border-radius: 4px;
         }
         .tab:hover {
-            background: #2a2d2e;
-            color: #d4d4d4;
+            background: var(--bg-hover);
+            color: var(--text-primary);
         }
         .tab.active {
-            background: #37373d;
-            color: #ffffff;
+            background: var(--bg-active);
+            color: var(--text-white);
         }
         .content {
             flex: 1;
@@ -181,24 +224,24 @@ public class EmbeddedResourceProvider
             overflow: hidden;
         }
         .toolbar {
-            background: #252526;
-            border-bottom: 1px solid #3c3c3c;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-primary);
             padding: 4px 8px;
             display: flex;
             gap: 8px;
             align-items: center;
         }
         .toolbar input {
-            background: #3c3c3c;
-            border: none;
+            background: var(--bg-input);
+            border: 1px solid var(--border-primary);
             padding: 4px 8px;
-            color: #d4d4d4;
+            color: var(--text-primary);
             border-radius: 4px;
             font-size: 12px;
             width: 200px;
         }
         .toolbar button {
-            background: #0e639c;
+            background: var(--accent-primary);
             border: none;
             padding: 4px 12px;
             color: white;
@@ -207,7 +250,7 @@ public class EmbeddedResourceProvider
             cursor: pointer;
         }
         .toolbar button:hover {
-            background: #1177bb;
+            background: var(--accent-hover);
         }
         .list-container {
             flex: 1;
@@ -219,56 +262,63 @@ public class EmbeddedResourceProvider
             font-size: 12px;
         }
         th {
-            background: #252526;
+            background: var(--bg-secondary);
             text-align: left;
             padding: 4px 8px;
             font-weight: 500;
-            color: #969696;
+            color: var(--text-secondary);
             position: sticky;
             top: 0;
-            border-bottom: 1px solid #3c3c3c;
+            border-bottom: 1px solid var(--border-primary);
         }
         td {
             padding: 4px 8px;
-            border-bottom: 1px solid #2d2d2d;
+            border-bottom: 1px solid var(--border-secondary);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
             max-width: 300px;
         }
         tr:hover {
-            background: #2a2d2e;
+            background: var(--bg-hover);
         }
         tr.selected {
-            background: #094771;
+            background: var(--bg-selected);
         }
-        .status-2xx { color: #4ec9b0; }
-        .status-3xx { color: #569cd6; }
-        .status-4xx { color: #ce9178; }
-        .status-5xx { color: #f14c4c; }
-        .status-error { color: #f14c4c; }
+        .status-2xx { color: var(--status-2xx); }
+        .status-3xx { color: var(--status-3xx); }
+        .status-4xx { color: var(--status-4xx); }
+        .status-5xx { color: var(--status-5xx); }
+        .status-error { color: var(--status-5xx); }
+        /* 콘솔 로그 레벨 색상 */
+        .console-trace { color: var(--text-secondary); }
+        .console-debug { color: var(--status-3xx); }
+        .console-info { color: var(--status-2xx); }
+        .console-warning { color: var(--status-4xx); }
+        .console-error { color: var(--status-5xx); }
+        .console-critical { color: var(--status-5xx); font-weight: bold; }
         .detail-panel {
             height: 40%;
-            border-top: 1px solid #3c3c3c;
-            background: #1e1e1e;
+            border-top: 1px solid var(--border-primary);
+            background: var(--bg-primary);
             overflow: auto;
         }
         .detail-tabs {
             display: flex;
-            background: #252526;
-            border-bottom: 1px solid #3c3c3c;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-primary);
         }
         .detail-tab {
             padding: 6px 12px;
             background: transparent;
             border: none;
-            color: #969696;
+            color: var(--text-secondary);
             cursor: pointer;
             font-size: 12px;
         }
         .detail-tab.active {
-            color: #ffffff;
-            border-bottom: 2px solid #0e639c;
+            color: var(--text-white);
+            border-bottom: 2px solid var(--accent-primary);
         }
         .detail-content {
             padding: 8px;
@@ -277,22 +327,89 @@ public class EmbeddedResourceProvider
             white-space: pre-wrap;
             word-break: break-all;
         }
+        .copy-dropdown {
+            position: relative;
+            margin-left: auto;
+            padding-right: 8px;
+        }
+        .copy-btn {
+            padding: 4px 10px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-primary);
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 11px;
+            border-radius: 3px;
+        }
+        .copy-btn:hover {
+            background: var(--bg-hover);
+            color: var(--text-white);
+        }
+        .copy-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-primary);
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            z-index: 1000;
+            min-width: 180px;
+            margin-top: 2px;
+        }
+        .copy-menu.show {
+            display: block;
+        }
+        .copy-menu-item {
+            display: block;
+            width: 100%;
+            padding: 8px 12px;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 12px;
+            text-align: left;
+        }
+        .copy-menu-item:hover {
+            background: var(--bg-hover);
+            color: var(--text-white);
+        }
+        .copy-toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-tertiary);
+            color: var(--text-white);
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-size: 13px;
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+        .copy-toast.show {
+            opacity: 1;
+        }
         .empty-state {
             display: flex;
             align-items: center;
             justify-content: center;
             height: 100%;
-            color: #969696;
+            color: var(--text-secondary);
             font-size: 14px;
         }
         .ws-indicator {
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background: #f14c4c;
+            background: var(--status-5xx);
         }
         .ws-indicator.connected {
-            background: #4ec9b0;
+            background: var(--status-2xx);
         }
         #app {
             height: 100%;
@@ -300,14 +417,14 @@ public class EmbeddedResourceProvider
             flex-direction: column;
         }
         .perf-card {
-            background: #252526;
-            border: 1px solid #3c3c3c;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-primary);
             border-radius: 6px;
             padding: 12px;
         }
         .perf-card-title {
             font-size: 11px;
-            color: #969696;
+            color: var(--text-secondary);
             text-transform: uppercase;
             letter-spacing: 0.5px;
             margin-bottom: 4px;
@@ -315,12 +432,25 @@ public class EmbeddedResourceProvider
         .perf-card-value {
             font-size: 24px;
             font-weight: 600;
-            color: #d4d4d4;
+            color: var(--text-primary);
             margin-bottom: 8px;
         }
         .perf-card canvas {
             width: 100%;
             display: block;
+        }
+        /* 테마 토글 버튼 */
+        .theme-toggle {
+            background: transparent;
+            border: 1px solid var(--border-primary);
+            font-size: 14px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-right: 8px;
+        }
+        .theme-toggle:hover {
+            background: var(--bg-hover);
         }
     </style>
 </head>
@@ -335,6 +465,7 @@ public class EmbeddedResourceProvider
                 <button class=""tab"" data-tab=""application"">Application</button>
             </div>
             <div style=""flex: 1""></div>
+            <button id=""theme-toggle"" class=""theme-toggle"" title=""Toggle theme"">🌙</button>
             <div class=""ws-indicator"" id=""ws-status"" title=""WebSocket disconnected""></div>
         </div>
         <div class=""content"" id=""network-panel"">
@@ -363,6 +494,16 @@ public class EmbeddedResourceProvider
                     <button class=""detail-tab"" data-detail=""request"">Request</button>
                     <button class=""detail-tab"" data-detail=""response"">Response</button>
                     <button class=""detail-tab"" data-detail=""timing"">Timing</button>
+                    <div class=""copy-dropdown"">
+                        <button class=""copy-btn"" id=""copy-btn"">Copy &#9660;</button>
+                        <div class=""copy-menu"" id=""copy-menu"">
+                            <button class=""copy-menu-item"" data-format=""curl-cmd"">Copy as cURL (cmd)</button>
+                            <button class=""copy-menu-item"" data-format=""curl-bash"">Copy as cURL (bash)</button>
+                            <button class=""copy-menu-item"" data-format=""powershell"">Copy as PowerShell</button>
+                            <button class=""copy-menu-item"" data-format=""fetch"">Copy as fetch</button>
+                            <button class=""copy-menu-item"" data-format=""csharp"">Copy as C# HttpClient</button>
+                        </div>
+                    </div>
                 </div>
                 <div class=""detail-content"" id=""detail-content""></div>
             </div>
@@ -378,7 +519,7 @@ public class EmbeddedResourceProvider
         <div class=""content"" id=""performance-panel"" style=""display: none"">
             <div class=""toolbar"">
                 <button id=""perf-clear-btn"">Clear</button>
-                <span id=""perf-status"" style=""font-size: 12px; color: #969696; margin-left: 8px""></span>
+                <span id=""perf-status"" style=""font-size: 12px; color: var(--text-secondary); margin-left: 8px""></span>
             </div>
             <div class=""list-container"" style=""padding: 12px; overflow: auto"">
                 <div style=""display: grid; grid-template-columns: 1fr 1fr; gap: 12px"">
@@ -408,20 +549,20 @@ public class EmbeddedResourceProvider
                         <div class=""perf-card-title"">GC Collections</div>
                         <div style=""display: flex; gap: 24px; margin-top: 8px"">
                             <div style=""text-align: center"">
-                                <div style=""font-size: 20px; color: #4ec9b0"" id=""perf-gen0"">-</div>
-                                <div style=""font-size: 11px; color: #969696"">Gen 0</div>
+                                <div style=""font-size: 20px; color: var(--status-2xx)"" id=""perf-gen0"">-</div>
+                                <div style=""font-size: 11px; color: var(--text-secondary)"">Gen 0</div>
                             </div>
                             <div style=""text-align: center"">
-                                <div style=""font-size: 20px; color: #dcdcaa"" id=""perf-gen1"">-</div>
-                                <div style=""font-size: 11px; color: #969696"">Gen 1</div>
+                                <div style=""font-size: 20px; color: var(--status-4xx)"" id=""perf-gen1"">-</div>
+                                <div style=""font-size: 11px; color: var(--text-secondary)"">Gen 1</div>
                             </div>
                             <div style=""text-align: center"">
-                                <div style=""font-size: 20px; color: #ce9178"" id=""perf-gen2"">-</div>
-                                <div style=""font-size: 11px; color: #969696"">Gen 2</div>
+                                <div style=""font-size: 20px; color: var(--status-4xx)"" id=""perf-gen2"">-</div>
+                                <div style=""font-size: 11px; color: var(--text-secondary)"">Gen 2</div>
                             </div>
                             <div style=""text-align: center"">
-                                <div style=""font-size: 20px; color: #569cd6"" id=""perf-gc-pause"">-</div>
-                                <div style=""font-size: 11px; color: #969696"">GC Pause %</div>
+                                <div style=""font-size: 20px; color: var(--status-3xx)"" id=""perf-gc-pause"">-</div>
+                                <div style=""font-size: 11px; color: var(--text-secondary)"">GC Pause %</div>
                             </div>
                         </div>
                     </div>
@@ -431,12 +572,12 @@ public class EmbeddedResourceProvider
                         <div class=""perf-card-title"">Thread Pool</div>
                         <div style=""display: flex; gap: 24px; margin-top: 8px"">
                             <div style=""text-align: center"">
-                                <div style=""font-size: 20px; color: #4ec9b0"" id=""perf-tp-worker"">-</div>
-                                <div style=""font-size: 11px; color: #969696"">Worker Threads</div>
+                                <div style=""font-size: 20px; color: var(--status-2xx)"" id=""perf-tp-worker"">-</div>
+                                <div style=""font-size: 11px; color: var(--text-secondary)"">Worker Threads</div>
                             </div>
                             <div style=""text-align: center"">
-                                <div style=""font-size: 20px; color: #569cd6"" id=""perf-tp-io"">-</div>
-                                <div style=""font-size: 11px; color: #969696"">IO Threads</div>
+                                <div style=""font-size: 20px; color: var(--status-3xx)"" id=""perf-tp-io"">-</div>
+                                <div style=""font-size: 11px; color: var(--text-secondary)"">IO Threads</div>
                             </div>
                         </div>
                     </div>
@@ -446,7 +587,7 @@ public class EmbeddedResourceProvider
         <div class=""content"" id=""application-panel"" style=""display: none"">
             <div class=""toolbar"">
                 <button id=""app-refresh-btn"">Refresh</button>
-                <span id=""app-status"" style=""font-size: 12px; color: #969696; margin-left: 8px""></span>
+                <span id=""app-status"" style=""font-size: 12px; color: var(--text-secondary); margin-left: 8px""></span>
             </div>
             <div class=""list-container"" style=""padding: 12px; overflow: auto"">
                 <div class=""perf-card"" style=""margin-bottom: 12px"">
@@ -457,8 +598,8 @@ public class EmbeddedResourceProvider
                     <div class=""perf-card-title"" style=""display: flex; align-items: center; gap: 8px"">
                         Environment Variables (<span id=""env-count"">0</span>)
                         <input type=""text"" placeholder=""Filter..."" id=""env-filter""
-                            style=""background: #3c3c3c; border: none; padding: 2px 6px;
-                            color: #d4d4d4; border-radius: 4px; font-size: 11px; width: 150px"">
+                            style=""background: var(--bg-input); border: 1px solid var(--border-primary); padding: 2px 6px;
+                            color: var(--text-primary); border-radius: 4px; font-size: 11px; width: 150px"">
                     </div>
                     <div id=""env-vars-content"" style=""max-height: 300px; overflow: auto; margin-top: 8px""></div>
                 </div>
@@ -466,8 +607,8 @@ public class EmbeddedResourceProvider
                     <div class=""perf-card-title"" style=""display: flex; align-items: center; gap: 8px"">
                         Loaded Assemblies (<span id=""assembly-count"">0</span>)
                         <input type=""text"" placeholder=""Filter..."" id=""asm-filter""
-                            style=""background: #3c3c3c; border: none; padding: 2px 6px;
-                            color: #d4d4d4; border-radius: 4px; font-size: 11px; width: 150px"">
+                            style=""background: var(--bg-input); border: 1px solid var(--border-primary); padding: 2px 6px;
+                            color: var(--text-primary); border-radius: 4px; font-size: 11px; width: 150px"">
                     </div>
                     <div id=""assemblies-content"" style=""max-height: 400px; overflow: auto; margin-top: 8px"">
                         <table>
@@ -488,6 +629,58 @@ public class EmbeddedResourceProvider
     </div>
 
     <script>
+        // 테마 매니저 (IIFE 외부에서 즉시 실행)
+        const ThemeManager = {
+            STORAGE_KEY: 'sharpinspect-theme',
+
+            getSystemTheme() {
+                return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            },
+
+            getSavedTheme() {
+                return localStorage.getItem(this.STORAGE_KEY) || 'system';
+            },
+
+            getEffectiveTheme() {
+                const saved = this.getSavedTheme();
+                return saved === 'system' ? this.getSystemTheme() : saved;
+            },
+
+            apply(theme) {
+                const effective = theme === 'system' ? this.getSystemTheme() : theme;
+                document.documentElement.setAttribute('data-theme', effective);
+                this.updateButton();
+            },
+
+            toggle() {
+                const current = this.getSavedTheme();
+                const next = current === 'dark' ? 'light' : current === 'light' ? 'system' : 'dark';
+                localStorage.setItem(this.STORAGE_KEY, next);
+                this.apply(next);
+            },
+
+            updateButton() {
+                const btn = document.getElementById('theme-toggle');
+                if (!btn) return;
+                const icons = { dark: '🌙', light: '☀️', system: '💻' };
+                const saved = this.getSavedTheme();
+                const effective = this.getEffectiveTheme();
+                btn.textContent = icons[saved];
+                btn.title = 'Theme: ' + saved + (saved === 'system' ? ' (' + effective + ')' : '');
+            },
+
+            init() {
+                this.apply(this.getSavedTheme());
+                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+                    if (this.getSavedTheme() === 'system') this.apply('system');
+                });
+                const btn = document.getElementById('theme-toggle');
+                if (btn) btn.addEventListener('click', () => this.toggle());
+            }
+        };
+        // 즉시 테마 적용 (깜빡임 방지)
+        ThemeManager.apply(ThemeManager.getSavedTheme());
+
         // SharpInspect DevTools UI
         (function() {
             const API_BASE = window.location.origin;
@@ -576,6 +769,11 @@ public class EmbeddedResourceProvider
             });
 
             // Mini chart drawing
+            // CSS 변수에서 차트 그리드 색상 가져오기
+            function getChartGridColor() {
+                return getComputedStyle(document.documentElement).getPropertyValue('--chart-grid').trim() || '#333';
+            }
+
             function drawChart(canvasId, data, color, formatLabel) {
                 const canvas = document.getElementById(canvasId);
                 if (!canvas) return;
@@ -592,7 +790,7 @@ public class EmbeddedResourceProvider
                 const range = max - min || 1;
 
                 // Grid lines
-                ctx.strokeStyle = '#333';
+                ctx.strokeStyle = getChartGridColor();
                 ctx.lineWidth = 0.5;
                 for (let i = 0; i <= 4; i++) {
                     const y = (h / 4) * i;
@@ -774,6 +972,19 @@ Content Download: ${formatTime(e.contentDownloadMs)}`;
                 detailContent.textContent = content;
             }
 
+            // 콘솔 로그 레벨별 CSS 클래스
+            function getLevelClass(level) {
+                const levelClasses = {
+                    'Trace': 'console-trace',
+                    'Debug': 'console-debug',
+                    'Information': 'console-info',
+                    'Warning': 'console-warning',
+                    'Error': 'console-error',
+                    'Critical': 'console-critical'
+                };
+                return levelClasses[level] || '';
+            }
+
             // Render console list
             function renderConsoleList() {
                 const filter = consoleFilterInput.value.toLowerCase();
@@ -781,22 +992,13 @@ Content Download: ${formatTime(e.contentDownloadMs)}`;
                     !filter || e.message.toLowerCase().includes(filter)
                 );
 
-                const levelColors = {
-                    'Trace': '#969696',
-                    'Debug': '#569cd6',
-                    'Information': '#4ec9b0',
-                    'Warning': '#dcdcaa',
-                    'Error': '#f14c4c',
-                    'Critical': '#ff6b6b'
-                };
-
                 consoleList.innerHTML = filtered.map(entry => `
-                    <div style=""padding: 4px 8px; border-bottom: 1px solid #2d2d2d; font-family: monospace; font-size: 12px;"">
-                        <span style=""color: ${levelColors[entry.level] || '#d4d4d4'}"">[${entry.level}]</span>
-                        <span style=""color: #969696; margin-left: 8px"">${new Date(entry.timestamp).toLocaleTimeString()}</span>
-                        <span style=""color: #569cd6; margin-left: 8px"">${entry.category || ''}</span>
+                    <div style=""padding: 4px 8px; border-bottom: 1px solid var(--border-secondary); font-family: monospace; font-size: 12px;"">
+                        <span class=""${getLevelClass(entry.level)}"">[${entry.level}]</span>
+                        <span style=""color: var(--text-secondary); margin-left: 8px"">${new Date(entry.timestamp).toLocaleTimeString()}</span>
+                        <span style=""color: var(--status-3xx); margin-left: 8px"">${entry.category || ''}</span>
                         <div style=""margin-top: 2px; white-space: pre-wrap; word-break: break-all;"">${escapeHtml(entry.message)}</div>
-                        ${entry.exceptionDetails ? `<div style=""color: #f14c4c; margin-top: 4px; white-space: pre-wrap;"">${escapeHtml(entry.exceptionDetails)}</div>` : ''}
+                        ${entry.exceptionDetails ? `<div style=""color: var(--status-5xx); margin-top: 4px; white-space: pre-wrap;"">${escapeHtml(entry.exceptionDetails)}</div>` : ''}
                     </div>
                 `).join('');
             }
@@ -960,8 +1162,307 @@ Content Download: ${formatTime(e.contentDownloadMs)}`;
                 .catch(console.error);
 
             connectWebSocket();
+
+            // === Copy as... 기능 ===
+            var SQ = String.fromCharCode(39);  // 작은따옴표
+            var BS = String.fromCharCode(92);  // 백슬래시
+            var DQ = String.fromCharCode(34);  // 큰따옴표
+            var NL = String.fromCharCode(10);  // 줄바꿈
+
+            // 이스케이프 헬퍼 함수들
+            function escapeCmdArg(str) {
+                if (!str) return str;
+                return str.split(BS).join(BS + BS).split(DQ).join(BS + DQ);
+            }
+
+            function escapeBashArg(str) {
+                if (!str) return SQ + SQ;
+                return SQ + str.split(SQ).join(SQ + BS + SQ + SQ) + SQ;
+            }
+
+            function escapePowerShellArg(str) {
+                if (!str) return str;
+                return str.split(DQ).join(BS + DQ).split(String.fromCharCode(96)).join(String.fromCharCode(96) + String.fromCharCode(96));
+            }
+
+            function escapeJsString(str) {
+                if (!str) return str;
+                return str.split(BS).join(BS + BS).split(DQ).join(BS + DQ).split(NL).join(BS + 'n');
+            }
+
+            function escapeCSharpString(str) {
+                if (!str) return str;
+                return str.split(BS).join(BS + BS).split(DQ).join(BS + DQ).split(NL).join(BS + 'n');
+            }
+
+            // cURL (Windows cmd) 변환
+            function toCurlCmd(entry) {
+                var lines = [];
+                var method = entry.method || 'GET';
+                lines.push('curl -X ' + method + ' ^');
+                lines.push('  ' + DQ + entry.url + DQ + ' ^');
+
+                if (entry.requestHeaders) {
+                    var keys = Object.keys(entry.requestHeaders);
+                    for (var i = 0; i < keys.length; i++) {
+                        var key = keys[i];
+                        var value = entry.requestHeaders[key];
+                        lines.push('  -H ' + DQ + key + ': ' + escapeCmdArg(value) + DQ + ' ^');
+                    }
+                }
+
+                if (entry.requestBody) {
+                    lines.push('  -d ' + DQ + escapeCmdArg(entry.requestBody) + DQ);
+                } else {
+                    var lastLine = lines[lines.length - 1];
+                    if (lastLine && lastLine.slice(-1) === '^') {
+                        lines[lines.length - 1] = lastLine.slice(0, -2);
+                    }
+                }
+
+                return lines.join(NL);
+            }
+
+            // cURL (bash) 변환
+            function toCurlBash(entry) {
+                var lines = [];
+                var method = entry.method || 'GET';
+                lines.push('curl -X ' + method + ' ' + BS);
+                lines.push('  ' + escapeBashArg(entry.url) + ' ' + BS);
+
+                if (entry.requestHeaders) {
+                    var keys = Object.keys(entry.requestHeaders);
+                    for (var i = 0; i < keys.length; i++) {
+                        var key = keys[i];
+                        var value = entry.requestHeaders[key];
+                        lines.push('  -H ' + escapeBashArg(key + ': ' + value) + ' ' + BS);
+                    }
+                }
+
+                if (entry.requestBody) {
+                    lines.push('  -d ' + escapeBashArg(entry.requestBody));
+                } else {
+                    var lastLine = lines[lines.length - 1];
+                    if (lastLine && lastLine.slice(-1) === BS) {
+                        lines[lines.length - 1] = lastLine.slice(0, -2);
+                    }
+                }
+
+                return lines.join(NL);
+            }
+
+            // PowerShell 변환
+            function toPowerShell(entry) {
+                var lines = [];
+                var method = entry.method || 'GET';
+
+                if (entry.requestHeaders && Object.keys(entry.requestHeaders).length > 0) {
+                    lines.push('$headers = @{');
+                    var keys = Object.keys(entry.requestHeaders);
+                    for (var i = 0; i < keys.length; i++) {
+                        var key = keys[i];
+                        var value = entry.requestHeaders[key];
+                        lines.push('    ' + DQ + key + DQ + ' = ' + DQ + escapePowerShellArg(value) + DQ);
+                    }
+                    lines.push('}');
+                    lines.push('');
+                }
+
+                if (entry.requestBody) {
+                    lines.push('$body = @' + DQ);
+                    lines.push(entry.requestBody);
+                    lines.push(DQ + '@');
+                    lines.push('');
+                }
+
+                lines.push('Invoke-RestMethod -Uri ' + DQ + entry.url + DQ + ' -Method ' + method + ' `');
+
+                if (entry.requestHeaders && Object.keys(entry.requestHeaders).length > 0) {
+                    lines.push('    -Headers $headers `');
+                }
+
+                if (entry.requestBody) {
+                    lines.push('    -Body $body');
+                } else {
+                    var lastLine = lines[lines.length - 1];
+                    if (lastLine && lastLine.slice(-1) === '`') {
+                        lines[lines.length - 1] = lastLine.slice(0, -2);
+                    }
+                }
+
+                return lines.join(NL);
+            }
+
+            // JavaScript fetch 변환
+            function toFetch(entry) {
+                var lines = [];
+                var method = entry.method || 'GET';
+
+                lines.push('fetch(' + DQ + escapeJsString(entry.url) + DQ + ', {');
+                lines.push('  method: ' + DQ + method + DQ + ',');
+
+                if (entry.requestHeaders && Object.keys(entry.requestHeaders).length > 0) {
+                    lines.push('  headers: {');
+                    var keys = Object.keys(entry.requestHeaders);
+                    for (var i = 0; i < keys.length; i++) {
+                        var key = keys[i];
+                        var value = entry.requestHeaders[key];
+                        var comma = (i < keys.length - 1) ? ',' : '';
+                        lines.push('    ' + DQ + escapeJsString(key) + DQ + ': ' + DQ + escapeJsString(value) + DQ + comma);
+                    }
+                    lines.push('  },');
+                }
+
+                if (entry.requestBody) {
+                    lines.push('  body: ' + DQ + escapeJsString(entry.requestBody) + DQ);
+                } else {
+                    var lastLine = lines[lines.length - 1];
+                    if (lastLine && lastLine.slice(-1) === ',') {
+                        lines[lines.length - 1] = lastLine.slice(0, -1);
+                    }
+                }
+
+                lines.push('})');
+                lines.push('.then(response => response.json())');
+                lines.push('.then(data => console.log(data))');
+                lines.push('.catch(error => console.error(error));');
+
+                return lines.join(NL);
+            }
+
+            // C# HttpClient 변환
+            function toCSharpHttpClient(entry) {
+                var lines = [];
+                var method = entry.method || 'GET';
+
+                lines.push('using var client = new HttpClient();');
+                lines.push('');
+                lines.push('var request = new HttpRequestMessage');
+                lines.push('{');
+                lines.push('    Method = HttpMethod.' + method.charAt(0).toUpperCase() + method.slice(1).toLowerCase() + ',');
+                lines.push('    RequestUri = new Uri(' + DQ + escapeCSharpString(entry.url) + DQ + ')');
+                lines.push('};');
+                lines.push('');
+
+                var headerKeys = entry.requestHeaders ? Object.keys(entry.requestHeaders).filter(function(k) {
+                    var lower = k.toLowerCase();
+                    return lower !== 'host' && lower !== 'content-length' && (lower !== 'content-type' || !entry.requestBody);
+                }) : [];
+
+                if (headerKeys.length > 0) {
+                    for (var i = 0; i < headerKeys.length; i++) {
+                        var key = headerKeys[i];
+                        var value = entry.requestHeaders[key];
+                        lines.push('request.Headers.TryAddWithoutValidation(' + DQ + key + DQ + ', ' + DQ + escapeCSharpString(value) + DQ + ');');
+                    }
+                    lines.push('');
+                }
+
+                if (entry.requestBody) {
+                    var contentType = entry.requestContentType || 'application/json';
+                    lines.push('request.Content = new StringContent(');
+                    lines.push('    ' + DQ + escapeCSharpString(entry.requestBody) + DQ + ',');
+                    lines.push('    Encoding.UTF8,');
+                    lines.push('    ' + DQ + contentType + DQ + ');');
+                    lines.push('');
+                }
+
+                lines.push('var response = await client.SendAsync(request);');
+                lines.push('var content = await response.Content.ReadAsStringAsync();');
+                lines.push('Console.WriteLine(content);');
+
+                return lines.join(NL);
+            }
+
+            // 클립보드 복사
+            function copyToClipboard(text) {
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    return navigator.clipboard.writeText(text);
+                }
+
+                var textarea = document.createElement('textarea');
+                textarea.value = text;
+                textarea.style.position = 'fixed';
+                textarea.style.opacity = '0';
+                textarea.style.left = '-9999px';
+                document.body.appendChild(textarea);
+                textarea.select();
+
+                try {
+                    document.execCommand('copy');
+                } finally {
+                    document.body.removeChild(textarea);
+                }
+
+                return Promise.resolve();
+            }
+
+            // 토스트 알림
+            function showToast(message) {
+                var toast = document.getElementById('copy-toast');
+                if (toast) {
+                    toast.textContent = message;
+                    toast.classList.add('show');
+                    setTimeout(function() {
+                        toast.classList.remove('show');
+                    }, 2000);
+                }
+            }
+
+            // Copy 버튼 이벤트 핸들러
+            var copyBtn = document.getElementById('copy-btn');
+            var copyMenu = document.getElementById('copy-menu');
+
+            if (copyBtn && copyMenu) {
+                copyBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    copyMenu.classList.toggle('show');
+                });
+
+                document.addEventListener('click', function() {
+                    copyMenu.classList.remove('show');
+                });
+
+                copyMenu.addEventListener('click', function(e) {
+                    var item = e.target.closest('.copy-menu-item');
+                    if (!item || !selectedEntry) return;
+
+                    var format = item.getAttribute('data-format');
+                    var text = '';
+
+                    switch (format) {
+                        case 'curl-cmd':
+                            text = toCurlCmd(selectedEntry);
+                            break;
+                        case 'curl-bash':
+                            text = toCurlBash(selectedEntry);
+                            break;
+                        case 'powershell':
+                            text = toPowerShell(selectedEntry);
+                            break;
+                        case 'fetch':
+                            text = toFetch(selectedEntry);
+                            break;
+                        case 'csharp':
+                            text = toCSharpHttpClient(selectedEntry);
+                            break;
+                    }
+
+                    if (text) {
+                        copyToClipboard(text).then(function() {
+                            showToast('Copied as ' + format);
+                        });
+                    }
+
+                    copyMenu.classList.remove('show');
+                });
+            }
+
+            // 테마 매니저 초기화 (DOM 로드 후)
+            ThemeManager.init();
         })();
     </script>
+    <div class=""copy-toast"" id=""copy-toast"">Copied!</div>
 </body>
 </html>";
     }
