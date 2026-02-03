@@ -26,6 +26,7 @@ namespace SharpInspect
         private static ISharpInspectServer _server;
 #endif
         private static readonly object _lock = new();
+        private static ApplicationInterceptor _applicationInterceptor;
         private static PerformanceInterceptor _performanceInterceptor;
         private static TraceHook _traceHook;
 
@@ -112,6 +113,12 @@ namespace SharpInspect
                     _performanceInterceptor = new PerformanceInterceptor(_store, Options, EventBus);
                 }
 
+                // 애플리케이션 정보 캡처 초기화
+                if (Options.EnableApplicationCapture)
+                {
+                    _applicationInterceptor = new ApplicationInterceptor(_store, Options, EventBus);
+                }
+
 #if !NET35
                 // 웹 서버 시작
                 _server = new HttpListenerServer(_store, Options, EventBus);
@@ -160,6 +167,9 @@ namespace SharpInspect
 
                 _performanceInterceptor?.Dispose();
                 _performanceInterceptor = null;
+
+                _applicationInterceptor?.Dispose();
+                _applicationInterceptor = null;
 
                 _store?.ClearAll();
                 EventBus?.ClearAll();

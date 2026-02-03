@@ -23,6 +23,7 @@ public class WebSocketManager : IDisposable
     private readonly IDisposable _networkSubscription;
     private readonly IDisposable _consoleSubscription;
     private readonly IDisposable _performanceSubscription;
+    private readonly IDisposable _applicationSubscription;
     private bool _disposed;
 
     /// <summary>
@@ -51,6 +52,7 @@ public class WebSocketManager : IDisposable
         _networkSubscription = _eventBus.Subscribe<NetworkEntryEvent>(OnNetworkEntry);
         _consoleSubscription = _eventBus.Subscribe<ConsoleEntryEvent>(OnConsoleEntry);
         _performanceSubscription = _eventBus.Subscribe<PerformanceEntryEvent>(OnPerformanceEntry);
+        _applicationSubscription = _eventBus.Subscribe<ApplicationInfoEvent>(OnApplicationInfo);
     }
 
 #if NET45_OR_GREATER || NETSTANDARD2_0 || NETCOREAPP
@@ -208,6 +210,15 @@ public class WebSocketManager : IDisposable
         });
     }
 
+    private void OnApplicationInfo(ApplicationInfoEvent evt)
+    {
+        Broadcast(new WebSocketMessage
+        {
+            Type = "application:info",
+            Data = evt.Info
+        });
+    }
+
     private void RemoveClient(WebSocketClient client)
     {
         lock (_clientsLock)
@@ -257,6 +268,7 @@ public class WebSocketManager : IDisposable
             _networkSubscription?.Dispose();
             _consoleSubscription?.Dispose();
             _performanceSubscription?.Dispose();
+            _applicationSubscription?.Dispose();
             CloseAll();
         }
     }

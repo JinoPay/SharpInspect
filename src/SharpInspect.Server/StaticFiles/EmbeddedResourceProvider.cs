@@ -332,6 +332,7 @@ public class EmbeddedResourceProvider
                 <button class=""tab active"" data-tab=""network"">Network</button>
                 <button class=""tab"" data-tab=""console"">Console</button>
                 <button class=""tab"" data-tab=""performance"">Performance</button>
+                <button class=""tab"" data-tab=""application"">Application</button>
             </div>
             <div style=""flex: 1""></div>
             <div class=""ws-indicator"" id=""ws-status"" title=""WebSocket disconnected""></div>
@@ -442,6 +443,48 @@ public class EmbeddedResourceProvider
                 </div>
             </div>
         </div>
+        <div class=""content"" id=""application-panel"" style=""display: none"">
+            <div class=""toolbar"">
+                <button id=""app-refresh-btn"">Refresh</button>
+                <span id=""app-status"" style=""font-size: 12px; color: #969696; margin-left: 8px""></span>
+            </div>
+            <div class=""list-container"" style=""padding: 12px; overflow: auto"">
+                <div class=""perf-card"" style=""margin-bottom: 12px"">
+                    <div class=""perf-card-title"">App Info</div>
+                    <div id=""app-info-content"" class=""detail-content"" style=""padding: 8px 0""></div>
+                </div>
+                <div class=""perf-card"" style=""margin-bottom: 12px"">
+                    <div class=""perf-card-title"" style=""display: flex; align-items: center; gap: 8px"">
+                        Environment Variables (<span id=""env-count"">0</span>)
+                        <input type=""text"" placeholder=""Filter..."" id=""env-filter""
+                            style=""background: #3c3c3c; border: none; padding: 2px 6px;
+                            color: #d4d4d4; border-radius: 4px; font-size: 11px; width: 150px"">
+                    </div>
+                    <div id=""env-vars-content"" style=""max-height: 300px; overflow: auto; margin-top: 8px""></div>
+                </div>
+                <div class=""perf-card"">
+                    <div class=""perf-card-title"" style=""display: flex; align-items: center; gap: 8px"">
+                        Loaded Assemblies (<span id=""assembly-count"">0</span>)
+                        <input type=""text"" placeholder=""Filter..."" id=""asm-filter""
+                            style=""background: #3c3c3c; border: none; padding: 2px 6px;
+                            color: #d4d4d4; border-radius: 4px; font-size: 11px; width: 150px"">
+                    </div>
+                    <div id=""assemblies-content"" style=""max-height: 400px; overflow: auto; margin-top: 8px"">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Version</th>
+                                    <th>Location</th>
+                                    <th style=""width: 60px"">Dynamic</th>
+                                </tr>
+                            </thead>
+                            <tbody id=""assembly-list""></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -473,9 +516,10 @@ public class EmbeddedResourceProvider
             const networkPanel = document.getElementById('network-panel');
             const consolePanel = document.getElementById('console-panel');
             const performancePanel = document.getElementById('performance-panel');
+            const applicationPanel = document.getElementById('application-panel');
 
             // Tab switching
-            const panels = { network: networkPanel, console: consolePanel, performance: performancePanel };
+            const panels = { network: networkPanel, console: consolePanel, performance: performancePanel, application: applicationPanel };
             document.querySelectorAll('.tab').forEach(tab => {
                 tab.addEventListener('click', () => {
                     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -762,6 +806,81 @@ Content Download: ${formatTime(e.contentDownloadMs)}`;
                 return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
             }
 
+            // Application tab
+            let applicationInfo = null;
+
+            function renderApplicationInfo() {
+                if (!applicationInfo) return;
+                const info = applicationInfo;
+
+                // App Info section
+                const appInfoHtml = [
+                    ['Assembly', (info.assemblyName || 'N/A') + ' v' + (info.assemblyVersion || 'N/A')],
+                    ['Location', info.assemblyLocation || 'N/A'],
+                    ['Runtime', info.frameworkDescription || info.runtimeVersion || 'N/A'],
+                    ['OS', info.osDescription || 'N/A'],
+                    ['Architecture', info.processArchitecture || 'N/A'],
+                    ['Process ID', info.processId],
+                    ['Machine', info.machineName || 'N/A'],
+                    ['User', info.userName || 'N/A'],
+                    ['Start Time', info.processStartTime ? new Date(info.processStartTime).toLocaleString() : 'N/A'],
+                    ['Working Dir', info.workingDirectory || 'N/A'],
+                    ['Processors', info.processorCount],
+                    ['Server GC', info.isServerGC ? 'Yes' : 'No'],
+                    ['Command Line', (info.commandLineArgs || []).join(' ') || 'N/A']
+                ].map(([k, v]) => '<div style=""display:flex;padding:2px 0""><span style=""color:#969696;min-width:120px"">' + escapeHtml(k) + ':</span><span>' + escapeHtml(String(v)) + '</span></div>').join('');
+                document.getElementById('app-info-content').innerHTML = appInfoHtml;
+
+                renderEnvironmentVariables();
+                renderAssemblies();
+
+                document.getElementById('app-status').textContent =
+                    'Last update: ' + new Date(info.timestamp).toLocaleTimeString();
+            }
+
+            function renderEnvironmentVariables() {
+                if (!applicationInfo) return;
+                const filter = (document.getElementById('env-filter').value || '').toLowerCase();
+                const envVars = applicationInfo.environmentVariables || {};
+                const keys = Object.keys(envVars).sort();
+                const filtered = keys.filter(k => !filter || k.toLowerCase().includes(filter) || envVars[k].toLowerCase().includes(filter));
+
+                document.getElementById('env-count').textContent = keys.length;
+
+                const html = '<table><thead><tr><th style=""width:30%"">Key</th><th>Value</th></tr></thead><tbody>' +
+                    filtered.map(k => '<tr><td style=""color:#4ec9b0"">' + escapeHtml(k) + '</td><td style=""word-break:break-all;white-space:normal"">' + escapeHtml(envVars[k]) + '</td></tr>').join('') +
+                    '</tbody></table>';
+                document.getElementById('env-vars-content').innerHTML = html;
+            }
+
+            function renderAssemblies() {
+                if (!applicationInfo) return;
+                const filter = (document.getElementById('asm-filter').value || '').toLowerCase();
+                const assemblies = applicationInfo.loadedAssemblies || [];
+                const filtered = assemblies.filter(a => !filter || (a.name || '').toLowerCase().includes(filter) || (a.location || '').toLowerCase().includes(filter));
+
+                document.getElementById('assembly-count').textContent = assemblies.length;
+
+                document.getElementById('assembly-list').innerHTML = filtered.map(a =>
+                    '<tr><td title=""' + escapeHtml(a.fullName || '') + '"">' + escapeHtml(a.name || '') + '</td>' +
+                    '<td>' + escapeHtml(a.version || '') + '</td>' +
+                    '<td style=""word-break:break-all;white-space:normal;max-width:400px"" title=""' + escapeHtml(a.location || '') + '"">' + escapeHtml(a.location || '') + '</td>' +
+                    '<td>' + (a.isDynamic ? 'Yes' : '') + '</td></tr>'
+                ).join('');
+            }
+
+            // Application tab event listeners
+            document.getElementById('app-refresh-btn').addEventListener('click', function() {
+                fetch(API_BASE + '/api/application/refresh', { method: 'POST' });
+                fetch(API_BASE + '/api/application')
+                    .then(function(r) { return r.json(); })
+                    .then(function(data) { applicationInfo = data; renderApplicationInfo(); })
+                    .catch(console.error);
+            });
+
+            document.getElementById('env-filter').addEventListener('input', renderEnvironmentVariables);
+            document.getElementById('asm-filter').addEventListener('input', renderAssemblies);
+
             // Connect WebSocket
             function connectWebSocket() {
                 const wsUrl = `ws://${window.location.host}/ws`;
@@ -799,6 +918,9 @@ Content Download: ${formatTime(e.contentDownloadMs)}`;
                             renderConsoleList();
                         } else if (msg.type === 'performance:entry') {
                             updatePerformanceUI(msg.data);
+                        } else if (msg.type === 'application:info') {
+                            applicationInfo = msg.data;
+                            renderApplicationInfo();
                         }
                     } catch {}
                 };
@@ -826,6 +948,14 @@ Content Download: ${formatTime(e.contentDownloadMs)}`;
                 .then(data => {
                     const items = data.items || [];
                     items.forEach(entry => updatePerformanceUI(entry));
+                })
+                .catch(console.error);
+
+            fetch(API_BASE + '/api/application')
+                .then(r => r.json())
+                .then(data => {
+                    applicationInfo = data;
+                    renderApplicationInfo();
                 })
                 .catch(console.error);
 

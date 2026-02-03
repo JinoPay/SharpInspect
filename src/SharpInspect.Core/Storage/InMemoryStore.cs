@@ -26,9 +26,11 @@ namespace SharpInspect.Core.Storage
 
         private readonly Dictionary<string, NetworkEntry> _networkIndex;
         private readonly object _networkIndexLock = new();
+        private readonly object _applicationInfoLock = new();
         private readonly RingBuffer<ConsoleEntry> _consoleEntries;
         private readonly RingBuffer<NetworkEntry> _networkEntries;
         private readonly RingBuffer<PerformanceEntry> _performanceEntries;
+        private ApplicationInfo _applicationInfo;
 
         /// <summary>
         ///     기본 용량으로 새 인메모리 스토어를 생성합니다.
@@ -179,6 +181,24 @@ namespace SharpInspect.Core.Storage
         public void ClearPerformanceEntries()
         {
             _performanceEntries.Clear();
+        }
+
+        /// <inheritdoc />
+        public ApplicationInfo GetApplicationInfo()
+        {
+            lock (_applicationInfoLock)
+            {
+                return _applicationInfo;
+            }
+        }
+
+        /// <inheritdoc />
+        public void SetApplicationInfo(ApplicationInfo info)
+        {
+            lock (_applicationInfoLock)
+            {
+                _applicationInfo = info;
+            }
         }
 
         private void RebuildNetworkIndex()
