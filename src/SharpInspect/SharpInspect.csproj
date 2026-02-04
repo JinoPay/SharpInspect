@@ -7,7 +7,12 @@
         <LangVersion>14</LangVersion>
         <PackageId>SharpInspect</PackageId>
         <Description>Chrome DevTools-like inspector for any .NET application. Press F12 to inspect HTTP traffic, logs, and performance in real-time.</Description>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="..\..\README.md" Pack="true" PackagePath="\"/>
+    </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\SharpInspect.Core\SharpInspect.Core.csproj"/>

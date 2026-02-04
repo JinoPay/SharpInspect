@@ -7,7 +7,12 @@
     <PackageId>SharpInspect.Core</PackageId>
     <LangVersion>14</LangVersion>
     <Description>Core components for SharpInspect - HTTP interception, logging, storage, and event system.</Description>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\"/>
+  </ItemGroup>
 
   <!-- .NET 3.5 specific references -->
   <ItemGroup Condition="'$(TargetFramework)' == 'net35'">
