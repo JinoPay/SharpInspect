@@ -31,10 +31,7 @@ HTTP 요청, 콘솔 로그, 성능 메트릭, 애플리케이션 정보를 실�
 ### 1. 설치
 
 ```bash
-# NuGet (준비 중)
 dotnet add package SharpInspect
-
-# 또는 프로젝트 참조
 ```
 
 ### 2. 초기화
@@ -174,12 +171,14 @@ options.EnableInDevelopmentOnly = false;
 
 ### Network 탭
 - 요청/응답 목록 및 타이밍 정보
+- 전체 경로 표시 (pathname + querystring)
 - 상태 코드별 색상 구분 (2xx 초록, 4xx 주황, 5xx 빨강)
 - 헤더 및 바디 상세 보기 (JSON 포맷팅)
 - 타이밍 분석 (DNS, TCP, TLS, TTFB)
 - 필터링 및 검색
 - Clear 버튼
 - **Export HAR**: 네트워크 로그를 HAR(HTTP Archive) 형식으로 내보내기
+- **Copy as cURL/fetch**: 요청을 cURL 명령어 또는 fetch 코드로 복사
 
 ### Console 탭
 - 로그 레벨별 색상 구분
@@ -192,6 +191,7 @@ options.EnableInDevelopmentOnly = false;
 - 메모리 메트릭 (Working Set, GC 힙)
 - GC 수집 횟수
 - 스레드 수 추적
+- **Request Stats**: 초당 요청 수, 평균 응답 시간, 에러율, 업타임
 
 ### Application 탭
 - 앱 정보 (이름, 버전, 런타임, PID)
@@ -206,12 +206,13 @@ options.EnableInDevelopmentOnly = false;
 | `/api/network` | GET | 네트워크 엔트리 (페이징) |
 | `/api/network/{id}` | GET | 특정 네트워크 엔트리 |
 | `/api/network/clear` | POST | 네트워크 로그 초기화 |
+| `/api/network/export/har` | GET | 네트워크 로그를 HAR로 내보내기 |
 | `/api/console` | GET | 콘솔 엔트리 (페이징) |
 | `/api/console/clear` | POST | 콘솔 로그 초기화 |
 | `/api/performance` | GET | 성능 엔트리 (페이징) |
 | `/api/performance/clear` | POST | 성능 로그 초기화 |
 | `/api/application` | GET | 애플리케이션 정보 |
-| `/api/network/export/har` | GET | 네트워크 로그를 HAR로 내보내기 |
+| `/api/application/refresh` | POST | 애플리케이션 정보 새로고침 |
 | `/ws` | WebSocket | 실시간 이벤트 스트림 |
 
 ## 프로젝트 구조
@@ -221,6 +222,7 @@ SharpInspect/
 ├── src/
 │   ├── SharpInspect.Core/       # 핵심 모델, 스토리지, 이벤트, 인터셉터
 │   ├── SharpInspect.Server/     # 임베디드 웹 서버 (REST API, WebSocket)
+│   │   └── wwwroot/             # 프론트엔드 파일 (HTML, CSS, JS)
 │   └── SharpInspect/            # 공개 API, DI 확장
 └── samples/
     ├── Sample.ConsoleApp/       # .NET 8 콘솔 예제
@@ -257,12 +259,15 @@ dotnet run --project samples/Sample.ConsoleApp
 - [x] 멀티 프레임워크 지원 (.NET Framework 3.5 ~ .NET 9.0)
 - [x] 다크 모드 UI
 - [x] HAR 내보내기
+- [x] Request Stats (초당 요청 수, 평균 응답 시간, 에러율)
+- [x] 프론트엔드 모듈화 (별도 HTML/CSS/JS 파일)
+- [x] 네트워크 패널 UX 개선 (전체 경로 표시, 에러 상태)
+- [x] NuGet 패키지 배포
 
 ### 예정
 - [ ] 커스텀 패널 플러그인 시스템
 - [ ] 요청 재전송 (Replay)
 - [ ] 성능 타임라인 뷰
-- [ ] NuGet 패키지 배포
 
 ## 기여
 

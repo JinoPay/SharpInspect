@@ -31,10 +31,7 @@ Monitor HTTP requests, console logs, performance metrics, and application info i
 ### 1. Install
 
 ```bash
-# NuGet (coming soon)
 dotnet add package SharpInspect
-
-# Or add project reference
 ```
 
 ### 2. Initialize
@@ -174,12 +171,14 @@ options.EnableInDevelopmentOnly = false;
 
 ### Network Tab
 - Request/response list with timing info
+- Full path display (pathname + querystring)
 - Status code color coding (2xx green, 4xx orange, 5xx red)
 - Headers and body inspection (JSON formatted)
 - Timing breakdown (DNS, TCP, TLS, TTFB)
 - Filtering and search
 - Clear button
 - **Export HAR**: Export network logs as HAR (HTTP Archive) format
+- **Copy as cURL/fetch**: Copy request as cURL command or fetch code
 
 ### Console Tab
 - Log level color coding
@@ -192,6 +191,7 @@ options.EnableInDevelopmentOnly = false;
 - Memory metrics (working set, GC heap)
 - GC collection counts
 - Thread count tracking
+- **Request Stats**: Requests/sec, avg response time, error rate, uptime
 
 ### Application Tab
 - App info (name, version, runtime, PID)
@@ -206,12 +206,13 @@ options.EnableInDevelopmentOnly = false;
 | `/api/network` | GET | Network entries (paginated) |
 | `/api/network/{id}` | GET | Single network entry |
 | `/api/network/clear` | POST | Clear network logs |
+| `/api/network/export/har` | GET | Export network logs as HAR |
 | `/api/console` | GET | Console entries (paginated) |
 | `/api/console/clear` | POST | Clear console logs |
 | `/api/performance` | GET | Performance entries (paginated) |
 | `/api/performance/clear` | POST | Clear performance logs |
 | `/api/application` | GET | Application info |
-| `/api/network/export/har` | GET | Export network logs as HAR |
+| `/api/application/refresh` | POST | Refresh application info |
 | `/ws` | WebSocket | Real-time event stream |
 
 ## Project Structure
@@ -221,6 +222,7 @@ SharpInspect/
 ├── src/
 │   ├── SharpInspect.Core/       # Core models, storage, events, interceptors
 │   ├── SharpInspect.Server/     # Embedded web server (REST API, WebSocket)
+│   │   └── wwwroot/             # Frontend files (HTML, CSS, JS)
 │   └── SharpInspect/            # Public API, DI extensions
 └── samples/
     ├── Sample.ConsoleApp/       # .NET 8 console example
@@ -257,12 +259,15 @@ dotnet run --project samples/Sample.ConsoleApp
 - [x] Multi-framework support (.NET Framework 3.5 ~ .NET 9.0)
 - [x] Dark mode UI
 - [x] HAR export
+- [x] Request Stats (requests/sec, avg response time, error rate)
+- [x] Frontend modularization (separate HTML/CSS/JS files)
+- [x] Network panel UX improvements (full path display, error status)
+- [x] NuGet package release
 
 ### Planned
 - [ ] Custom panel plugin system
 - [ ] Request replay
 - [ ] Performance timeline view
-- [ ] NuGet package release
 
 ## Contributing
 
