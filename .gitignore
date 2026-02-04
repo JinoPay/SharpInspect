@@ -261,3 +261,7 @@ __pycache__/
 *.pyc
 /PassOrderAdmin/resources/sound/alarm_origin.wav
 /PassOrderAdmin/resources/sound/vip_origin.wav
+
+# Claude Code
+.claude/
+CLAUDE.md
