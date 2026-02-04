@@ -673,3 +673,19 @@ tr.selected {
     border-radius: 2px;
     flex-shrink: 0;
 }
+
+/* Scroll to bottom button */
+.scroll-btn {
+    background: var(--status-info, #569cd6);
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 11px;
+    margin-left: auto;
+}
+
+.scroll-btn:hover {
+    opacity: 0.9;
+}

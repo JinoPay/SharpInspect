@@ -14,6 +14,8 @@
     var currentTab = 'network';
     var applicationInfo = null;
     var isPrettyFormat = true;
+    var networkAutoScroll = true;
+    var consoleAutoScroll = true;
 
     // Performance chart data
     var PERF_MAX_POINTS = SharpInspectCharts.PERF_MAX_POINTS;
@@ -34,6 +36,10 @@
     var consolePanel = document.getElementById('console-panel');
     var performancePanel = document.getElementById('performance-panel');
     var applicationPanel = document.getElementById('application-panel');
+    var networkListContainer = document.querySelector('#network-panel .list-container');
+    var consoleListContainer = document.getElementById('console-list');
+    var networkScrollBtn = document.getElementById('network-scroll-btn');
+    var consoleScrollBtn = document.getElementById('console-scroll-btn');
 
     // Panels map
     var panels = {
@@ -75,6 +81,20 @@
         });
     }
 
+    // ===== Auto Scroll =====
+    function isScrolledToBottom(element) {
+        var threshold = 50;
+        return element.scrollHeight - element.scrollTop - element.clientHeight < threshold;
+    }
+
+    function scrollToBottom(element) {
+        element.scrollTop = element.scrollHeight;
+    }
+
+    function updateScrollButton(btn, isAutoScroll) {
+        btn.style.display = isAutoScroll ? 'none' : 'block';
+    }
+
     // ===== Network Panel =====
     function renderNetworkList() {
         var filter = filterInput.value.toLowerCase();
@@ -105,6 +125,11 @@
                 renderDetail();
             });
         });
+
+        // Auto scroll
+        if (networkAutoScroll) {
+            scrollToBottom(networkListContainer);
+        }
     }
 
     function renderDetail() {
@@ -170,6 +195,11 @@
                 (entry.exceptionDetails ? '<div style="color: var(--status-5xx); margin-top: 4px; white-space: pre-wrap;">' + SharpInspectUtils.escapeHtml(entry.exceptionDetails) + '</div>' : '') +
                 '</div>';
         }).join('');
+
+        // Auto scroll
+        if (consoleAutoScroll) {
+            scrollToBottom(consoleListContainer);
+        }
     }
 
     // ===== Performance Panel =====
@@ -409,6 +439,29 @@
 
         document.getElementById('env-filter').addEventListener('input', renderEnvironmentVariables);
         document.getElementById('asm-filter').addEventListener('input', renderAssemblies);
+
+        // Auto scroll event listeners
+        networkListContainer.addEventListener('scroll', function() {
+            networkAutoScroll = isScrolledToBottom(networkListContainer);
+            updateScrollButton(networkScrollBtn, networkAutoScroll);
+        });
+
+        consoleListContainer.addEventListener('scroll', function() {
+            consoleAutoScroll = isScrolledToBottom(consoleListContainer);
+            updateScrollButton(consoleScrollBtn, consoleAutoScroll);
+        });
+
+        networkScrollBtn.addEventListener('click', function() {
+            scrollToBottom(networkListContainer);
+            networkAutoScroll = true;
+            updateScrollButton(networkScrollBtn, true);
+        });
+
+        consoleScrollBtn.addEventListener('click', function() {
+            scrollToBottom(consoleListContainer);
+            consoleAutoScroll = true;
+            updateScrollButton(consoleScrollBtn, true);
+        });
 
         // Copy dropdown
         initCopyDropdown();
