@@ -16,8 +16,8 @@ namespace SharpInspect.Core.Models
             Id = Guid.NewGuid().ToString("N");
             Timestamp = DateTime.UtcNow;
             EnvironmentVariables = new Dictionary<string, string>();
-            LoadedAssemblies = new List<AssemblyInfo>();
-            CommandLineArgs = new List<string>();
+            LoadedAssemblies = [];
+            CommandLineArgs = [];
         }
 
         /// <summary>

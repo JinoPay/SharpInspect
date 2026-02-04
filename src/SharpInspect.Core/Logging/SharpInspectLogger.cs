@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.IO;
 using Microsoft.Extensions.Logging;
 using SharpInspect.Core.Configuration;
-using SharpInspect.Core.Events;
 using SharpInspect.Core.Models;
 using SharpInspect.Core.Storage;
 
@@ -16,7 +15,6 @@ namespace SharpInspect.Core.Logging
     /// </summary>
     public class SharpInspectLogger : ILogger
     {
-        private readonly EventBus _eventBus;
         private readonly ISharpInspectStore _store;
         private readonly SharpInspectOptions _options;
         private readonly string _categoryName;
@@ -27,13 +25,24 @@ namespace SharpInspect.Core.Logging
         public SharpInspectLogger(
             string categoryName,
             ISharpInspectStore store,
-            SharpInspectOptions options,
-            EventBus eventBus = null)
+            SharpInspectOptions options)
         {
             _categoryName = categoryName ?? "";
             _store = store ?? throw new ArgumentNullException(nameof(store));
             _options = options ?? throw new ArgumentNullException(nameof(options));
-            _eventBus = eventBus ?? EventBus.Instance;
+        }
+
+        /// <summary>
+        ///     [Obsolete] 하위 호환성을 위한 생성자. EventBus 파라미터는 무시됩니다.
+        /// </summary>
+        [Obsolete("EventBus는 더 이상 직접 전달할 필요가 없습니다. Store에서 자동으로 이벤트를 발행합니다.")]
+        public SharpInspectLogger(
+            string categoryName,
+            ISharpInspectStore store,
+            SharpInspectOptions options,
+            Events.EventBus eventBus)
+            : this(categoryName, store, options)
+        {
         }
 
         /// <inheritdoc />
@@ -84,8 +93,8 @@ namespace SharpInspect.Core.Logging
                 entry.StackTrace = exception.StackTrace;
             }
 
+            // Store에서 자동으로 이벤트 발행
             _store.AddConsoleEntry(entry);
-            _eventBus.PublishAsync(new ConsoleEntryEvent(entry));
         }
 
         private LogLevel MapLogLevel(SharpInspectLogLevel level)
@@ -187,7 +196,6 @@ namespace SharpInspect.Core.Logging
     /// </summary>
     public class SharpInspectLoggerProvider : ILoggerProvider
     {
-        private readonly EventBus _eventBus;
         private readonly ISharpInspectStore _store;
         private readonly SharpInspectOptions _options;
 
@@ -196,12 +204,22 @@ namespace SharpInspect.Core.Logging
         /// </summary>
         public SharpInspectLoggerProvider(
             ISharpInspectStore store,
-            SharpInspectOptions options,
-            EventBus eventBus = null)
+            SharpInspectOptions options)
         {
             _store = store ?? throw new ArgumentNullException(nameof(store));
             _options = options ?? throw new ArgumentNullException(nameof(options));
-            _eventBus = eventBus ?? EventBus.Instance;
+        }
+
+        /// <summary>
+        ///     [Obsolete] 하위 호환성을 위한 생성자. EventBus 파라미터는 무시됩니다.
+        /// </summary>
+        [Obsolete("EventBus는 더 이상 직접 전달할 필요가 없습니다. Store에서 자동으로 이벤트를 발행합니다.")]
+        public SharpInspectLoggerProvider(
+            ISharpInspectStore store,
+            SharpInspectOptions options,
+            Events.EventBus eventBus)
+            : this(store, options)
+        {
         }
 
         /// <inheritdoc />
@@ -213,7 +231,7 @@ namespace SharpInspect.Core.Logging
         /// <inheritdoc />
         public ILogger CreateLogger(string categoryName)
         {
-            return new SharpInspectLogger(categoryName, _store, _options, _eventBus);
+            return new SharpInspectLogger(categoryName, _store, _options);
         }
     }
 }

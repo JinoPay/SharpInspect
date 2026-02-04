@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 using SharpInspect.Core.Configuration;
-using SharpInspect.Core.Events;
 using SharpInspect.Core.Models;
 using SharpInspect.Core.Storage;
 
@@ -15,7 +14,6 @@ namespace SharpInspect.Core.Logging
     /// </summary>
     public class TraceHook : TraceListener, IDisposable
     {
-        private readonly EventBus _eventBus;
         private readonly ISharpInspectStore _store;
         private readonly SharpInspectOptions _options;
         private readonly StringBuilder _buffer;
@@ -26,12 +24,10 @@ namespace SharpInspect.Core.Logging
         /// </summary>
         public TraceHook(
             ISharpInspectStore store,
-            SharpInspectOptions options,
-            EventBus eventBus = null)
+            SharpInspectOptions options)
         {
-            _store = store ?? throw new ArgumentNullException("store");
-            _options = options ?? throw new ArgumentNullException("options");
-            _eventBus = eventBus ?? EventBus.Instance;
+            _store = store ?? throw new ArgumentNullException(nameof(store));
+            _options = options ?? throw new ArgumentNullException(nameof(options));
             _buffer = new StringBuilder();
 
             // 이 리스너를 트레이스 리스너 컬렉션에 추가
@@ -39,6 +35,18 @@ namespace SharpInspect.Core.Logging
 #if NETFRAMEWORK || NET35
             Debug.Listeners.Add(this);
 #endif
+        }
+
+        /// <summary>
+        ///     [Obsolete] 하위 호환성을 위한 생성자. EventBus 파라미터는 무시됩니다.
+        /// </summary>
+        [Obsolete("EventBus는 더 이상 직접 전달할 필요가 없습니다. Store에서 자동으로 이벤트를 발행합니다.")]
+        public TraceHook(
+            ISharpInspectStore store,
+            SharpInspectOptions options,
+            Events.EventBus eventBus)
+            : this(store, options)
+        {
         }
 
         /// <summary>
@@ -67,13 +75,8 @@ namespace SharpInspect.Core.Logging
                 Source = GetSource()
             };
 
+            // Store에서 자동으로 이벤트 발행
             _store.AddConsoleEntry(entry);
-
-#if NET35
-            _eventBus.Publish(new ConsoleEntryEvent(entry));
-#else
-            _eventBus.PublishAsync(new ConsoleEntryEvent(entry));
-#endif
         }
 
         /// <summary>
@@ -142,13 +145,8 @@ namespace SharpInspect.Core.Logging
                 Source = GetSource()
             };
 
+            // Store에서 자동으로 이벤트 발행
             _store.AddConsoleEntry(entry);
-
-#if NET35
-            _eventBus.Publish(new ConsoleEntryEvent(entry));
-#else
-            _eventBus.PublishAsync(new ConsoleEntryEvent(entry));
-#endif
         }
 
         /// <summary>
@@ -222,7 +220,7 @@ namespace SharpInspect.Core.Logging
                     if (!string.IsNullOrEmpty(fileName))
                         return string.Format("{0}.{1}() in {2}:line {3}",
                             typeName, method.Name, Path.GetFileName(fileName), lineNumber);
-                    return string.Format("{0}.{1}()", typeName, method.Name);
+                    return $"{typeName}.{method.Name}()";
                 }
 
                 return null;
