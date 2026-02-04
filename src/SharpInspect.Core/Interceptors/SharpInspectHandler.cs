@@ -6,7 +6,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using SharpInspect.Core.Configuration;
-using SharpInspect.Core.Events;
 using SharpInspect.Core.Models;
 using SharpInspect.Core.Storage;
 
@@ -18,7 +17,6 @@ namespace SharpInspect.Core.Interceptors
     /// </summary>
     public class SharpInspectHandler : DelegatingHandler
     {
-        private readonly EventBus _eventBus;
         private readonly ISharpInspectStore _store;
         private readonly SharpInspectOptions _options;
 
@@ -27,9 +25,8 @@ namespace SharpInspect.Core.Interceptors
         /// </summary>
         public SharpInspectHandler(
             ISharpInspectStore store,
-            SharpInspectOptions options,
-            EventBus eventBus)
-            : this(store, options, eventBus, new HttpClientHandler())
+            SharpInspectOptions options)
+            : this(store, options, new HttpClientHandler())
         {
         }
 
@@ -39,13 +36,36 @@ namespace SharpInspect.Core.Interceptors
         public SharpInspectHandler(
             ISharpInspectStore store,
             SharpInspectOptions options,
-            EventBus eventBus,
             HttpMessageHandler innerHandler)
             : base(innerHandler)
         {
             _store = store ?? throw new ArgumentNullException(nameof(store));
             _options = options ?? throw new ArgumentNullException(nameof(options));
-            _eventBus = eventBus ?? EventBus.Instance;
+        }
+
+        /// <summary>
+        ///     [Obsolete] 하위 호환성을 위한 생성자. EventBus 파라미터는 무시됩니다.
+        /// </summary>
+        [Obsolete("EventBus는 더 이상 직접 전달할 필요가 없습니다. Store에서 자동으로 이벤트를 발행합니다.")]
+        public SharpInspectHandler(
+            ISharpInspectStore store,
+            SharpInspectOptions options,
+            Events.EventBus eventBus)
+            : this(store, options, new HttpClientHandler())
+        {
+        }
+
+        /// <summary>
+        ///     [Obsolete] 하위 호환성을 위한 생성자. EventBus 파라미터는 무시됩니다.
+        /// </summary>
+        [Obsolete("EventBus는 더 이상 직접 전달할 필요가 없습니다. Store에서 자동으로 이벤트를 발행합니다.")]
+        public SharpInspectHandler(
+            ISharpInspectStore store,
+            SharpInspectOptions options,
+            Events.EventBus eventBus,
+            HttpMessageHandler innerHandler)
+            : this(store, options, innerHandler)
+        {
         }
 
         /// <inheritdoc />
@@ -82,9 +102,8 @@ namespace SharpInspect.Core.Interceptors
             }
             finally
             {
-                // 엔트리 저장 및 발행
+                // 엔트리 저장 (Store에서 자동으로 이벤트 발행)
                 _store.AddNetworkEntry(entry);
-                _eventBus.PublishAsync(new NetworkEntryEvent(entry));
             }
         }
 

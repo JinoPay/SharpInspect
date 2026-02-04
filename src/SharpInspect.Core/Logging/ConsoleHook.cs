@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 using SharpInspect.Core.Configuration;
-using SharpInspect.Core.Events;
 using SharpInspect.Core.Models;
 using SharpInspect.Core.Storage;
 
@@ -15,7 +14,6 @@ namespace SharpInspect.Core.Logging
     /// </summary>
     public class ConsoleHook : IDisposable
     {
-        private readonly EventBus _eventBus;
         private readonly InterceptingTextWriter _interceptedError;
         private readonly InterceptingTextWriter _interceptedOut;
         private readonly ISharpInspectStore _store;
@@ -29,12 +27,10 @@ namespace SharpInspect.Core.Logging
         /// </summary>
         public ConsoleHook(
             ISharpInspectStore store,
-            SharpInspectOptions options,
-            EventBus eventBus = null)
+            SharpInspectOptions options)
         {
-            _store = store ?? throw new ArgumentNullException("store");
-            _options = options ?? throw new ArgumentNullException("options");
-            _eventBus = eventBus ?? EventBus.Instance;
+            _store = store ?? throw new ArgumentNullException(nameof(store));
+            _options = options ?? throw new ArgumentNullException(nameof(options));
 
             // 원본 Writer 저장
             _originalOut = Console.Out;
@@ -52,6 +48,18 @@ namespace SharpInspect.Core.Logging
             // 콘솔 Writer 교체
             Console.SetOut(_interceptedOut);
             Console.SetError(_interceptedError);
+        }
+
+        /// <summary>
+        ///     [Obsolete] 하위 호환성을 위한 생성자. EventBus 파라미터는 무시됩니다.
+        /// </summary>
+        [Obsolete("EventBus는 더 이상 직접 전달할 필요가 없습니다. Store에서 자동으로 이벤트를 발행합니다.")]
+        public ConsoleHook(
+            ISharpInspectStore store,
+            SharpInspectOptions options,
+            Events.EventBus eventBus)
+            : this(store, options)
+        {
         }
 
         /// <summary>
@@ -99,9 +107,8 @@ namespace SharpInspect.Core.Logging
                     var lineNumber = frame.GetFileLineNumber();
 
                     if (!string.IsNullOrEmpty(fileName))
-                        return string.Format("{0}.{1}() in {2}:line {3}",
-                            typeName, method.Name, Path.GetFileName(fileName), lineNumber);
-                    return string.Format("{0}.{1}()", typeName, method.Name);
+                        return $"{typeName}.{method.Name}() in {Path.GetFileName(fileName)}:line {lineNumber}";
+                    return $"{typeName}.{method.Name}()";
                 }
 
                 return null;
@@ -131,36 +138,22 @@ namespace SharpInspect.Core.Logging
                 Source = GetSource()
             };
 
+            // Store에서 자동으로 이벤트 발행
             _store.AddConsoleEntry(entry);
-
-#if NET35
-            _eventBus.Publish(new ConsoleEntryEvent(entry));
-#else
-            _eventBus.PublishAsync(new ConsoleEntryEvent(entry));
-#endif
         }
 
         /// <summary>
         ///     쓰기를 인터셉트하여 원본 Writer와 콜백 모두에 전달하는 TextWriter.
         /// </summary>
-        private class InterceptingTextWriter : TextWriter
+        private class InterceptingTextWriter(TextWriter inner, Action<string> onWrite) : TextWriter
         {
-            private readonly Action<string> _onWrite;
-            private readonly StringBuilder _lineBuffer;
-            private readonly TextWriter _inner;
+            private readonly StringBuilder _lineBuffer = new();
 
-            public InterceptingTextWriter(TextWriter inner, Action<string> onWrite)
-            {
-                _inner = inner;
-                _onWrite = onWrite;
-                _lineBuffer = new StringBuilder();
-            }
-
-            public override Encoding Encoding => _inner.Encoding;
+            public override Encoding Encoding => inner.Encoding;
 
             public override void Write(char value)
             {
-                _inner.Write(value);
+                inner.Write(value);
 
                 if (value == '\n')
                     FlushLine();
@@ -169,7 +162,7 @@ namespace SharpInspect.Core.Logging
 
             public override void Write(string value)
             {
-                _inner.Write(value);
+                inner.Write(value);
 
                 if (value == null)
                     return;
@@ -182,14 +175,14 @@ namespace SharpInspect.Core.Logging
 
             public override void WriteLine(string value)
             {
-                _inner.WriteLine(value);
+                inner.WriteLine(value);
                 _lineBuffer.Append(value);
                 FlushLine();
             }
 
             public override void WriteLine()
             {
-                _inner.WriteLine();
+                inner.WriteLine();
                 FlushLine();
             }
 
@@ -205,7 +198,7 @@ namespace SharpInspect.Core.Logging
                 {
                     try
                     {
-                        _onWrite(_lineBuffer.ToString());
+                        onWrite(_lineBuffer.ToString());
                     }
                     catch
                     {

@@ -163,35 +163,34 @@ public static class SimpleJson
 
         var type = value.GetType();
 
-        if (value is string)
+        if (value is string s)
         {
-            SerializeString((string)value, sb);
+            SerializeString(s, sb);
         }
-        else if (value is bool)
+        else if (value is bool b)
         {
-            sb.Append((bool)value ? "true" : "false");
+            sb.Append(b ? "true" : "false");
         }
-        else if (value is int || value is long || value is short || value is byte ||
-                 value is uint || value is ulong || value is ushort || value is sbyte)
+        else if (value is int or long or short or byte or uint or ulong or ushort or sbyte)
         {
             sb.Append(value.ToString());
         }
-        else if (value is float)
+        else if (value is float f)
         {
-            sb.Append(((float)value).ToString(CultureInfo.InvariantCulture));
+            sb.Append(f.ToString(CultureInfo.InvariantCulture));
         }
-        else if (value is double)
+        else if (value is double d)
         {
-            sb.Append(((double)value).ToString(CultureInfo.InvariantCulture));
+            sb.Append(d.ToString(CultureInfo.InvariantCulture));
         }
-        else if (value is decimal)
+        else if (value is decimal value1)
         {
-            sb.Append(((decimal)value).ToString(CultureInfo.InvariantCulture));
+            sb.Append(value1.ToString(CultureInfo.InvariantCulture));
         }
-        else if (value is DateTime)
+        else if (value is DateTime time)
         {
             sb.Append('"');
-            sb.Append(((DateTime)value).ToString("o"));
+            sb.Append(time.ToString("o"));
             sb.Append('"');
         }
         else if (value is Enum)
@@ -200,13 +199,13 @@ public static class SimpleJson
             sb.Append(value.ToString());
             sb.Append('"');
         }
-        else if (value is IDictionary)
+        else if (value is IDictionary dictionary)
         {
-            SerializeDictionary((IDictionary)value, sb);
+            SerializeDictionary(dictionary, sb);
         }
-        else if (value is IEnumerable)
+        else if (value is IEnumerable enumerable)
         {
-            SerializeArray((IEnumerable)value, sb);
+            SerializeArray(enumerable, sb);
         }
         else
         {

@@ -40,8 +40,8 @@ public class HttpListenerServer : ISharpInspectServer
         SharpInspectOptions options,
         EventBus eventBus = null)
     {
-        _store = store ?? throw new ArgumentNullException("store");
-        _options = options ?? throw new ArgumentNullException("options");
+        _store = store ?? throw new ArgumentNullException(nameof(store));
+        _options = options ?? throw new ArgumentNullException(nameof(options));
         _eventBus = eventBus ?? EventBus.Instance;
         _staticFiles = new EmbeddedResourceProvider();
         _webSocketManager = new WebSocketManager(_eventBus);
@@ -72,7 +72,7 @@ public class HttpListenerServer : ISharpInspectServer
     /// <summary>
     ///     서버의 기본 URL을 가져옵니다.
     /// </summary>
-    public string BaseUrl => string.Format("http://{0}:{1}/", _options.Host, _options.Port);
+    public string BaseUrl => $"http://{_options.Host}:{_options.Port}/";
 
     /// <summary>
     ///     서버를 시작합니다.
@@ -94,9 +94,7 @@ public class HttpListenerServer : ISharpInspectServer
             catch (HttpListenerException ex)
             {
                 throw new InvalidOperationException(
-                    string.Format(
-                        "Failed to start HTTP listener on {0}. Port may be in use or require administrator privileges.",
-                        BaseUrl),
+                    $"Failed to start HTTP listener on {BaseUrl}. Port may be in use or require administrator privileges.",
                     ex);
             }
 
@@ -144,8 +142,7 @@ public class HttpListenerServer : ISharpInspectServer
         if (string.IsNullOrEmpty(value))
             return defaultValue;
 
-        int result;
-        if (int.TryParse(value, out result))
+        if (int.TryParse(value, out var result))
             return result;
 
         return defaultValue;
@@ -215,10 +212,9 @@ public class HttpListenerServer : ISharpInspectServer
 
             if (download)
             {
-                var filename = string.Format("sharpinspect-{0}.har",
-                    DateTime.UtcNow.ToString("yyyy-MM-ddTHH-mm-ss"));
+                var filename = $"sharpinspect-{DateTime.UtcNow:yyyy-MM-ddTHH-mm-ss}.har";
                 response.Headers.Add("Content-Disposition",
-                    string.Format("attachment; filename=\"{0}\"", filename));
+                    $"attachment; filename=\"{filename}\"");
             }
 
             WriteJson(response, har);

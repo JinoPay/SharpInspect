@@ -46,7 +46,7 @@ public class WebSocketManager : IDisposable
     public WebSocketManager(EventBus eventBus)
     {
         _eventBus = eventBus ?? EventBus.Instance;
-        _clients = new List<WebSocketClient>();
+        _clients = [];
 
         // 이벤트 구독
         _networkSubscription = _eventBus.Subscribe<NetworkEntryEvent>(OnNetworkEntry);

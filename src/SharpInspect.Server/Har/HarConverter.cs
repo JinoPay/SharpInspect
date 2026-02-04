@@ -21,7 +21,7 @@ namespace SharpInspect.Server.Har
         public static HarRoot Convert(NetworkEntry[] entries)
         {
             if (entries == null)
-                entries = new NetworkEntry[0];
+                entries = [];
 
             var harEntries = new HarEntry[entries.Length];
             for (var i = 0; i < entries.Length; i++)
@@ -145,7 +145,7 @@ namespace SharpInspect.Server.Har
         private static HarNameValuePair[] ConvertHeaders(Dictionary<string, string> headers)
         {
             if (headers == null || headers.Count == 0)
-                return new HarNameValuePair[0];
+                return [];
 
             var result = new List<HarNameValuePair>();
             foreach (var kvp in headers)
@@ -166,7 +166,7 @@ namespace SharpInspect.Server.Har
         private static HarNameValuePair[] ParseQueryString(string queryString)
         {
             if (string.IsNullOrEmpty(queryString))
-                return new HarNameValuePair[0];
+                return [];
 
             // 앞에 ?가 있으면 제거
             if (queryString.StartsWith("?"))
@@ -208,7 +208,7 @@ namespace SharpInspect.Server.Har
         private static HarCookie[] ParseCookies(string cookieHeader)
         {
             if (string.IsNullOrEmpty(cookieHeader))
-                return new HarCookie[0];
+                return [];
 
             var result = new List<HarCookie>();
             var cookies = cookieHeader.Split(';');

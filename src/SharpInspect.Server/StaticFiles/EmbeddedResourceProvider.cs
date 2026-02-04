@@ -42,24 +42,21 @@ public class EmbeddedResourceProvider
 
         lock (_cacheLock)
         {
-            byte[] content;
-            if (_cache.TryGetValue(path, out content)) return content;
+            if (_cache.TryGetValue(path, out var content)) return content;
         }
 
         // 캐시에 없으면 임베디드 리소스에서 로드 시도
         var resourceName = _resourcePrefix + "." + path;
-        using (var stream = _assembly.GetManifestResourceStream(resourceName))
+        using var stream = _assembly.GetManifestResourceStream(resourceName);
+        if (stream != null)
         {
-            if (stream != null)
+            var content = ReadStream(stream);
+            lock (_cacheLock)
             {
-                var content = ReadStream(stream);
-                lock (_cacheLock)
-                {
-                    _cache[path] = content;
-                }
-
-                return content;
+                _cache[path] = content;
             }
+
+            return content;
         }
 
         return null;
