@@ -205,11 +205,25 @@
         document.getElementById('perf-gc-pause').textContent =
             entry.gcPauseTimePercent >= 0 ? entry.gcPauseTimePercent.toFixed(2) + '%' : 'N/A';
 
-        // Thread pool
-        document.getElementById('perf-tp-worker').textContent =
-            entry.threadPoolWorkerThreads >= 0 ? entry.threadPoolWorkerThreads : 'N/A';
-        document.getElementById('perf-tp-io').textContent =
-            entry.threadPoolCompletionPortThreads >= 0 ? entry.threadPoolCompletionPortThreads : 'N/A';
+        // Request stats
+        document.getElementById('perf-rps').textContent =
+            entry.requestsPerSecond >= 0 ? entry.requestsPerSecond.toFixed(1) + '/s' : '-';
+        document.getElementById('perf-avg-time').textContent =
+            entry.avgResponseTimeMs >= 0 ? Math.round(entry.avgResponseTimeMs) + 'ms' : '-';
+        document.getElementById('perf-error-rate').textContent =
+            entry.errorRatePercent >= 0 ? entry.errorRatePercent.toFixed(1) + '%' : '-';
+
+        // Uptime 포맷: HH:MM:SS
+        var uptime = entry.uptimeSeconds;
+        if (uptime >= 0) {
+            var h = Math.floor(uptime / 3600);
+            var m = Math.floor((uptime % 3600) / 60);
+            var s = uptime % 60;
+            document.getElementById('perf-uptime').textContent =
+                h.toString().padStart(2, '0') + ':' + m.toString().padStart(2, '0') + ':' + s.toString().padStart(2, '0');
+        } else {
+            document.getElementById('perf-uptime').textContent = '-';
+        }
 
         // Status
         document.getElementById('perf-status').textContent =
