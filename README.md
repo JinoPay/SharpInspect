@@ -179,6 +179,7 @@ options.EnableInDevelopmentOnly = false;
 - Timing breakdown (DNS, TCP, TLS, TTFB)
 - Filtering and search
 - Clear button
+- **Export HAR**: Export network logs as HAR (HTTP Archive) format
 
 ### Console Tab
 - Log level color coding
@@ -210,6 +211,7 @@ options.EnableInDevelopmentOnly = false;
 | `/api/performance` | GET | Performance entries (paginated) |
 | `/api/performance/clear` | POST | Clear performance logs |
 | `/api/application` | GET | Application info |
+| `/api/network/export/har` | GET | Export network logs as HAR |
 | `/ws` | WebSocket | Real-time event stream |
 
 ## Project Structure
@@ -254,9 +256,9 @@ dotnet run --project samples/Sample.ConsoleApp
 - [x] Development-only mode with multiple detection strategies
 - [x] Multi-framework support (.NET Framework 3.5 ~ .NET 9.0)
 - [x] Dark mode UI
+- [x] HAR export
 
 ### Planned
-- [ ] HAR export
 - [ ] Custom panel plugin system
 - [ ] Request replay
 - [ ] Performance timeline view
