@@ -86,7 +86,7 @@
             var selected = selectedEntry && selectedEntry.id === entry.id ? 'selected' : '';
             var urlName = SharpInspectUtils.getUrlName(entry.url);
             return '<tr data-id="' + entry.id + '" class="' + selected + '">' +
-                '<td class="' + statusClass + '">' + (entry.isError ? 'Error' : entry.statusCode) + '</td>' +
+                '<td class="' + statusClass + '">' + (entry.isError && !entry.statusCode ? 'ERR' : entry.statusCode) + '</td>' +
                 '<td>' + entry.method + '</td>' +
                 '<td title="' + SharpInspectUtils.escapeHtml(entry.url) + '">' + SharpInspectUtils.escapeHtml(urlName) + '</td>' +
                 '<td>' + SharpInspectUtils.formatBytes(entry.responseContentLength) + '</td>' +
