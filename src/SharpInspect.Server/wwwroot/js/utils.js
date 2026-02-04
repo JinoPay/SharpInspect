@@ -71,6 +71,38 @@ var SharpInspectUtils = (function() {
     }
 
     /**
+     * URL에서 name(경로 부분)을 추출
+     * 크롬 개발자 도구의 Network 탭처럼 표시
+     */
+    function getUrlName(url) {
+        if (!url) return '';
+        try {
+            var urlObj = new URL(url);
+            var pathname = urlObj.pathname;
+            var search = urlObj.search;
+
+            // 경로의 마지막 부분 추출 (파일명 또는 마지막 세그먼트)
+            var name = pathname;
+            if (pathname !== '/') {
+                var segments = pathname.split('/').filter(function(s) { return s; });
+                if (segments.length > 0) {
+                    name = segments[segments.length - 1];
+                }
+            }
+
+            // 쿼리 스트링이 있으면 추가
+            if (search) {
+                name += search;
+            }
+
+            return name || '/';
+        } catch (e) {
+            // URL 파싱 실패 시 원본 반환
+            return url;
+        }
+    }
+
+    /**
      * 클립보드에 텍스트 복사
      */
     function copyToClipboard(text) {
@@ -103,6 +135,7 @@ var SharpInspectUtils = (function() {
         getLevelClass: getLevelClass,
         escapeHtml: escapeHtml,
         showToast: showToast,
-        copyToClipboard: copyToClipboard
+        copyToClipboard: copyToClipboard,
+        getUrlName: getUrlName
     };
 })();
