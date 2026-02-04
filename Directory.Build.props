@@ -12,8 +12,8 @@
         <Product>SharpInspect</Product>
         <Copyright>Copyright (c) SharpInspect Contributors. All rights reserved.</Copyright>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
-        <PackageProjectUrl>https://github.com/example/SharpInspect</PackageProjectUrl>
-        <RepositoryUrl>https://github.com/example/SharpInspect</RepositoryUrl>
+        <PackageProjectUrl>https://github.com/JinoPay/SharpInspect</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/JinoPay/SharpInspect</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
         <PackageTags>devtools;inspector;debug;network;http;profiler;diagnostics</PackageTags>
     </PropertyGroup>
