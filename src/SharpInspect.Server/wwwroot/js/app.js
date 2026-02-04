@@ -13,6 +13,7 @@
     var currentDetailTab = 'headers';
     var currentTab = 'network';
     var applicationInfo = null;
+    var isPrettyFormat = true;
 
     // Performance chart data
     var PERF_MAX_POINTS = SharpInspectCharts.PERF_MAX_POINTS;
@@ -109,47 +110,47 @@
     function renderDetail() {
         if (!selectedEntry) return;
 
-        var content = '';
         var e = selectedEntry;
+        var html = '';
+
+        // Body controls 표시/숨김
+        var bodyControls = document.getElementById('body-controls');
+        if (bodyControls) {
+            bodyControls.style.display = (currentDetailTab === 'request' || currentDetailTab === 'response') ? 'flex' : 'none';
+        }
 
         switch (currentDetailTab) {
             case 'headers':
-                content = 'General:\n' +
-                    '  Request URL: ' + e.url + '\n' +
-                    '  Request Method: ' + e.method + '\n' +
-                    '  Status Code: ' + e.statusCode + ' ' + (e.statusText || '') + '\n' +
-                    '  Protocol: ' + (e.protocol || 'HTTP/1.1') + '\n\n' +
-                    'Request Headers:\n' +
-                    Object.keys(e.requestHeaders || {}).map(function(k) {
-                        return '  ' + k + ': ' + e.requestHeaders[k];
-                    }).join('\n') + '\n\n' +
-                    'Response Headers:\n' +
-                    Object.keys(e.responseHeaders || {}).map(function(k) {
-                        return '  ' + k + ': ' + e.responseHeaders[k];
-                    }).join('\n');
+                html = SharpInspectDetailRenderer.renderHeaders(e);
+                detailContent.innerHTML = html;
+                SharpInspectDetailRenderer.initHeaderCollapse();
                 break;
+
             case 'request':
-                content = e.requestBody || '(No request body)';
+                var reqContentType = (e.requestHeaders && e.requestHeaders['Content-Type']) || '';
+                html = SharpInspectDetailRenderer.renderBody(
+                    e.requestBody || '(No request body)',
+                    reqContentType,
+                    isPrettyFormat
+                );
+                detailContent.innerHTML = html;
                 break;
+
             case 'response':
-                content = e.responseBody || '(No response body)';
-                try {
-                    var parsed = JSON.parse(content);
-                    content = JSON.stringify(parsed, null, 2);
-                } catch (ex) {}
+                var resContentType = (e.responseHeaders && e.responseHeaders['Content-Type']) || '';
+                html = SharpInspectDetailRenderer.renderBody(
+                    e.responseBody || '(No response body)',
+                    resContentType,
+                    isPrettyFormat
+                );
+                detailContent.innerHTML = html;
                 break;
+
             case 'timing':
-                content = 'Total: ' + SharpInspectUtils.formatTime(e.totalMs) + '\n' +
-                    'DNS Lookup: ' + SharpInspectUtils.formatTime(e.dnsLookupMs) + '\n' +
-                    'TCP Connect: ' + SharpInspectUtils.formatTime(e.tcpConnectMs) + '\n' +
-                    'TLS Handshake: ' + SharpInspectUtils.formatTime(e.tlsHandshakeMs) + '\n' +
-                    'Request Sent: ' + SharpInspectUtils.formatTime(e.requestSentMs) + '\n' +
-                    'Waiting (TTFB): ' + SharpInspectUtils.formatTime(e.waitingMs) + '\n' +
-                    'Content Download: ' + SharpInspectUtils.formatTime(e.contentDownloadMs);
+                html = SharpInspectDetailRenderer.renderTiming(e);
+                detailContent.innerHTML = html;
                 break;
         }
-
-        detailContent.textContent = content;
     }
 
     // ===== Console Panel =====
@@ -397,6 +398,25 @@
 
         // Copy dropdown
         initCopyDropdown();
+
+        // Pretty/Raw toggle
+        initBodyToggle();
+    }
+
+    function initBodyToggle() {
+        var bodyControls = document.getElementById('body-controls');
+        if (bodyControls) {
+            bodyControls.querySelectorAll('.body-toggle').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    bodyControls.querySelectorAll('.body-toggle').forEach(function(b) {
+                        b.classList.remove('active');
+                    });
+                    btn.classList.add('active');
+                    isPrettyFormat = btn.dataset.format === 'pretty';
+                    renderDetail();
+                });
+            });
+        }
     }
 
     function initCopyDropdown() {
