@@ -85,7 +85,7 @@
             var statusClass = SharpInspectUtils.getStatusClass(entry.statusCode, entry.isError);
             var selected = selectedEntry && selectedEntry.id === entry.id ? 'selected' : '';
             return '<tr data-id="' + entry.id + '" class="' + selected + '">' +
-                '<td class="' + statusClass + '">' + (entry.isError ? 'Error' : entry.statusCode) + '</td>' +
+                '<td class="' + statusClass + '">' + (entry.isError && !entry.statusCode ? 'ERR' : entry.statusCode) + '</td>' +
                 '<td>' + entry.method + '</td>' +
                 '<td title="' + SharpInspectUtils.escapeHtml(entry.url) + '">' + SharpInspectUtils.escapeHtml(entry.url) + '</td>' +
                 '<td>' + SharpInspectUtils.formatBytes(entry.responseContentLength) + '</td>' +
