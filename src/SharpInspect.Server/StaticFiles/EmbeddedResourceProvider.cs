@@ -472,6 +472,7 @@ public class EmbeddedResourceProvider
             <div class=""toolbar"">
                 <input type=""text"" placeholder=""Filter..."" id=""filter-input"">
                 <button id=""clear-btn"">Clear</button>
+                <button id=""export-har-btn"">Export HAR</button>
             </div>
             <div class=""list-container"">
                 <table>
@@ -746,6 +747,11 @@ public class EmbeddedResourceProvider
                         renderNetworkList();
                         detailPanel.style.display = 'none';
                     });
+            });
+
+            // Export HAR button
+            document.getElementById('export-har-btn').addEventListener('click', () => {
+                window.location.href = API_BASE + '/api/network/export/har';
             });
 
             document.getElementById('console-clear-btn').addEventListener('click', () => {

@@ -7,6 +7,7 @@ using SharpInspect.Core.Events;
 using SharpInspect.Core.Models;
 using SharpInspect.Core.Storage;
 using SharpInspect.Server.Api;
+using SharpInspect.Server.Har;
 using SharpInspect.Server.Json;
 using SharpInspect.Server.StaticFiles;
 using SharpInspect.Server.WebSocket;
@@ -150,6 +151,15 @@ public class HttpListenerServer : ISharpInspectServer
         return defaultValue;
     }
 
+    private bool GetQueryBool(HttpListenerRequest request, string name, bool defaultValue)
+    {
+        var value = request.QueryString[name];
+        if (string.IsNullOrEmpty(value))
+            return defaultValue;
+
+        return value == "1" || value.Equals("true", StringComparison.OrdinalIgnoreCase);
+    }
+
     private void HandleApiRequest(HttpListenerRequest request, HttpListenerResponse response, string path)
     {
         var method = request.HttpMethod;
@@ -185,6 +195,33 @@ public class HttpListenerServer : ISharpInspectServer
                 Limit = limit
             };
             WriteJson(response, pagedResponse);
+            return;
+        }
+
+        // GET /api/network/export/har
+        if (path == "/api/network/export/har" && method == "GET")
+        {
+            var offset = GetQueryInt(request, "offset", 0);
+            var limit = GetQueryInt(request, "limit", 0);
+            var download = GetQueryBool(request, "download", true);
+
+            NetworkEntry[] entries;
+            if (limit > 0)
+                entries = _store.GetNetworkEntries(offset, limit);
+            else
+                entries = _store.GetNetworkEntries();
+
+            var har = HarConverter.Convert(entries);
+
+            if (download)
+            {
+                var filename = string.Format("sharpinspect-{0}.har",
+                    DateTime.UtcNow.ToString("yyyy-MM-ddTHH-mm-ss"));
+                response.Headers.Add("Content-Disposition",
+                    string.Format("attachment; filename=\"{0}\"", filename));
+            }
+
+            WriteJson(response, har);
             return;
         }
 

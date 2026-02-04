@@ -179,6 +179,7 @@ options.EnableInDevelopmentOnly = false;
 - 타이밍 분석 (DNS, TCP, TLS, TTFB)
 - 필터링 및 검색
 - Clear 버튼
+- **Export HAR**: 네트워크 로그를 HAR(HTTP Archive) 형식으로 내보내기
 
 ### Console 탭
 - 로그 레벨별 색상 구분
@@ -210,6 +211,7 @@ options.EnableInDevelopmentOnly = false;
 | `/api/performance` | GET | 성능 엔트리 (페이징) |
 | `/api/performance/clear` | POST | 성능 로그 초기화 |
 | `/api/application` | GET | 애플리케이션 정보 |
+| `/api/network/export/har` | GET | 네트워크 로그를 HAR로 내보내기 |
 | `/ws` | WebSocket | 실시간 이벤트 스트림 |
 
 ## 프로젝트 구조
@@ -254,9 +256,9 @@ dotnet run --project samples/Sample.ConsoleApp
 - [x] 개발 환경 전용 모드 (다양한 감지 전략)
 - [x] 멀티 프레임워크 지원 (.NET Framework 3.5 ~ .NET 9.0)
 - [x] 다크 모드 UI
+- [x] HAR 내보내기
 
 ### 예정
-- [ ] HAR 내보내기
 - [ ] 커스텀 패널 플러그인 시스템
 - [ ] 요청 재전송 (Replay)
 - [ ] 성능 타임라인 뷰
