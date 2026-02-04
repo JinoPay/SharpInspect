@@ -253,13 +253,13 @@ dotnet run --project samples/Sample.ConsoleApp
 - [x] Chrome DevTools-style UI
 - [x] Development-only mode with multiple detection strategies
 - [x] Multi-framework support (.NET Framework 3.5 ~ .NET 9.0)
+- [x] Dark mode UI
 
 ### Planned
 - [ ] HAR export
 - [ ] Custom panel plugin system
 - [ ] Request replay
 - [ ] Performance timeline view
-- [ ] Dark mode UI
 - [ ] NuGet package release
 
 ## Contributing

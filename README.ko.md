@@ -253,13 +253,13 @@ dotnet run --project samples/Sample.ConsoleApp
 - [x] Chrome DevTools 스타일 UI
 - [x] 개발 환경 전용 모드 (다양한 감지 전략)
 - [x] 멀티 프레임워크 지원 (.NET Framework 3.5 ~ .NET 9.0)
+- [x] 다크 모드 UI
 
 ### 예정
 - [ ] HAR 내보내기
 - [ ] 커스텀 패널 플러그인 시스템
 - [ ] 요청 재전송 (Replay)
 - [ ] 성능 타임라인 뷰
-- [ ] 다크 모드 UI
 - [ ] NuGet 패키지 배포
 
 ## 기여
