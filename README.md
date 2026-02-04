@@ -5,7 +5,7 @@
 Monitor HTTP requests, console logs, performance metrics, and application info in real-time.
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![.NET](https://img.shields.io/badge/.NET-3.5%20%7C%204.6.2%20%7C%206.0%20%7C%208.0%20%7C%209.0-purple.svg)
+![.NET](https://img.shields.io/badge/.NET-4.6.2%20%7C%206.0%20%7C%208.0%20%7C%209.0-purple.svg)
 
 **English** | [한국어](README.ko.md)
 
@@ -22,7 +22,7 @@ Monitor HTTP requests, console logs, performance metrics, and application info i
 
 | Platform | Version |
 |----------|---------|
-| .NET Framework | 3.5+, 4.6.2+ |
+| .NET Framework | 4.6.2+ |
 | .NET | 6.0, 8.0, 9.0 |
 | .NET Standard | 2.0 |
 
@@ -256,7 +256,7 @@ dotnet run --project samples/Sample.ConsoleApp
 - [x] Real-time WebSocket streaming
 - [x] Chrome DevTools-style UI
 - [x] Development-only mode with multiple detection strategies
-- [x] Multi-framework support (.NET Framework 3.5 ~ .NET 9.0)
+- [x] Multi-framework support (.NET Framework 4.6.2 ~ .NET 9.0)
 - [x] Dark mode UI
 - [x] HAR export
 - [x] Request Stats (requests/sec, avg response time, error rate)

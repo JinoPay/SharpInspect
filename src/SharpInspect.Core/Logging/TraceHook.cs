@@ -10,7 +10,7 @@ namespace SharpInspect.Core.Logging
 {
     /// <summary>
     ///     Debug.WriteLine과 Trace.WriteLine을 후킹하여 트레이스 출력을 캡처합니다.
-    ///     .NET Framework 3.5+ 호환.
+    ///     .NET Framework 4.6.2+ 호환.
     /// </summary>
     public class TraceHook : TraceListener, IDisposable
     {
@@ -32,7 +32,7 @@ namespace SharpInspect.Core.Logging
 
             // 이 리스너를 트레이스 리스너 컬렉션에 추가
             Trace.Listeners.Add(this);
-#if NETFRAMEWORK || NET35
+#if NETFRAMEWORK
             Debug.Listeners.Add(this);
 #endif
         }
@@ -160,7 +160,7 @@ namespace SharpInspect.Core.Logging
                 if (disposing)
                 {
                     Trace.Listeners.Remove(this);
-#if NETFRAMEWORK || NET35
+#if NETFRAMEWORK
                     Debug.Listeners.Remove(this);
 #endif
                 }

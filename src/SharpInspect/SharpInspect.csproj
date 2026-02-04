@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>net35;net462;netstandard2.0;net6.0;net8.0;net9.0</TargetFrameworks>
+        <TargetFrameworks>net462;netstandard2.0;net6.0;net8.0;net9.0</TargetFrameworks>
         <RootNamespace>SharpInspect</RootNamespace>
         <AssemblyName>SharpInspect</AssemblyName>
         <LangVersion>14</LangVersion>
@@ -18,8 +18,7 @@
         <ProjectReference Include="..\SharpInspect.Core\SharpInspect.Core.csproj"/>
     </ItemGroup>
 
-    <!-- Server is not available for .NET 3.5 -->
-    <ItemGroup Condition="'$(TargetFramework)' != 'net35'">
+    <ItemGroup>
         <ProjectReference Include="..\SharpInspect.Server\SharpInspect.Server.csproj"/>
     </ItemGroup>
 

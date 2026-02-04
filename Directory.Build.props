@@ -18,11 +18,6 @@
         <PackageTags>devtools;inspector;debug;network;http;profiler;diagnostics</PackageTags>
     </PropertyGroup>
 
-    <!-- .NET 3.5 specific settings -->
-    <PropertyGroup Condition="'$(TargetFramework)' == 'net35'">
-        <DefineConstants>$(DefineConstants);NET35;LEGACY</DefineConstants>
-    </PropertyGroup>
-
     <!-- .NET Framework 4.x settings -->
     <PropertyGroup Condition="$(TargetFramework.StartsWith('net4'))">
         <DefineConstants>$(DefineConstants);NETFRAMEWORK</DefineConstants>

@@ -8,10 +8,8 @@ using SharpInspect.Core.Events;
 using SharpInspect.Core.Interceptors;
 using SharpInspect.Core.Logging;
 using SharpInspect.Core.Storage;
-#if !NET35
 using System.Net.Http;
 using SharpInspect.Server.WebServer;
-#endif
 
 namespace SharpInspect;
 
@@ -26,9 +24,7 @@ public static class SharpInspectDevTools
     private static ConsoleHook _consoleHook;
     private static InMemoryStore _store;
 
-#if !NET35
     private static ISharpInspectServer _server;
-#endif
     private static readonly object _lock = new();
     private static PerformanceInterceptor _performanceInterceptor;
     private static TraceHook _traceHook;
@@ -144,13 +140,11 @@ public static class SharpInspectDevTools
             // 애플리케이션 정보 캡처 초기화
             if (Options.EnableApplicationCapture) _applicationInterceptor = new ApplicationInterceptor(_store, Options);
 
-#if !NET35
             // 웹 서버 시작
             _server = new HttpListenerServer(_store, Options, EventBus);
             _server.Start();
 
             if (Options.AutoOpenBrowser) OpenBrowser(Options.GetDevToolsUrl());
-#endif
 
             _initialized = true;
 
@@ -179,10 +173,8 @@ public static class SharpInspectDevTools
             if (!_initialized)
                 return;
 
-#if !NET35
             _server?.Dispose();
             _server = null;
-#endif
 
             _consoleHook?.Dispose();
             _consoleHook = null;
@@ -280,7 +272,6 @@ public static class SharpInspectDevTools
 #endif
     }
 
-#if !NET35
     /// <summary>
     ///     SharpInspect 인터셉션이 활성화된 새 HttpClient를 생성합니다.
     ///     비활성화 상태에서는 인터셉션 없는 일반 HttpClient를 반환합니다.
@@ -340,7 +331,6 @@ public static class SharpInspectDevTools
         {
         }
     }
-#endif
 }
 
 /// <summary>

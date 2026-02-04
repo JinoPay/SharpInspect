@@ -4,9 +4,7 @@ using SharpInspect.Core.Configuration;
 using SharpInspect.Core.Events;
 using SharpInspect.Core.Models;
 using SharpInspect.Core.Storage;
-#if !NET35
 using System.Threading;
-#endif
 
 namespace SharpInspect.Core.Interceptors;
 
@@ -28,11 +26,7 @@ public class PerformanceInterceptor : IDisposable
     private int _lastNetworkCount;
     private DateTime _lastNetworkCheckTime;
 
-#if NET35
-        private System.Timers.Timer _timer;
-#else
     private Timer _timer;
-#endif
 
     /// <summary>
     ///     새 PerformanceInterceptor를 생성하고 수집을 시작합니다.
@@ -75,18 +69,11 @@ public class PerformanceInterceptor : IDisposable
         var interval = _options.PerformanceCaptureIntervalMs;
         if (interval <= 0) interval = 1000;
 
-#if NET35
-            _timer = new System.Timers.Timer(interval);
-            _timer.Elapsed += (s, e) => CaptureMetrics();
-            _timer.AutoReset = true;
-            _timer.Start();
-#else
         _timer = new Timer(
             _ => CaptureMetrics(),
             null,
             interval,
             interval);
-#endif
     }
 
     private void CaptureMetrics()
@@ -243,12 +230,7 @@ public class PerformanceInterceptor : IDisposable
         if (!_disposed)
         {
             _disposed = true;
-#if NET35
-                _timer?.Stop();
-                _timer?.Dispose();
-#else
             _timer?.Dispose();
-#endif
         }
     }
 }
