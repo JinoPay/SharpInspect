@@ -1,4 +1,3 @@
-#if !NET35
 using System;
 using System.Diagnostics;
 using System.Net.Http;
@@ -276,4 +275,3 @@ namespace SharpInspect.Core.Interceptors
         }
     }
 }
-#endif

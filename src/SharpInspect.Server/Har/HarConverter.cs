@@ -267,11 +267,7 @@ namespace SharpInspect.Server.Har
             if (string.IsNullOrEmpty(value))
                 return value;
 
-#if NET35 || LEGACY
-            return System.Web.HttpUtility.UrlDecode(value);
-#else
             return Uri.UnescapeDataString(value.Replace('+', ' '));
-#endif
         }
     }
 }

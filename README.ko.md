@@ -5,7 +5,7 @@
 HTTP 요청, 콘솔 로그, 성능 메트릭, 애플리케이션 정보를 실시간으로 모니터링합니다.
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![.NET](https://img.shields.io/badge/.NET-3.5%20%7C%204.6.2%20%7C%206.0%20%7C%208.0%20%7C%209.0-purple.svg)
+![.NET](https://img.shields.io/badge/.NET-4.6.2%20%7C%206.0%20%7C%208.0%20%7C%209.0-purple.svg)
 
 [English](README.md) | **한국어**
 
@@ -22,7 +22,7 @@ HTTP 요청, 콘솔 로그, 성능 메트릭, 애플리케이션 정보를 실�
 
 | 플랫폼 | 버전 |
 |--------|------|
-| .NET Framework | 3.5+, 4.6.2+ |
+| .NET Framework | 4.6.2+ |
 | .NET | 6.0, 8.0, 9.0 |
 | .NET Standard | 2.0 |
 
@@ -256,7 +256,7 @@ dotnet run --project samples/Sample.ConsoleApp
 - [x] 실시간 WebSocket 스트리밍
 - [x] Chrome DevTools 스타일 UI
 - [x] 개발 환경 전용 모드 (다양한 감지 전략)
-- [x] 멀티 프레임워크 지원 (.NET Framework 3.5 ~ .NET 9.0)
+- [x] 멀티 프레임워크 지원 (.NET Framework 4.6.2 ~ .NET 9.0)
 - [x] 다크 모드 UI
 - [x] HAR 내보내기
 - [x] Request Stats (초당 요청 수, 평균 응답 시간, 에러율)

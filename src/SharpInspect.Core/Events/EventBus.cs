@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
-#if !NET35
 using System.Threading;
-#endif
 
 namespace SharpInspect.Core.Events;
 
@@ -15,7 +13,7 @@ public delegate void EventHandler<T>(T evt) where T : ISharpInspectEvent;
 
 /// <summary>
 ///     SharpInspect 이벤트를 위한 간단한 인프로세스 이벤트 버스.
-///     스레드 안전하며 .NET 3.5+ 호환.
+///     스레드 안전하며 멀티 프레임워크 호환.
 /// </summary>
 public class EventBus
 {
@@ -132,7 +130,6 @@ public class EventBus
             }
     }
 
-#if !NET35
     /// <summary>
     ///     스레드 풀에서 이벤트를 비동기로 발행합니다.
     /// </summary>
@@ -145,7 +142,6 @@ public class EventBus
 
         ThreadPool.QueueUserWorkItem(_ => Publish(evt));
     }
-#endif
 
     /// <summary>
     ///     T 타입의 이벤트에서 핸들러 구독을 취소합니다.

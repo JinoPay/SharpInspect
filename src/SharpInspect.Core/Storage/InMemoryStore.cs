@@ -237,15 +237,11 @@ public class InMemoryStore : ISharpInspectStore
     }
 
     /// <summary>
-    ///     이벤트를 EventBus에 발행합니다. .NET 3.5에서는 동기, 그 외에는 비동기로 발행합니다.
+    ///     이벤트를 EventBus에 비동기로 발행합니다.
     /// </summary>
     private void PublishEvent<T>(T evt) where T : ISharpInspectEvent
     {
-#if NET35
-            _eventBus.Publish(evt);
-#else
         _eventBus.PublishAsync(evt);
-#endif
     }
 
     private void RebuildNetworkIndex()

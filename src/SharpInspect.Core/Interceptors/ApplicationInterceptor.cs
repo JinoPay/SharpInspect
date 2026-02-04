@@ -7,9 +7,7 @@ using System.Runtime;
 using SharpInspect.Core.Configuration;
 using SharpInspect.Core.Models;
 using SharpInspect.Core.Storage;
-#if !NET35
 using System.Threading;
-#endif
 
 namespace SharpInspect.Core.Interceptors;
 
@@ -23,11 +21,7 @@ public class ApplicationInterceptor : IDisposable
     private readonly SharpInspectOptions _options;
     private bool _disposed;
 
-#if NET35
-        private System.Timers.Timer _timer;
-#else
     private Timer _timer;
-#endif
 
     /// <summary>
     ///     새 ApplicationInterceptor를 생성하고 초기 스냅샷을 캡처합니다.
@@ -95,10 +89,6 @@ public class ApplicationInterceptor : IDisposable
                 info.OsDescription = System.Runtime.InteropServices.RuntimeInformation.OSDescription;
                 info.ProcessArchitecture =
  System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture.ToString();
-#elif NET35
-                info.FrameworkDescription = ".NET Framework 3.5";
-                info.OsDescription = Environment.OSVersion.ToString();
-                info.ProcessArchitecture = IntPtr.Size == 8 ? "X64" : "X86";
 #elif NETFRAMEWORK
             info.FrameworkDescription = ".NET Framework " + Environment.Version;
             info.OsDescription = Environment.OSVersion.ToString();
@@ -123,12 +113,7 @@ public class ApplicationInterceptor : IDisposable
 
             info.MachineName = Environment.MachineName;
 
-#if NET35
-                // NET35에서는 Environment.UserName이 없으므로 환경 변수로 폴백
-                info.UserName = Environment.GetEnvironmentVariable("USERNAME");
-#else
             info.UserName = Environment.UserName;
-#endif
 
             info.WorkingDirectory = Environment.CurrentDirectory;
             info.ProcessorCount = Environment.ProcessorCount;
@@ -213,22 +198,8 @@ public class ApplicationInterceptor : IDisposable
                         ? asm.GetName().Version.ToString()
                         : null
                 };
-#if !NET35
                 asmInfo.IsDynamic = asm.IsDynamic;
-#endif
 
-#if NET35
-                    // NET35에서는 IsDynamic이 없으므로 Location으로 판별
-                    try
-                    {
-                        asmInfo.Location = asm.Location;
-                        asmInfo.IsGAC = asm.GlobalAssemblyCache;
-                    }
-                    catch
-                    {
-                        asmInfo.IsDynamic = true;
-                    }
-#else
                 if (!asm.IsDynamic)
                 {
                     try
@@ -244,7 +215,6 @@ public class ApplicationInterceptor : IDisposable
                     asmInfo.IsGAC = asm.GlobalAssemblyCache;
 #endif
                 }
-#endif
 
                 result.Add(asmInfo);
             }
@@ -262,18 +232,11 @@ public class ApplicationInterceptor : IDisposable
         var interval = _options.ApplicationRefreshIntervalMs;
         if (interval <= 0) interval = 30000;
 
-#if NET35
-            _timer = new System.Timers.Timer(interval);
-            _timer.Elapsed += (s, e) => CaptureSnapshot();
-            _timer.AutoReset = true;
-            _timer.Start();
-#else
         _timer = new Timer(
             _ => CaptureSnapshot(),
             null,
             interval,
             interval);
-#endif
     }
 
     /// <summary>
@@ -284,12 +247,7 @@ public class ApplicationInterceptor : IDisposable
         if (!_disposed)
         {
             _disposed = true;
-#if NET35
-                _timer?.Stop();
-                _timer?.Dispose();
-#else
             _timer?.Dispose();
-#endif
         }
     }
 }
