@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SharpInspect DevTools</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="js/theme.js"></script>
+</head>
+<body>
+    <div id="app">
+        <div class="header">
+            <h1>SharpInspect</h1>
+            <div class="tabs">
+                <button class="tab active" data-tab="network">Network</button>
+                <button class="tab" data-tab="console">Console</button>
+                <button class="tab" data-tab="performance">Performance</button>
+                <button class="tab" data-tab="application">Application</button>
+            </div>
+            <div style="flex: 1"></div>
+            <button id="theme-toggle" class="theme-toggle" title="Toggle theme"></button>
+            <div class="ws-indicator" id="ws-status" title="WebSocket disconnected"></div>
+        </div>
+        <div class="content" id="network-panel">
+            <div class="toolbar">
+                <input type="text" placeholder="Filter..." id="filter-input">
+                <button id="clear-btn">Clear</button>
+                <button id="export-har-btn">Export HAR</button>
+            </div>
+            <div class="list-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 60px">Status</th>
+                            <th style="width: 60px">Method</th>
+                            <th>URL</th>
+                            <th style="width: 80px">Size</th>
+                            <th style="width: 80px">Time</th>
+                        </tr>
+                    </thead>
+                    <tbody id="network-list">
+                    </tbody>
+                </table>
+            </div>
+            <div class="detail-panel" id="detail-panel" style="display: none">
+                <div class="detail-tabs">
+                    <button class="detail-tab active" data-detail="headers">Headers</button>
+                    <button class="detail-tab" data-detail="request">Request</button>
+                    <button class="detail-tab" data-detail="response">Response</button>
+                    <button class="detail-tab" data-detail="timing">Timing</button>
+                    <div class="copy-dropdown">
+                        <button class="copy-btn" id="copy-btn">Copy &#9660;</button>
+                        <div class="copy-menu" id="copy-menu">
+                            <button class="copy-menu-item" data-format="curl-cmd">Copy as cURL (cmd)</button>
+                            <button class="copy-menu-item" data-format="curl-bash">Copy as cURL (bash)</button>
+                            <button class="copy-menu-item" data-format="powershell">Copy as PowerShell</button>
+                            <button class="copy-menu-item" data-format="fetch">Copy as fetch</button>
+                            <button class="copy-menu-item" data-format="csharp">Copy as C# HttpClient</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="detail-content" id="detail-content"></div>
+            </div>
+        </div>
+        <div class="content" id="console-panel" style="display: none">
+            <div class="toolbar">
+                <input type="text" placeholder="Filter..." id="console-filter-input">
+                <button id="console-clear-btn">Clear</button>
+            </div>
+            <div class="list-container" id="console-list">
+            </div>
+        </div>
+        <div class="content" id="performance-panel" style="display: none">
+            <div class="toolbar">
+                <button id="perf-clear-btn">Clear</button>
+                <span id="perf-status" style="font-size: 12px; color: var(--text-secondary); margin-left: 8px"></span>
+            </div>
+            <div class="list-container" style="padding: 12px; overflow: auto">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px">
+                    <div class="perf-card">
+                        <div class="perf-card-title">CPU Usage</div>
+                        <div class="perf-card-value" id="perf-cpu">-</div>
+                        <canvas id="chart-cpu" height="120"></canvas>
+                    </div>
+                    <div class="perf-card">
+                        <div class="perf-card-title">Memory (Working Set)</div>
+                        <div class="perf-card-value" id="perf-memory">-</div>
+                        <canvas id="chart-memory" height="120"></canvas>
+                    </div>
+                    <div class="perf-card">
+                        <div class="perf-card-title">GC Heap (Managed)</div>
+                        <div class="perf-card-value" id="perf-gc-heap">-</div>
+                        <canvas id="chart-gc-heap" height="120"></canvas>
+                    </div>
+                    <div class="perf-card">
+                        <div class="perf-card-title">Thread Count</div>
+                        <div class="perf-card-value" id="perf-threads">-</div>
+                        <canvas id="chart-threads" height="120"></canvas>
+                    </div>
+                </div>
+                <div style="margin-top: 12px">
+                    <div class="perf-card">
+                        <div class="perf-card-title">GC Collections</div>
+                        <div style="display: flex; gap: 24px; margin-top: 8px">
+                            <div style="text-align: center">
+                                <div style="font-size: 20px; color: var(--status-2xx)" id="perf-gen0">-</div>
+                                <div style="font-size: 11px; color: var(--text-secondary)">Gen 0</div>
+                            </div>
+                            <div style="text-align: center">
+                                <div style="font-size: 20px; color: var(--status-4xx)" id="perf-gen1">-</div>
+                                <div style="font-size: 11px; color: var(--text-secondary)">Gen 1</div>
+                            </div>
+                            <div style="text-align: center">
+                                <div style="font-size: 20px; color: var(--status-4xx)" id="perf-gen2">-</div>
+                                <div style="font-size: 11px; color: var(--text-secondary)">Gen 2</div>
+                            </div>
+                            <div style="text-align: center">
+                                <div style="font-size: 20px; color: var(--status-3xx)" id="perf-gc-pause">-</div>
+                                <div style="font-size: 11px; color: var(--text-secondary)">GC Pause %</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div style="margin-top: 12px">
+                    <div class="perf-card">
+                        <div class="perf-card-title">Thread Pool</div>
+                        <div style="display: flex; gap: 24px; margin-top: 8px">
+                            <div style="text-align: center">
+                                <div style="font-size: 20px; color: var(--status-2xx)" id="perf-tp-worker">-</div>
+                                <div style="font-size: 11px; color: var(--text-secondary)">Worker Threads</div>
+                            </div>
+                            <div style="text-align: center">
+                                <div style="font-size: 20px; color: var(--status-3xx)" id="perf-tp-io">-</div>
+                                <div style="font-size: 11px; color: var(--text-secondary)">IO Threads</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="content" id="application-panel" style="display: none">
+            <div class="toolbar">
+                <button id="app-refresh-btn">Refresh</button>
+                <span id="app-status" style="font-size: 12px; color: var(--text-secondary); margin-left: 8px"></span>
+            </div>
+            <div class="list-container" style="padding: 12px; overflow: auto">
+                <div class="perf-card" style="margin-bottom: 12px">
+                    <div class="perf-card-title">App Info</div>
+                    <div id="app-info-content" class="detail-content" style="padding: 8px 0"></div>
+                </div>
+                <div class="perf-card" style="margin-bottom: 12px">
+                    <div class="perf-card-title" style="display: flex; align-items: center; gap: 8px">
+                        Environment Variables (<span id="env-count">0</span>)
+                        <input type="text" placeholder="Filter..." id="env-filter"
+                            style="background: var(--bg-input); border: 1px solid var(--border-primary); padding: 2px 6px;
+                            color: var(--text-primary); border-radius: 4px; font-size: 11px; width: 150px">
+                    </div>
+                    <div id="env-vars-content" style="max-height: 300px; overflow: auto; margin-top: 8px"></div>
+                </div>
+                <div class="perf-card">
+                    <div class="perf-card-title" style="display: flex; align-items: center; gap: 8px">
+                        Loaded Assemblies (<span id="assembly-count">0</span>)
+                        <input type="text" placeholder="Filter..." id="asm-filter"
+                            style="background: var(--bg-input); border: 1px solid var(--border-primary); padding: 2px 6px;
+                            color: var(--text-primary); border-radius: 4px; font-size: 11px; width: 150px">
+                    </div>
+                    <div id="assemblies-content" style="max-height: 400px; overflow: auto; margin-top: 8px">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Version</th>
+                                    <th>Location</th>
+                                    <th style="width: 60px">Dynamic</th>
+                                </tr>
+                            </thead>
+                            <tbody id="assembly-list"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="copy-toast" id="copy-toast">Copied!</div>
+
+    <script src="js/utils.js"></script>
+    <script src="js/charts.js"></script>
+    <script src="js/copy-as.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
