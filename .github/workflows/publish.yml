@@ -44,10 +44,14 @@ jobs:
           dotnet pack src/SharpInspect/SharpInspect.csproj --no-build --configuration Release -p:PackageVersion=${{ steps.version.outputs.VERSION }} --output ./nupkgs
 
       - name: Push to NuGet
-        run: dotnet nuget push ./nupkgs/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+        run: |
+          Get-ChildItem -Path ./nupkgs -Filter *.nupkg | ForEach-Object {
+            dotnet nuget push $_.FullName --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+          }
+        shell: pwsh
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: nupkgs
-          path: ./nupkgs/*.nupkg
+          path: nupkgs/
