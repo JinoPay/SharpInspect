@@ -16,8 +16,7 @@ public class PerformanceEntry
         Timestamp = DateTime.UtcNow;
         GcPauseTimePercent = -1;
         ManagedHeapSizeBytes = -1;
-        ThreadPoolWorkerThreads = -1;
-        ThreadPoolCompletionPortThreads = -1;
+        AvgResponseTimeMs = -1;
     }
 
     /// <summary>
@@ -56,14 +55,24 @@ public class PerformanceEntry
     public int ThreadCount { get; set; }
 
     /// <summary>
-    ///     스레드 풀의 사용 가능한 완료 포트 스레드 수. 사용 불가 시 -1.
+    ///     초당 HTTP 요청 수.
     /// </summary>
-    public int ThreadPoolCompletionPortThreads { get; set; }
+    public double RequestsPerSecond { get; set; }
 
     /// <summary>
-    ///     스레드 풀의 사용 가능한 작업자 스레드 수. 사용 불가 시 -1.
+    ///     최근 요청들의 평균 응답 시간(밀리초). 요청 없으면 -1.
     /// </summary>
-    public int ThreadPoolWorkerThreads { get; set; }
+    public double AvgResponseTimeMs { get; set; }
+
+    /// <summary>
+    ///     최근 요청 중 에러(4xx/5xx) 비율 (0-100).
+    /// </summary>
+    public double ErrorRatePercent { get; set; }
+
+    /// <summary>
+    ///     앱 시작 후 경과 시간(초).
+    /// </summary>
+    public long UptimeSeconds { get; set; }
 
     /// <summary>
     ///     관리 힙 크기(바이트). .NET 6+ 전용; 사용 불가 시 -1.

@@ -24,6 +24,10 @@ public class PerformanceInterceptor : IDisposable
     private DateTime _lastCpuCheckTime;
     private TimeSpan _lastCpuTime;
 
+    // 네트워크 통계 계산 상태
+    private int _lastNetworkCount;
+    private DateTime _lastNetworkCheckTime;
+
 #if NET35
         private System.Timers.Timer _timer;
 #else
@@ -48,6 +52,8 @@ public class PerformanceInterceptor : IDisposable
         _currentProcess = Process.GetCurrentProcess();
         _lastCpuCheckTime = DateTime.UtcNow;
         _lastCpuTime = _currentProcess.TotalProcessorTime;
+        _lastNetworkCheckTime = DateTime.UtcNow;
+        _lastNetworkCount = 0;
 
         StartTimer();
     }
@@ -108,11 +114,8 @@ public class PerformanceInterceptor : IDisposable
                 ThreadCount = _currentProcess.Threads.Count
             };
 
-#if !NET35
-            ThreadPool.GetAvailableThreads(out var workerThreads, out var completionPortThreads);
-            entry.ThreadPoolWorkerThreads = workerThreads;
-            entry.ThreadPoolCompletionPortThreads = completionPortThreads;
-#endif
+            // 네트워크 요청 통계 계산
+            CalculateNetworkStats(entry);
 
             // 최신 .NET 전용 메트릭
 #if MODERN_DOTNET
@@ -177,6 +180,58 @@ public class PerformanceInterceptor : IDisposable
         catch
         {
             return 0;
+        }
+    }
+
+    private void CalculateNetworkStats(PerformanceEntry entry)
+    {
+        try
+        {
+            var now = DateTime.UtcNow;
+            var currentCount = _store.NetworkEntryCount;
+            var elapsedSeconds = (now - _lastNetworkCheckTime).TotalSeconds;
+
+            // 초당 요청 수 계산
+            if (elapsedSeconds > 0)
+            {
+                var newRequests = currentCount - _lastNetworkCount;
+                entry.RequestsPerSecond = Math.Round(newRequests / elapsedSeconds, 1);
+            }
+
+            _lastNetworkCount = currentCount;
+            _lastNetworkCheckTime = now;
+
+            // Uptime 계산
+            var uptime = now - _currentProcess.StartTime.ToUniversalTime();
+            entry.UptimeSeconds = (long)uptime.TotalSeconds;
+
+            // 최근 요청들의 평균 응답 시간 및 에러율 계산
+            var recentEntries = _store.GetNetworkEntries(0, 100);
+            if (recentEntries != null && recentEntries.Length > 0)
+            {
+                double totalTime = 0;
+                int errorCount = 0;
+                int validCount = 0;
+
+                foreach (var e in recentEntries)
+                {
+                    if (e.TotalMs > 0)
+                    {
+                        totalTime += e.TotalMs;
+                        validCount++;
+                    }
+
+                    if (e.IsError || e.StatusCode >= 400)
+                        errorCount++;
+                }
+
+                entry.AvgResponseTimeMs = validCount > 0 ? Math.Round(totalTime / validCount, 1) : -1;
+                entry.ErrorRatePercent = Math.Round((double)errorCount / recentEntries.Length * 100, 1);
+            }
+        }
+        catch
+        {
+            // 네트워크 통계 계산 실패 시 기본값 유지
         }
     }
 
