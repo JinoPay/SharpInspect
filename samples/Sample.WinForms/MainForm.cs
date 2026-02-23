@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Net.Http;
 using System.Text;
@@ -12,6 +13,7 @@ public class MainForm : Form
     private Button _logButton;
     private Button _openDevToolsButton;
     private Button _requestButton;
+    private Button _formRequestButton;
     private readonly HttpClient _httpClient;
     private TextBox _logTextBox;
 
@@ -73,7 +75,15 @@ public class MainForm : Form
         };
         _openDevToolsButton.Click += OpenDevToolsButton_Click;
 
+        _formRequestButton = new Button
+        {
+            Text = "Form Request",
+            Width = 100
+        };
+        _formRequestButton.Click += FormRequestButton_Click;
+
         panel.Controls.Add(_requestButton);
+        panel.Controls.Add(_formRequestButton);
         panel.Controls.Add(_logButton);
         panel.Controls.Add(_openDevToolsButton);
 
@@ -115,6 +125,48 @@ public class MainForm : Form
     {
         SharpInspectDevTools.OpenDevTools();
         AppendLog("Opening DevTools in browser...");
+    }
+
+    private async void FormRequestButton_Click(object sender, EventArgs e)
+    {
+        _formRequestButton.Enabled = false;
+
+        try
+        {
+            AppendLog("Making form-encoded requests...");
+
+            // application/x-www-form-urlencoded 요청
+            AppendLog("  POST (form-urlencoded) https://httpbin.org/post");
+            var formContent = new FormUrlEncodedContent(new[]
+            {
+                new KeyValuePair<string, string>("title", "test"),
+                new KeyValuePair<string, string>("body", "WinForms form data"),
+                new KeyValuePair<string, string>("userId", "1"),
+                new KeyValuePair<string, string>("tags[]", "csharp"),
+                new KeyValuePair<string, string>("tags[]", "winforms")
+            });
+            var response1 = await _httpClient.PostAsync("https://httpbin.org/post", formContent);
+            AppendLog($"  Response: {response1.StatusCode}");
+
+            // multipart/form-data 요청
+            AppendLog("  POST (multipart/form-data) https://httpbin.org/post");
+            var multipartContent = new MultipartFormDataContent();
+            multipartContent.Add(new StringContent("John Doe"), "username");
+            multipartContent.Add(new StringContent("john@example.com"), "email");
+            multipartContent.Add(new ByteArrayContent(Encoding.UTF8.GetBytes("sample file content")), "attachment", "sample.txt");
+            var response2 = await _httpClient.PostAsync("https://httpbin.org/post", multipartContent);
+            AppendLog($"  Response: {response2.StatusCode}");
+
+            AppendLog("Form requests completed! Check DevTools Network tab.");
+        }
+        catch (Exception ex)
+        {
+            AppendLog($"Error: {ex.Message}");
+        }
+        finally
+        {
+            _formRequestButton.Enabled = true;
+        }
     }
 
     private async void RequestButton_Click(object sender, EventArgs e)

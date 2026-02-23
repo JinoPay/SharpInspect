@@ -174,6 +174,7 @@ options.EnableInDevelopmentOnly = false;
 - 전체 경로 표시 (pathname + querystring)
 - 상태 코드별 색상 구분 (2xx 초록, 4xx 주황, 5xx 빨강)
 - 헤더 및 바디 상세 보기 (JSON 포맷팅)
+- **Form Data 파싱**: `application/x-www-form-urlencoded` 및 `multipart/form-data`를 key-value 테이블로 표시
 - 타이밍 분석 (DNS, TCP, TLS, TTFB)
 - 필터링 및 검색
 - Clear 버튼
@@ -226,7 +227,9 @@ SharpInspect/
 │   └── SharpInspect/            # 공개 API, DI 확장
 └── samples/
     ├── Sample.ConsoleApp/       # .NET 8 콘솔 예제
-    └── Sample.WinForms/         # .NET Framework 4.6.2 WinForms 예제
+    ├── Sample.WinForms/         # .NET Framework 4.6.2 WinForms 예제
+    ├── Sample.Wpf/              # .NET 8 WPF 예제
+    └── Sample.Avalonia/         # .NET 8 Avalonia 크로스 플랫폼 예제
 ```
 
 ## 빌드
@@ -263,6 +266,7 @@ dotnet run --project samples/Sample.ConsoleApp
 - [x] 프론트엔드 모듈화 (별도 HTML/CSS/JS 파일)
 - [x] 네트워크 패널 UX 개선 (전체 경로 표시, 에러 상태)
 - [x] NuGet 패키지 배포
+- [x] Form Data 표시 (form-urlencoded & multipart를 key-value 테이블로 파싱)
 
 ### 예정
 - [ ] 커스텀 패널 플러그인 시스템

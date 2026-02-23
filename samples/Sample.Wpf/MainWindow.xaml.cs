@@ -41,6 +41,51 @@ public partial class MainWindow : Window
     }
 
     /// <summary>
+    /// Form 요청 버튼 클릭 핸들러
+    /// </summary>
+    private async void FormRequestButton_Click(object sender, RoutedEventArgs e)
+    {
+        FormRequestButton.IsEnabled = false;
+
+        try
+        {
+            AppendLog("Making form-encoded requests...");
+
+            // application/x-www-form-urlencoded 요청
+            AppendLog("  POST (form-urlencoded) https://httpbin.org/post");
+            var formContent = new FormUrlEncodedContent(new[]
+            {
+                new KeyValuePair<string, string>("title", "test"),
+                new KeyValuePair<string, string>("body", "WPF form data"),
+                new KeyValuePair<string, string>("userId", "1"),
+                new KeyValuePair<string, string>("tags[]", "csharp"),
+                new KeyValuePair<string, string>("tags[]", "wpf")
+            });
+            var response1 = await _httpClient.PostAsync("https://httpbin.org/post", formContent);
+            AppendLog($"  Response: {response1.StatusCode}");
+
+            // multipart/form-data 요청
+            AppendLog("  POST (multipart/form-data) https://httpbin.org/post");
+            var multipartContent = new MultipartFormDataContent();
+            multipartContent.Add(new StringContent("John Doe"), "username");
+            multipartContent.Add(new StringContent("john@example.com"), "email");
+            multipartContent.Add(new ByteArrayContent(Encoding.UTF8.GetBytes("sample file content")), "attachment", "sample.txt");
+            var response2 = await _httpClient.PostAsync("https://httpbin.org/post", multipartContent);
+            AppendLog($"  Response: {response2.StatusCode}");
+
+            AppendLog("Form requests completed! Check DevTools Network tab.");
+        }
+        catch (Exception ex)
+        {
+            AppendLog($"Error: {ex.Message}");
+        }
+        finally
+        {
+            FormRequestButton.IsEnabled = true;
+        }
+    }
+
+    /// <summary>
     /// HTTP 요청 버튼 클릭 핸들러
     /// </summary>
     private async void RequestButton_Click(object sender, RoutedEventArgs e)

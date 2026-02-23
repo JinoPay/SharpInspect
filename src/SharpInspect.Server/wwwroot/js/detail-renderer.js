@@ -59,6 +59,77 @@ var SharpInspectDetailRenderer = (function() {
         return html;
     }
 
+    // ===== Form Data 파싱 =====
+    function decodeURIComponentSafe(str) {
+        try {
+            return decodeURIComponent(str.replace(/\+/g, ' '));
+        } catch (e) {
+            return str;
+        }
+    }
+
+    function parseFormUrlEncoded(content) {
+        if (!content) return [];
+        var pairs = [];
+        var parts = content.split('&');
+        for (var i = 0; i < parts.length; i++) {
+            var part = parts[i];
+            if (!part) continue;
+            var eqIndex = part.indexOf('=');
+            if (eqIndex === -1) {
+                pairs.push([decodeURIComponentSafe(part), '']);
+            } else {
+                pairs.push([
+                    decodeURIComponentSafe(part.substring(0, eqIndex)),
+                    decodeURIComponentSafe(part.substring(eqIndex + 1))
+                ]);
+            }
+        }
+        return pairs;
+    }
+
+    function parseMultipartFormData(content, contentType) {
+        if (!content || !contentType) return [];
+
+        var boundaryMatch = contentType.match(/boundary="?([^"\s;]+)"?/i);
+        if (!boundaryMatch) return [];
+        var boundary = '--' + boundaryMatch[1];
+
+        var pairs = [];
+        var parts = content.split(boundary);
+
+        for (var i = 1; i < parts.length; i++) {
+            var part = parts[i];
+            if (part.trim() === '--' || part.trim() === '') continue;
+
+            var nameMatch = part.match(/Content-Disposition:[^\n]*name="([^"]*)"(?:;\s*filename="([^"]*)")?/i);
+            if (!nameMatch) continue;
+
+            var key = nameMatch[1];
+            var filename = nameMatch[2];
+
+            var headerBodySplit = part.indexOf('\r\n\r\n');
+            if (headerBodySplit === -1) headerBodySplit = part.indexOf('\n\n');
+            if (headerBodySplit === -1) continue;
+
+            var separatorLen = part.indexOf('\r\n\r\n') !== -1 ? 4 : 2;
+            var body = part.substring(headerBodySplit + separatorLen).trim();
+
+            if (filename) {
+                pairs.push([key, filename + ' (binary)']);
+            } else {
+                pairs.push([key, body]);
+            }
+        }
+        return pairs;
+    }
+
+    function renderFormData(pairs, title) {
+        return '<div class="headers-section">' +
+            renderHeaderGroup(title || 'Form Data', pairs, pairs.length) +
+            '</div>';
+    }
+
     // ===== Body (Request/Response) 렌더링 =====
     function renderBody(content, contentType, isPretty) {
         if (!content || content === '(No request body)' || content === '(No response body)') {
@@ -72,6 +143,16 @@ var SharpInspectDetailRenderer = (function() {
                 return '<pre class="body-content body-highlighted">' + highlightJson(content) + '</pre>';
             } else if (type === 'xml' || type === 'html') {
                 return '<pre class="body-content body-highlighted">' + highlightXml(content) + '</pre>';
+            } else if (type === 'form-urlencoded') {
+                var urlPairs = parseFormUrlEncoded(content);
+                if (urlPairs.length > 0) {
+                    return renderFormData(urlPairs, 'Form Data');
+                }
+            } else if (type === 'form-data') {
+                var multiPairs = parseMultipartFormData(content, contentType);
+                if (multiPairs.length > 0) {
+                    return renderFormData(multiPairs, 'Form Data');
+                }
             }
         }
 
@@ -84,6 +165,8 @@ var SharpInspectDetailRenderer = (function() {
             if (ct.indexOf('application/json') !== -1 || ct.indexOf('+json') !== -1) return 'json';
             if (ct.indexOf('application/xml') !== -1 || ct.indexOf('text/xml') !== -1 || ct.indexOf('+xml') !== -1) return 'xml';
             if (ct.indexOf('text/html') !== -1) return 'html';
+            if (ct.indexOf('application/x-www-form-urlencoded') !== -1) return 'form-urlencoded';
+            if (ct.indexOf('multipart/form-data') !== -1) return 'form-data';
         }
         // 내용 기반 감지
         if (content) {

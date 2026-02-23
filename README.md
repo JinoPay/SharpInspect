@@ -174,6 +174,7 @@ options.EnableInDevelopmentOnly = false;
 - Full path display (pathname + querystring)
 - Status code color coding (2xx green, 4xx orange, 5xx red)
 - Headers and body inspection (JSON formatted)
+- **Form Data parsing**: `application/x-www-form-urlencoded` and `multipart/form-data` displayed as key-value tables
 - Timing breakdown (DNS, TCP, TLS, TTFB)
 - Filtering and search
 - Clear button
@@ -226,7 +227,9 @@ SharpInspect/
 │   └── SharpInspect/            # Public API, DI extensions
 └── samples/
     ├── Sample.ConsoleApp/       # .NET 8 console example
-    └── Sample.WinForms/         # .NET Framework 4.6.2 WinForms example
+    ├── Sample.WinForms/         # .NET Framework 4.6.2 WinForms example
+    ├── Sample.Wpf/              # .NET 8 WPF example
+    └── Sample.Avalonia/         # .NET 8 Avalonia cross-platform example
 ```
 
 ## Build
@@ -263,6 +266,7 @@ dotnet run --project samples/Sample.ConsoleApp
 - [x] Frontend modularization (separate HTML/CSS/JS files)
 - [x] Network panel UX improvements (full path display, error status)
 - [x] NuGet package release
+- [x] Form Data display (form-urlencoded & multipart parsed as key-value tables)
 
 ### Planned
 - [ ] Custom panel plugin system

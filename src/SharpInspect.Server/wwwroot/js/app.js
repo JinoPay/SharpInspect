@@ -152,13 +152,14 @@
                 break;
 
             case 'request':
-                var reqContentType = (e.requestHeaders && e.requestHeaders['Content-Type']) || '';
+                var reqContentType = (e.requestHeaders && e.requestHeaders['Content-Type']) || e.requestContentType || '';
                 html = SharpInspectDetailRenderer.renderBody(
                     e.requestBody || '(No request body)',
                     reqContentType,
                     isPrettyFormat
                 );
                 detailContent.innerHTML = html;
+                SharpInspectDetailRenderer.initHeaderCollapse();
                 break;
 
             case 'response':
