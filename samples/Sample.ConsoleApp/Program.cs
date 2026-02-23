@@ -22,6 +22,7 @@ internal class Program
         Console.WriteLine($"Open your browser at: {SharpInspectDevTools.DevToolsUrl}");
         Console.WriteLine();
         Console.WriteLine("Press 'r' to make HTTP requests");
+        Console.WriteLine("Press 'f' to make form-encoded requests");
         Console.WriteLine("Press 'l' to write log messages");
         Console.WriteLine("Press 'o' to open DevTools in browser");
         Console.WriteLine("Press 'q' to quit");
@@ -43,6 +44,10 @@ internal class Program
                     await MakeHttpRequests(httpClient);
                     break;
 
+                case 'f':
+                    await MakeFormRequests(httpClient);
+                    break;
+
                 case 'l':
                     WriteLogMessages();
                     break;
@@ -57,7 +62,7 @@ internal class Program
                     break;
 
                 default:
-                    Console.WriteLine("Unknown command. Use 'r', 'l', 'o', or 'q'.");
+                    Console.WriteLine("Unknown command. Use 'r', 'f', 'l', 'o', or 'q'.");
                     break;
             }
         }
@@ -102,6 +107,42 @@ internal class Program
             }
 
             Console.WriteLine("  All requests completed! Check the DevTools Network tab.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"  Error: {ex.Message}");
+        }
+    }
+
+    private static async Task MakeFormRequests(HttpClient httpClient)
+    {
+        Console.WriteLine("Making form-encoded requests...");
+
+        try
+        {
+            // application/x-www-form-urlencoded 요청
+            Console.WriteLine("  POST (form-urlencoded) https://httpbin.org/post");
+            var formContent = new FormUrlEncodedContent(new[]
+            {
+                new KeyValuePair<string, string>("title", "foo"),
+                new KeyValuePair<string, string>("body", "bar baz"),
+                new KeyValuePair<string, string>("userId", "1"),
+                new KeyValuePair<string, string>("tags[]", "csharp"),
+                new KeyValuePair<string, string>("tags[]", "dotnet")
+            });
+            var response1 = await httpClient.PostAsync("https://httpbin.org/post", formContent);
+            Console.WriteLine($"  Response: {response1.StatusCode}");
+
+            // multipart/form-data 요청
+            Console.WriteLine("  POST (multipart/form-data) https://httpbin.org/post");
+            var multipartContent = new MultipartFormDataContent();
+            multipartContent.Add(new StringContent("John Doe"), "username");
+            multipartContent.Add(new StringContent("john@example.com"), "email");
+            multipartContent.Add(new ByteArrayContent(Encoding.UTF8.GetBytes("sample file content")), "attachment", "sample.txt");
+            var response2 = await httpClient.PostAsync("https://httpbin.org/post", multipartContent);
+            Console.WriteLine($"  Response: {response2.StatusCode}");
+
+            Console.WriteLine("  Form requests completed! Check the DevTools Network tab.");
         }
         catch (Exception ex)
         {

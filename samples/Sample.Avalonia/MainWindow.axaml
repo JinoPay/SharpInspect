@@ -29,6 +29,11 @@
                     HorizontalAlignment="Stretch"
                     HorizontalContentAlignment="Center"
                     Padding="15,10"/>
+            <Button Content="Form 요청 보내기"
+                    Click="OnMakeFormRequestsClick"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Center"
+                    Padding="15,10"/>
             <Button Content="로그 메시지 작성"
                     Click="OnWriteLogsClick"
                     HorizontalAlignment="Stretch"

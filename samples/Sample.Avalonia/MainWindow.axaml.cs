@@ -79,6 +79,49 @@ public partial class MainWindow : Window
     }
 
     /// <summary>
+    /// Form 요청 보내기 버튼 클릭 핸들러
+    /// </summary>
+    private async void OnMakeFormRequestsClick(object? sender, RoutedEventArgs e)
+    {
+        StatusText.Text = "상태: Form 요청 중...";
+        AppendOutput("");
+        AppendOutput("--- Form 요청 시작 ---");
+
+        try
+        {
+            // application/x-www-form-urlencoded 요청
+            AppendOutput("POST (form-urlencoded) https://httpbin.org/post");
+            var formContent = new FormUrlEncodedContent(new[]
+            {
+                new KeyValuePair<string, string>("title", "test"),
+                new KeyValuePair<string, string>("body", "Avalonia form data"),
+                new KeyValuePair<string, string>("userId", "1"),
+                new KeyValuePair<string, string>("tags[]", "csharp"),
+                new KeyValuePair<string, string>("tags[]", "avalonia")
+            });
+            var response1 = await _httpClient.PostAsync("https://httpbin.org/post", formContent);
+            AppendOutput($"  응답: {response1.StatusCode}");
+
+            // multipart/form-data 요청
+            AppendOutput("POST (multipart/form-data) https://httpbin.org/post");
+            var multipartContent = new MultipartFormDataContent();
+            multipartContent.Add(new StringContent("John Doe"), "username");
+            multipartContent.Add(new StringContent("john@example.com"), "email");
+            multipartContent.Add(new ByteArrayContent(Encoding.UTF8.GetBytes("sample file content")), "attachment", "sample.txt");
+            var response2 = await _httpClient.PostAsync("https://httpbin.org/post", multipartContent);
+            AppendOutput($"  응답: {response2.StatusCode}");
+
+            AppendOutput("--- Form 요청 완료! DevTools Network 탭을 확인하세요. ---");
+            StatusText.Text = "상태: Form 요청 완료";
+        }
+        catch (Exception ex)
+        {
+            AppendOutput($"오류: {ex.Message}");
+            StatusText.Text = $"상태: 오류 - {ex.Message}";
+        }
+    }
+
+    /// <summary>
     /// 로그 메시지 작성 버튼 클릭 핸들러
     /// </summary>
     private void OnWriteLogsClick(object? sender, RoutedEventArgs e)

@@ -18,6 +18,9 @@
             <Button x:Name="LogButton" Content="Write Log"
                     Width="100" Height="30" Margin="0,0,10,0"
                     Click="LogButton_Click"/>
+            <Button x:Name="FormRequestButton" Content="Form Request"
+                    Width="120" Height="30" Margin="0,0,10,0"
+                    Click="FormRequestButton_Click"/>
             <Button x:Name="OpenDevToolsButton" Content="Open DevTools"
                     Width="110" Height="30"
                     Click="OpenDevToolsButton_Click"/>
